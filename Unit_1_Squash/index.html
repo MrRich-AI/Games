@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Squash Verb Rally</title>
+<style>
+  :root{
+    --court:#0b3b7a; --courtline:#f5f5f5; --tin:#c8102e; --ballpoint:#f4c542;
+    --bg:#081226; --panel:#0f1d3a; --panel2:#132449; --ink:#eef1f8; --dim:#93a3c4;
+    --win:#2ecc71; --lose:#e74c3c;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; display:flex; justify-content:center; padding:20px;
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif; color:var(--ink);
+    background:
+      radial-gradient(circle at 20% 0%, #123268 0%, transparent 50%),
+      radial-gradient(circle at 90% 100%, #1a1440 0%, transparent 50%),
+      var(--bg);
+  }
+  #app{ width:100%; max-width:720px; }
+  .card{ background:var(--panel); border-radius:18px; padding:28px; box-shadow:0 10px 40px rgba(0,0,0,.45); border:1px solid #1e2f57; }
+
+  h1{ margin:0 0 4px; font-size:1.6em; }
+  .sub{ color:var(--dim); margin:0 0 16px; }
+
+  .court-strip{
+    height:10px; border-radius:6px; margin-bottom:18px; background:var(--court);
+    border:2px solid var(--courtline); position:relative; overflow:hidden;
+  }
+  .court-strip i{ position:absolute; top:0; bottom:0; width:2px; background:var(--courtline); opacity:.6; }
+
+  .btn{
+    appearance:none; border:none; cursor:pointer; font-weight:700; font-size:1em;
+    padding:14px 22px; border-radius:12px; color:#0b1224; background:var(--ballpoint);
+    box-shadow:0 6px 18px rgba(244,197,66,.25); transition:transform .12s ease;
+  }
+  .btn:hover{ transform:translateY(-2px); }
+  .btn:disabled{ opacity:.4; cursor:not-allowed; transform:none; }
+  .btn.block{ width:100%; }
+  .btn.ghost{ background:transparent; border:1px solid #2c3d66; color:var(--ink); box-shadow:none; }
+
+  .scoreline{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px; }
+  .rallytag{ font-size:.8em; color:var(--dim); text-transform:uppercase; letter-spacing:1px; }
+  .points{ font-family:'Consolas',monospace; font-size:1.5em; font-weight:800; }
+  .points .you{ color:var(--win); }
+  .points .div{ color:var(--dim); font-weight:400; padding:0 8px; }
+  .points .opp{ color:var(--lose); }
+
+  .qcount{ color:var(--dim); font-size:.85em; margin-bottom:16px; }
+
+  .prompt{
+    background:var(--panel2); border-radius:14px; padding:22px; font-size:1.15em; line-height:1.6;
+    margin-bottom:16px; border:1px solid #1e2f57;
+  }
+  .blank-hint{ color:var(--ballpoint); font-weight:700; }
+  .baseverb{ color:var(--dim); font-style:italic; font-size:.85em; }
+
+  .answerrow{ display:flex; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
+  input[type=text]{
+    flex:1; min-width:180px; background:#0c1a36; border:2px solid #24365f; border-radius:10px;
+    padding:14px 16px; color:var(--ink); font-size:1.05em; outline:none;
+  }
+  input[type=text]:focus{ border-color:var(--ballpoint); }
+
+  .feedback{ margin-top:14px; padding:14px 16px; border-radius:12px; font-size:.95em; line-height:1.5; display:none; }
+  .feedback.show{ display:block; }
+  .feedback.correct{ background:rgba(46,204,113,.14); border:1px solid var(--win); color:#d3f8e2; }
+  .feedback.wrong{ background:rgba(231,76,60,.14); border:1px solid var(--lose); color:#ffd9d4; }
+  .feedback b.answer{ color:var(--ballpoint); }
+
+  .resultwrap{ text-align:center; }
+  .matchscore{ font-family:'Consolas',monospace; font-size:2.4em; font-weight:800; margin:10px 0; }
+  .matchscore .win{ color:var(--win); } .matchscore .lose{ color:var(--lose); }
+  .statrow{ display:flex; justify-content:center; gap:24px; margin:18px 0; flex-wrap:wrap; }
+  .stat{ background:var(--panel2); padding:14px 20px; border-radius:12px; min-width:110px; border:1px solid #1e2f57; }
+  .stat b{ display:block; font-size:1.4em; }
+  .stat span{ color:var(--dim); font-size:.8em; }
+  .rating{ font-size:1.15em; font-weight:800; margin:14px 0 4px; }
+  .ratingsub{ color:var(--dim); font-size:.9em; margin-bottom:20px; }
+
+  .reviewlist{ text-align:left; margin-top:8px; }
+  .reviewlist h3{ font-size:.9em; color:var(--dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
+  .rrow{ background:var(--panel2); border-left:4px solid var(--lose); border-radius:8px; padding:10px 14px; margin-bottom:8px; font-size:.92em; }
+  .rrow b{ color:var(--ballpoint); }
+
+  footer.note{ color:var(--dim); font-size:.78em; text-align:center; margin-top:18px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ---------------- DATA ----------------
+   10 original squash-themed sentences (not from the coursebook or the
+   speedcubing game). Each has a governing verb already in the sentence;
+   the student types the correctly-formed SECOND verb (either -ing or
+   to + infinitive) for the base verb shown in brackets. */
+
+const ITEMS = [
+  { sentence:"The coach didn't finish", blankVerb:"explain",
+    after:"the new drill before the buzzer rang.",
+    accept:["explaining"], pattern:"-ing", explain:"finish + verb-ing" },
+
+  { sentence:"After losing the first game, Maya decided", blankVerb:"change",
+    after:"her racket grip.",
+    accept:["to change"], pattern:"to + infinitive", explain:"decide + to infinitive" },
+
+  { sentence:"He refused to give up", blankVerb:"chase",
+    after:"every shot, even when he was exhausted.",
+    accept:["chasing"], pattern:"-ing", explain:"give up + verb-ing" },
+
+  { sentence:"Both players agreed", blankVerb:"restart",
+    after:"the point after the let call.",
+    accept:["to restart"], pattern:"to + infinitive", explain:"agree + to infinitive" },
+
+  { sentence:"Squash beginners should practise", blankVerb:"hit",
+    after:"the ball straight down the side wall.",
+    accept:["hitting"], pattern:"-ing", explain:"practise + verb-ing" },
+
+  { sentence:"My opponent seemed", blankVerb:"struggle",
+    after:"with her footwork in the front corners.",
+    accept:["to struggle"], pattern:"to + infinitive", explain:"seem + to infinitive" },
+
+  { sentence:"The club invited every member", blankVerb:"join",
+    after:"the Saturday squash tournament.",
+    accept:["to join"], pattern:"noun + to + infinitive", explain:"invite someone + to infinitive" },
+
+  { sentence:"The referee chose", blankVerb:"replay",
+    after:"the point instead of awarding a stroke.",
+    accept:["to replay"], pattern:"to + infinitive", explain:"choose + to infinitive" },
+
+  { sentence:"It took me months to learn", blankVerb:"control",
+    after:"the drop shot properly.",
+    accept:["to control"], pattern:"to + infinitive", explain:"learn + to infinitive" },
+
+  { sentence:"I love", blankVerb:"play",
+    after:"squash on Friday evenings after work.",
+    accept:["playing","to play"], pattern:"-ing OR to + infinitive (both correct — 'love' allows either)",
+    explain:"love allows either form with no change in meaning" },
+
+  { sentence:"Top players avoid", blankVerb:"rush",
+    after:"the ball when they're out of position.",
+    accept:["rushing"], pattern:"-ing", explain:"avoid + verb-ing" },
+
+  { sentence:"Her coach considered", blankVerb:"switch",
+    after:"her to a heavier racket before the tournament.",
+    accept:["switching"], pattern:"-ing", explain:"consider + verb-ing" },
+
+  { sentence:"The coach urged her players", blankVerb:"stay",
+    after:"low during every rally.",
+    accept:["to stay"], pattern:"noun + to + infinitive", explain:"urge someone + to infinitive" },
+
+  { sentence:"The referee allowed the players", blankVerb:"take",
+    after:"a short water break between games.",
+    accept:["to take"], pattern:"noun + to + infinitive", explain:"allow someone + to infinitive" },
+
+  { sentence:"The umpire ordered both players", blankVerb:"return",
+    after:"to their positions after the let.",
+    accept:["to return"], pattern:"noun + to + infinitive", explain:"order someone + to infinitive" }
+];
+
+/* ---------------- STATE ---------------- */
+let state = { idx:0, you:0, opp:0, mistakes:[], startTime:0, items:ITEMS };
+const app = document.getElementById("app");
+
+function normalize(str){
+  return str.trim().toLowerCase().replace(/\s+/g," ").replace(/[.!?]+$/,"");
+}
+
+function shuffleArray(arr){
+  const a = arr.slice();
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function renderStart(){
+  state = { idx:0, you:0, opp:0, mistakes:[], startTime:performance.now(), items:shuffleArray(ITEMS) };
+  app.innerHTML = `
+    <div class="card">
+      <div class="court-strip"><i style="left:33%"></i><i style="left:66%"></i></div>
+      <h1>🎾 Squash Verb Rally</h1>
+      <p class="sub">Grammar Solve — Verbs Followed by Other Verbs</p>
+      <p>Type the second verb in its correct form — either <b>verb + -ing</b> or <b>to + infinitive</b> —
+      to win each rally. Fifteen points, keep the most to win the match.</p>
+      <p style="color:var(--dim); font-size:.9em;">Type only the missing part of the sentence (e.g. <i>playing</i> or <i>to play</i>) — not the whole sentence.</p>
+      <button class="btn block" onclick="renderQuestion()">Serve to Start →</button>
+      <footer class="note">Based on the IGCSE Language Focus: Verbs followed by other verbs</footer>
+    </div>
+  `;
+}
+
+function renderQuestion(){
+  const item = state.items[state.idx];
+  app.innerHTML = `
+    <div class="card">
+      <div class="court-strip"><i style="left:33%"></i><i style="left:66%"></i></div>
+      <div class="scoreline">
+        <div class="rallytag">Rally ${state.idx+1} of ${state.items.length}</div>
+        <div class="points"><span class="you">${state.you}</span><span class="div">–</span><span class="opp">${state.opp}</span></div>
+      </div>
+      <div class="prompt">
+        ${item.sentence} <span class="blank-hint">______</span> ${item.after}
+        <br><span class="baseverb">(${item.blankVerb})</span>
+      </div>
+      <div class="answerrow">
+        <input type="text" id="answerInput" placeholder="Type the missing verb form..." autocomplete="off" onkeydown="if(event.key==='Enter') submitAnswer()">
+        <button class="btn" onclick="submitAnswer()">Play the Shot</button>
+      </div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+  `;
+  document.getElementById("answerInput").focus();
+}
+
+function submitAnswer(){
+  const item = state.items[state.idx];
+  const input = document.getElementById("answerInput");
+  const btn = document.querySelector(".answerrow .btn");
+  if(input.disabled) return;
+  const typed = normalize(input.value);
+  const correct = item.accept.some(acc => normalize(acc) === typed);
+
+  input.disabled = true; btn.disabled = true;
+
+  if(correct){ state.you++; } else { state.opp++; state.mistakes.push({
+    sentence: `${item.sentence} ____ ${item.after}`,
+    correct: item.accept.join(" / "),
+    typed: input.value.trim() || "(no answer)",
+    explain: item.explain
+  }); }
+
+  const fb = document.getElementById("feedback");
+  fb.className = "feedback show " + (correct ? "correct":"wrong");
+  fb.innerHTML = correct
+    ? `✅ Point won! <b class="answer">${item.accept[0]}</b> — ${item.explain}.`
+    : `❌ Rally lost. Correct answer: <b class="answer">${item.accept.join(" / ")}</b><br>${item.explain}.`;
+
+  setTimeout(()=>{
+    state.idx++;
+    if(state.idx >= state.items.length){ renderFinal(); } else { renderQuestion(); }
+  }, correct ? 1100 : 2200);
+}
+
+function renderFinal(){
+  const totalTime = (performance.now() - state.startTime)/1000;
+  const won = state.you > state.opp;
+  const tied = state.you === state.opp;
+  const acc = Math.round((state.you/state.items.length)*100);
+
+  let rating, ratingSub;
+  if(acc >= 90){ rating="🏆 PSA Tour Ready"; ratingSub="Near-flawless control of both verb patterns."; }
+  else if(acc >= 70){ rating="🥇 Club Champion"; ratingSub="Strong grasp of -ing and to+infinitive — a few shots to tidy up."; }
+  else if(acc >= 50){ rating="🥈 League Player"; ratingSub="You're winning rallies, but review the missed patterns below."; }
+  else{ rating="🎽 Still in Training"; ratingSub="Drill the patterns below, then step back on court for a rematch."; }
+
+  app.innerHTML = `
+    <div class="card resultwrap">
+      <div class="court-strip"><i style="left:33%"></i><i style="left:66%"></i></div>
+      <h1>Match Result</h1>
+      <div class="matchscore">
+        <span class="${won?'win':(tied?'':'lose')}">${state.you}</span> – <span class="${!won && !tied?'win':'lose'}">${state.opp}</span>
+      </div>
+      <p class="sub">${won ? "You won the match!" : tied ? "A tight, tied match." : "The match slipped away this time."}</p>
+      <div class="statrow">
+        <div class="stat"><b>${acc}%</b><span>Accuracy</span></div>
+        <div class="stat"><b>${totalTime.toFixed(1)}s</b><span>Match Time</span></div>
+        <div class="stat"><b>${state.you}/${state.items.length}</b><span>Points Won</span></div>
+      </div>
+      <div class="rating">${rating}</div>
+      <div class="ratingsub">${ratingSub}</div>
+      ${state.mistakes.length ? `
+        <div class="reviewlist">
+          <h3>Rallies to review</h3>
+          ${state.mistakes.map(m=>`
+            <div class="rrow">
+              <div>${m.sentence}</div>
+              <div>You typed: <i>${m.typed}</i> — Correct: <b>${m.correct}</b></div>
+              <div style="color:var(--dim); font-size:.85em;">${m.explain}</div>
+            </div>`).join("")}
+        </div>` : `<p style="color:var(--win)">Perfect match — every point won! 🎉</p>`}
+      <div style="height:6px"></div>
+      <button class="btn block" onclick="renderStart()">↺ Rematch</button>
+      <footer class="note">Verbs followed by other verbs — verb+-ing and to+infinitive patterns.</footer>
+    </div>
+  `;
+}
+
+renderStart();
+</script>
+</body>
+</html>
