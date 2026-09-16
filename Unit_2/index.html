@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digital Life OS — Vocab Apps</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-page: #0D0A20;
+    --wallpaper-1: #1B1246;
+    --wallpaper-2: #170F35;
+    --glass: rgba(255,255,255,0.07);
+    --glass-border: rgba(255,255,255,0.14);
+    --text: #F4F1FF;
+    --text-dim: #ABA1DE;
+    --coral: #FF7A56;
+    --coral-deep: #E85A36;
+    --violet: #9B7BFF;
+    --violet-deep: #7C5CE0;
+    --lime: #CFFF6E;
+    --lime-deep: #92CC3E;
+    --cyan: #4FE3C9;
+    --cyan-deep: #22B8A0;
+    --danger: #FF6B6B;
+    --card: #1F1A47;
+    --card-raised: #291F5C;
+    --shadow: 0 24px 60px rgba(4,2,20,0.55);
+  }
+  :root[data-theme="light"] {
+    --bg-page: #EFEAFF;
+    --wallpaper-1: #E4DBFF;
+    --wallpaper-2: #F4F0FF;
+    --glass: rgba(255,255,255,0.55);
+    --glass-border: rgba(21,15,46,0.12);
+    --text: #180F3B;
+    --text-dim: #5C5288;
+    --card: #FFFFFF;
+    --card-raised: #F8F6FF;
+    --shadow: 0 24px 60px rgba(21,15,46,0.14);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  .hidden { display: none !important; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg-page);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 28px 14px;
+  }
+  button { font-family: inherit; }
+  button:focus-visible, .tile:focus-visible, .letter-tile:focus-visible, .app-icon:focus-visible, .swipe-card:focus-visible {
+    outline: 2px solid var(--lime);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+  /* ---------- PHONE FRAME ---------- */
+  .phone {
+    width: 100%;
+    max-width: 400px;
+    height: 780px;
+    max-height: 92vh;
+    border-radius: 42px;
+    padding: 12px;
+    background: linear-gradient(160deg, #2A2160, #100B28);
+    box-shadow: var(--shadow);
+    position: relative;
+  }
+  .screen-frame {
+    height: 100%;
+    width: 100%;
+    border-radius: 32px;
+    overflow: hidden;
+    position: relative;
+    background:
+      radial-gradient(circle at 15% 8%, rgba(207,255,110,0.16), transparent 38%),
+      radial-gradient(circle at 90% 88%, rgba(255,122,86,0.20), transparent 42%),
+      linear-gradient(180deg, var(--wallpaper-1), var(--wallpaper-2));
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ---------- STATUS BAR ---------- */
+  .statusbar {
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 22px 6px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--text);
+  }
+  .status-icons { display: flex; align-items: center; gap: 6px; }
+  .status-icons svg { display: block; }
+
+  /* ---------- HOME SCREEN ---------- */
+  .home {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 6px 20px 0;
+    overflow: hidden;
+  }
+  .home-heading { padding: 6px 2px 14px; }
+  .home-eyebrow {
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--lime);
+    margin-bottom: 3px;
+  }
+  .home-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 24px;
+    letter-spacing: -0.01em;
+  }
+  .xp-widget {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 18px;
+    padding: 13px 16px;
+    margin-bottom: 18px;
+    backdrop-filter: blur(6px);
+  }
+  .xp-widget .xp-num { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 20px; }
+  .xp-widget .xp-lbl { font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.04em; }
+  .xp-widget .xp-track {
+    flex: 1; margin: 0 14px;
+    height: 6px; border-radius: 4px;
+    background: rgba(255,255,255,0.12);
+    overflow: hidden;
+  }
+  .xp-widget .xp-fill { height: 100%; background: linear-gradient(90deg, var(--lime), var(--cyan)); border-radius: 4px; transition: width 0.4s ease; }
+
+  .app-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 16px;
+    margin-bottom: 8px;
+  }
+  .app-icon {
+    background: transparent;
+    border: none;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 2px;
+  }
+  .app-icon .glyph {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 22px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 30px;
+    box-shadow: 0 10px 22px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.25);
+    transition: transform 0.15s ease;
+  }
+  .app-icon:hover .glyph { transform: translateY(-2px) scale(1.03); }
+  .app-icon:active .glyph { transform: translateY(0) scale(0.97); }
+  .glyph.g-scramble { background: linear-gradient(155deg, var(--coral), var(--coral-deep)); }
+  .glyph.g-memory   { background: linear-gradient(155deg, var(--violet), var(--violet-deep)); }
+  .glyph.g-type     { background: linear-gradient(155deg, var(--lime), var(--lime-deep)); color: #17240A; }
+  .glyph.g-swipe    { background: linear-gradient(155deg, var(--cyan), var(--cyan-deep)); }
+  .app-icon .app-name { font-size: 12.5px; font-weight: 600; }
+  .app-icon .app-sub { font-size: 10px; color: var(--text-dim); }
+
+  .dock {
+    margin-top: auto;
+    display: flex;
+    gap: 12px;
+    padding: 12px 0 6px;
+  }
+  .dock-btn {
+    flex: 1;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    color: var(--text);
+    border-radius: 16px;
+    padding: 12px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    cursor: pointer;
+  }
+  .dock-btn .ic { font-size: 17px; }
+
+  .home-indicator {
+    flex-shrink: 0;
+    display: flex; justify-content: center; padding: 10px 0 4px;
+  }
+  .home-indicator .bar { width: 120px; height: 4px; border-radius: 3px; background: rgba(255,255,255,0.35); }
+  .home-indicator .bar.clickable { cursor: pointer; }
+
+  /* ---------- SUB-APP CHROME ---------- */
+  .app-screen {
+    flex: 1;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .app-screen.active { display: flex; }
+  .app-topbar {
+    flex-shrink: 0;
+    display: flex; align-items: center; gap: 10px;
+    padding: 4px 18px 12px;
+  }
+  .back-btn {
+    width: 32px; height: 32px;
+    border-radius: 10px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    color: var(--text);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .app-topbar-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 16px; flex: 1; }
+  .app-topbar-meta { font-size: 12px; color: var(--text-dim); font-weight: 600; }
+  .app-body { flex: 1; overflow-y: auto; padding: 4px 20px 20px; }
+
+  /* ---------- SHARED BITS ---------- */
+  .clue-card {
+    background: var(--card);
+    border: 1px solid var(--glass-border);
+    border-radius: 18px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+  }
+  .clue-pos {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--lime-deep, var(--lime));
+    background: rgba(207,255,110,0.14);
+    border-radius: 999px;
+    padding: 3px 9px;
+    margin-bottom: 8px;
+  }
+  .clue-text { font-size: 15.5px; line-height: 1.5; font-weight: 500; }
+  .primary-btn {
+    width: 100%;
+    background: var(--lime);
+    color: #17240A;
+    border: none;
+    border-radius: 15px;
+    padding: 14px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+  }
+  .primary-btn:disabled { opacity: 0.4; cursor: default; }
+  .ghost-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text);
+    border-radius: 15px;
+    padding: 12px;
+    font-weight: 600;
+    font-size: 13.5px;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+  .result-banner {
+    border-radius: 15px;
+    padding: 12px 14px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    margin: 4px 0 14px;
+    border: 1px solid var(--glass-border);
+  }
+  .result-banner.good { background: rgba(207,255,110,0.14); }
+  .result-banner.bad  { background: rgba(255,107,107,0.14); }
+  .result-banner strong { display: block; font-family: 'Space Grotesk', sans-serif; font-size: 14px; margin-bottom: 2px; }
+
+  /* ---------- UNSCRAMBLE ---------- */
+  .answer-row { display: flex; gap: 7px; flex-wrap: wrap; justify-content: center; margin-bottom: 18px; min-height: 46px; }
+  .answer-slot {
+    width: 34px; height: 40px;
+    border-bottom: 3px solid var(--glass-border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 19px; font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .answer-slot.filled { border-color: var(--cyan); }
+  .letter-bank { display: flex; gap: 7px; flex-wrap: wrap; justify-content: center; margin-bottom: 18px; }
+  .letter-tile {
+    width: 36px; height: 40px;
+    border-radius: 10px;
+    background: var(--card-raised);
+    border: 1px solid var(--glass-border);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 17px; font-weight: 600;
+    cursor: pointer;
+  }
+  .letter-tile:disabled { opacity: 0.25; cursor: default; }
+  .scramble-actions { display: flex; gap: 8px; }
+  .scramble-actions .ghost-btn { margin-top: 0; }
+
+  /* ---------- MEMORY ---------- */
+  .memory-meta-row { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--text-dim); margin-bottom: 10px; font-weight: 600; }
+  .memory-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .mem-card {
+    aspect-ratio: 1;
+    border-radius: 12px;
+    background: var(--card-raised);
+    border: 1px solid var(--glass-border);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    padding: 6px;
+    text-align: center;
+    position: relative;
+  }
+  .mem-card .mem-back { font-size: 20px; opacity: 0.5; }
+  .mem-card .mem-front { display: none; font-size: 11px; font-weight: 600; line-height: 1.25; }
+  .mem-card.flipped .mem-back { display: none; }
+  .mem-card.flipped .mem-front { display: block; }
+  .mem-card.flipped.word .mem-front { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 14px; }
+  .mem-card.matched { background: rgba(207,255,110,0.16); border-color: var(--lime); cursor: default; }
+  .mem-card.wrong { background: rgba(255,107,107,0.16); border-color: var(--danger); }
+
+  /* ---------- TYPE IT ---------- */
+  .type-input {
+    width: 100%;
+    background: var(--card);
+    border: 1.5px solid var(--glass-border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    color: var(--text);
+    font-size: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 12px;
+  }
+  .type-input:focus { outline: none; border-color: var(--cyan); }
+  .type-input.correct { border-color: var(--lime); }
+  .type-input.incorrect { border-color: var(--danger); }
+  .hint-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .hint-link { background: none; border: none; color: var(--cyan); font-size: 12.5px; font-weight: 600; cursor: pointer; padding: 0; }
+
+  /* ---------- SWIPE ---------- */
+  .swipe-stage { position: relative; height: 260px; margin-bottom: 16px; }
+  .swipe-card {
+    position: absolute;
+    inset: 0;
+    background: var(--card);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    transition: transform 0.35s ease, opacity 0.35s ease;
+  }
+  .swipe-card .sw-word {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 26px;
+    margin-bottom: 4px;
+  }
+  .swipe-card .sw-pos { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 14px; }
+  .swipe-card .sw-def { font-size: 14.5px; line-height: 1.5; color: var(--text-dim); }
+  .swipe-card.fly-yes { transform: translateX(140%) rotate(14deg); opacity: 0; }
+  .swipe-card.fly-no { transform: translateX(-140%) rotate(-14deg); opacity: 0; }
+  .swipe-actions { display: flex; gap: 12px; }
+  .swipe-btn {
+    flex: 1;
+    border-radius: 15px;
+    padding: 14px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 14.5px;
+    cursor: pointer;
+    border: none;
+  }
+  .swipe-btn.no { background: rgba(255,107,107,0.16); color: var(--danger); border: 1px solid rgba(255,107,107,0.35); }
+  .swipe-btn.yes { background: rgba(207,255,110,0.18); color: var(--lime-deep, var(--lime)); border: 1px solid rgba(207,255,110,0.4); }
+
+  /* ---------- WORD LIST ---------- */
+  .wl-item { padding: 11px 0; border-bottom: 1px solid var(--glass-border); }
+  .wl-item:last-child { border-bottom: none; }
+  .wl-head { display: flex; align-items: baseline; gap: 8px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 15px; }
+  .wl-pos { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 10.5px; color: var(--text-dim); background: var(--card-raised); border-radius: 6px; padding: 2px 7px; }
+  .wl-def { color: var(--text-dim); font-size: 13px; margin-top: 3px; line-height: 1.45; }
+
+  .theme-toggle {
+    position: absolute; top: 14px; right: 18px;
+    background: var(--glass); border: 1px solid var(--glass-border); color: var(--text);
+    border-radius: 999px; padding: 5px 10px; font-size: 10.5px; font-weight: 600; cursor: pointer;
+    z-index: 5;
+  }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="screen-frame" id="screenFrame">
+
+    <button class="theme-toggle" id="themeToggle" type="button">Light</button>
+
+    <div class="statusbar">
+      <span id="clock">9:41</span>
+      <div class="status-icons">
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="none"><path d="M1 9.5C4.5 4 11.5 4 15 9.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M4 9.5C6 6.8 10 6.8 12 9.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="9.5" r="1" fill="currentColor"/></svg>
+        <svg width="20" height="11" viewBox="0 0 20 11" fill="none"><rect x="1" y="1" width="16" height="9" rx="2" stroke="currentColor" stroke-width="1.3"/><rect x="2.5" y="2.5" width="12" height="6" rx="1" fill="currentColor"/><rect x="18" y="3.5" width="1.5" height="4" rx="0.75" fill="currentColor"/></svg>
+      </div>
+    </div>
+
+    <!-- HOME -->
+    <div class="home app-screen active" id="screen-home">
+      <div class="home-heading">
+        <div class="home-eyebrow">UNIT 2 · DIGITAL LIFE</div>
+        <div class="home-title">Vocab OS</div>
+      </div>
+
+      <div class="xp-widget">
+        <div>
+          <div class="xp-num" id="xpNum">0 XP</div>
+          <div class="xp-lbl">Total score</div>
+        </div>
+        <div class="xp-track"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
+        <div style="font-size:20px;">📶</div>
+      </div>
+
+      <div class="app-grid">
+        <button class="app-icon" data-open="scramble" type="button">
+          <div class="glyph g-scramble">🔀</div>
+          <div class="app-name">Unscramble</div>
+          <div class="app-sub">Rebuild the word</div>
+        </button>
+        <button class="app-icon" data-open="memory" type="button">
+          <div class="glyph g-memory">🧠</div>
+          <div class="app-name">Memory Match</div>
+          <div class="app-sub">Pair words &amp; meanings</div>
+        </button>
+        <button class="app-icon" data-open="typeit" type="button">
+          <div class="glyph g-type">✍️</div>
+          <div class="app-name">Type It</div>
+          <div class="app-sub">Recall from memory</div>
+        </button>
+        <button class="app-icon" data-open="swipe" type="button">
+          <div class="glyph g-swipe">👆</div>
+          <div class="app-name">Swipe Check</div>
+          <div class="app-sub">Match or no match?</div>
+        </button>
+      </div>
+
+      <div class="dock">
+        <button class="dock-btn" id="openWordlist" type="button"><span class="ic">📚</span>Word list</button>
+        <button class="dock-btn" id="resetXp" type="button"><span class="ic">↺</span>Reset score</button>
+      </div>
+    </div>
+
+    <!-- UNSCRAMBLE -->
+    <div class="app-screen" id="screen-scramble">
+      <div class="app-topbar">
+        <button class="back-btn" data-home type="button">←</button>
+        <div class="app-topbar-title">Unscramble</div>
+        <div class="app-topbar-meta" id="scrambleMeta">1/8</div>
+      </div>
+      <div class="app-body">
+        <div class="clue-card">
+          <span class="clue-pos" id="scramblePos">noun</span>
+          <div class="clue-text" id="scrambleClue">Clue goes here</div>
+        </div>
+        <div class="answer-row" id="scrambleAnswer"></div>
+        <div class="letter-bank" id="scrambleBank"></div>
+        <div id="scrambleFeedback"></div>
+        <div class="scramble-actions">
+          <button class="ghost-btn" id="scrambleHint" type="button">Hint (reveal 1 letter)</button>
+          <button class="ghost-btn" id="scrambleShuffle" type="button">Reshuffle</button>
+        </div>
+        <button class="primary-btn" id="scrambleCheck" type="button" style="margin-top:12px;">Check word</button>
+      </div>
+    </div>
+
+    <!-- MEMORY -->
+    <div class="app-screen" id="screen-memory">
+      <div class="app-topbar">
+        <button class="back-btn" data-home type="button">←</button>
+        <div class="app-topbar-title">Memory Match</div>
+        <div class="app-topbar-meta" id="memoryMeta">0 moves</div>
+      </div>
+      <div class="app-body">
+        <div class="memory-meta-row"><span id="memoryPairs">0 / 6 pairs</span><span id="memoryStatus">Tap two cards</span></div>
+        <div class="memory-grid" id="memoryGrid"></div>
+        <button class="primary-btn hidden" id="memoryNewRound" type="button">New round</button>
+      </div>
+    </div>
+
+    <!-- TYPE IT -->
+    <div class="app-screen" id="screen-typeit">
+      <div class="app-topbar">
+        <button class="back-btn" data-home type="button">←</button>
+        <div class="app-topbar-title">Type It</div>
+        <div class="app-topbar-meta" id="typeMeta">1/10</div>
+      </div>
+      <div class="app-body">
+        <div class="clue-card">
+          <span class="clue-pos" id="typePos">verb</span>
+          <div class="clue-text" id="typeClue">Complete the sentence…</div>
+        </div>
+        <input class="type-input" id="typeInput" type="text" placeholder="Type the missing word" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <div class="hint-row">
+          <button class="hint-link" id="typeHint" type="button">Show first letter</button>
+          <span id="typeHintDisplay" style="font-size:12.5px;color:var(--text-dim);"></span>
+        </div>
+        <div id="typeFeedback"></div>
+        <button class="primary-btn" id="typeCheck" type="button">Check answer</button>
+      </div>
+    </div>
+
+    <!-- SWIPE -->
+    <div class="app-screen" id="screen-swipe">
+      <div class="app-topbar">
+        <button class="back-btn" data-home type="button">←</button>
+        <div class="app-topbar-title">Swipe Check</div>
+        <div class="app-topbar-meta" id="swipeMeta">1/12</div>
+      </div>
+      <div class="app-body">
+        <p style="font-size:12.5px;color:var(--text-dim);margin:0 0 12px;">Does the definition match the word?</p>
+        <div class="swipe-stage" id="swipeStage"></div>
+        <div class="swipe-actions">
+          <button class="swipe-btn no" id="swipeNo" type="button">✕ No match</button>
+          <button class="swipe-btn yes" id="swipeYes" type="button">✓ Match</button>
+        </div>
+        <div id="swipeFeedback"></div>
+      </div>
+    </div>
+
+    <!-- WORD LIST -->
+    <div class="app-screen" id="screen-wordlist">
+      <div class="app-topbar">
+        <button class="back-btn" data-home type="button">←</button>
+        <div class="app-topbar-title">Word list — all 25</div>
+      </div>
+      <div class="app-body" id="wordlistBody"></div>
+    </div>
+
+    <div class="home-indicator"><div class="bar clickable" data-home></div></div>
+  </div>
+</div>
+
+<script>
+const WORDS = [
+  { w: "access", pos: "verb", def: "to be able to use or reach something", ex: "You can ___ the app from any device." },
+  { w: "addictive", pos: "adjective", def: "making you want to keep doing something", ex: "Some games are so ___ you lose track of time." },
+  { w: "advertise", pos: "verb", def: "to tell people about something to make them want it", ex: "Use your poster to ___ the event." },
+  { w: "app", pos: "noun", def: "a program you use on a phone or tablet", ex: "Which ___ do you use most for entertainment?" },
+  { w: "audience", pos: "noun", def: "the people watching or listening to something", ex: "Think about your ___ before designing the poster." },
+  { w: "available", pos: "adjective", def: "able to be used or obtained", ex: "The show is ___ on several streaming apps." },
+  { w: "browse", pos: "verb", def: "to look through content without a fixed goal", ex: "I like to ___ videos before choosing one to watch." },
+  { w: "convenient", pos: "adjective", def: "easy to use, saving time or effort", ex: "Streaming is ___ because you can watch anytime." },
+  { w: "device", pos: "noun", def: "a piece of equipment, e.g. phone or laptop", ex: "Which ___ do you use for gaming?" },
+  { w: "digital", pos: "adjective", def: "using computer technology", ex: "We spend a lot of time on ___ entertainment." },
+  { w: "download", pos: "verb", def: "to save a file from the internet onto a device", ex: "Did you ___ the episode to watch offline?" },
+  { w: "engaging", pos: "adjective", def: "interesting and holding your attention", ex: "A good podcast has to be ___." },
+  { w: "entertainment", pos: "noun", def: "activities that amuse or interest people", ex: "Gaming is a popular form of ___." },
+  { w: "interactive", pos: "adjective", def: "allowing two-way communication or participation", ex: "Livestreams are ___ because viewers can comment." },
+  { w: "livestream", pos: "noun", def: "video shown live over the internet", ex: "She watched the concert ___ with friends." },
+  { w: "notification", pos: "noun", def: "a message alerting you to something new", ex: "I turned off ___s to focus on homework." },
+  { w: "platform", pos: "noun", def: "a website or app where content is shared", ex: "Which ___ has the best selection of shows?" },
+  { w: "podcast", pos: "noun", def: "an audio programme you can listen to online", ex: "We listened to a ___ about technology." },
+  { w: "popular", pos: "adjective", def: "liked or used by many people", ex: "This app is ___ with teenagers." },
+  { w: "poster", pos: "noun", def: "a large printed or digital notice or advertisement", ex: "Design a ___ to advertise your event." },
+  { w: "recommend", pos: "verb", def: "to suggest something as good", ex: "Can you ___ a good podcast?" },
+  { w: "schedule", pos: "noun", def: "a plan of times for activities", ex: "Plan your event ___ before you start designing." },
+  { w: "stream", pos: "verb", def: "to watch or listen to content live over the internet", ex: "We ___ movies instead of buying DVDs." },
+  { w: "subscribe", pos: "verb", def: "to sign up to receive regular content", ex: "I ___d to a channel about gaming." },
+  { w: "upload", pos: "verb", def: "to send data from a device to the internet", ex: "He ___ed a video of the gameplay." }
+];
+
+const el = (id) => document.getElementById(id);
+const shuffle = (arr) => { const a = arr.slice(); for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+
+let totalXP = 0;
+function addXP(n) {
+  totalXP = Math.max(0, totalXP + n);
+  el("xpNum").textContent = totalXP + " XP";
+  el("xpFill").style.width = Math.min(100, totalXP) + "%";
+}
+el("resetXp").addEventListener("click", () => addXP(-totalXP));
+
+/* ---------------- NAVIGATION ---------------- */
+function openApp(name) {
+  document.querySelectorAll(".app-screen").forEach((s) => s.classList.remove("active"));
+  el("screen-" + name).classList.add("active");
+  if (name === "scramble") startScramble();
+  if (name === "memory") startMemory();
+  if (name === "typeit") startTypeIt();
+  if (name === "swipe") startSwipe();
+  if (name === "wordlist") renderWordlist();
+}
+document.querySelectorAll("[data-open]").forEach((b) => b.addEventListener("click", () => openApp(b.dataset.open)));
+document.querySelectorAll("[data-home]").forEach((b) => b.addEventListener("click", () => openApp("home")));
+el("openWordlist").addEventListener("click", () => openApp("wordlist"));
+
+/* ---------------- CLOCK ---------------- */
+function tickClock() {
+  const d = new Date();
+  let h = d.getHours(), m = d.getMinutes();
+  const ampm = h >= 12 ? "PM" : "AM";
+  h = h % 12 || 12;
+  el("clock").textContent = `${h}:${m.toString().padStart(2,"0")}`;
+}
+tickClock(); setInterval(tickClock, 15000);
+
+/* ---------------- THEME ---------------- */
+let manualTheme = null;
+el("themeToggle").addEventListener("click", () => {
+  manualTheme = manualTheme === "light" ? "dark" : "light";
+  if (manualTheme === "dark") document.documentElement.removeAttribute("data-theme");
+  else document.documentElement.setAttribute("data-theme", manualTheme);
+  el("themeToggle").textContent = manualTheme === "light" ? "Dark" : "Light";
+});
+
+/* ================= WORD LIST ================= */
+function renderWordlist() {
+  const body = el("wordlistBody");
+  body.innerHTML = "";
+  WORDS.slice().sort((a,b)=>a.w.localeCompare(b.w)).forEach((item) => {
+    const div = document.createElement("div");
+    div.className = "wl-item";
+    div.innerHTML = `<div class="wl-head">${item.w} <span class="wl-pos">${item.pos}</span></div><div class="wl-def">${item.def}</div>`;
+    body.appendChild(div);
+  });
+}
+
+/* ================= 1. UNSCRAMBLE ================= */
+let scrambleQueue = [], scrambleIdx = 0, scrambleAnswerArr = [], scrambleBankArr = [], scrambleWord = null, scrambleLocked = false;
+
+function startScramble() {
+  scrambleQueue = shuffle(WORDS).slice(0, 8);
+  scrambleIdx = 0;
+  loadScrambleQuestion();
+}
+function loadScrambleQuestion() {
+  if (scrambleIdx >= scrambleQueue.length) {
+    el("scrambleClue").textContent = "All done! 🎉";
+    el("scramblePos").textContent = "complete";
+    el("scrambleAnswer").innerHTML = "";
+    el("scrambleBank").innerHTML = "";
+    el("scrambleFeedback").innerHTML = `<div class="result-banner good"><strong>Round complete</strong>You unscrambled ${scrambleQueue.length} words. Nice recall.</div>`;
+    el("scrambleCheck").disabled = true;
+    return;
+  }
+  el("scrambleCheck").disabled = false;
+  scrambleLocked = false;
+  scrambleWord = scrambleQueue[scrambleIdx];
+  el("scrambleMeta").textContent = `${scrambleIdx+1}/${scrambleQueue.length}`;
+  el("scramblePos").textContent = scrambleWord.pos;
+  el("scrambleClue").textContent = scrambleWord.def;
+  el("scrambleFeedback").innerHTML = "";
+
+  let letters = scrambleWord.w.split("");
+  let attempts = 0;
+  let shuffled;
+  do { shuffled = shuffle(letters); attempts++; } while (shuffled.join("") === scrambleWord.w && attempts < 8);
+  scrambleBankArr = shuffled.map((ch, i) => ({ ch, id: i, used: false }));
+  scrambleAnswerArr = new Array(letters.length).fill(null);
+  renderScramble();
+}
+function renderScramble() {
+  const answerRow = el("scrambleAnswer");
+  answerRow.innerHTML = "";
+  scrambleAnswerArr.forEach((slot, i) => {
+    const d = document.createElement("div");
+    d.className = "answer-slot" + (slot ? " filled" : "");
+    d.textContent = slot ? slot.ch : "";
+    d.addEventListener("click", () => {
+      if (!slot || scrambleLocked) return;
+      scrambleBankArr.find((t) => t.id === slot.id).used = false;
+      scrambleAnswerArr[i] = null;
+      renderScramble();
+    });
+    answerRow.appendChild(d);
+  });
+  const bank = el("scrambleBank");
+  bank.innerHTML = "";
+  scrambleBankArr.forEach((tile) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "letter-tile";
+    b.textContent = tile.ch;
+    b.disabled = tile.used;
+    b.addEventListener("click", () => {
+      if (tile.used || scrambleLocked) return;
+      const emptyIdx = scrambleAnswerArr.findIndex((s) => s === null);
+      if (emptyIdx === -1) return;
+      scrambleAnswerArr[emptyIdx] = tile;
+      tile.used = true;
+      renderScramble();
+    });
+    bank.appendChild(b);
+  });
+}
+el("scrambleShuffle").addEventListener("click", () => {
+  if (scrambleLocked) return;
+  scrambleAnswerArr.forEach((slot) => { if (slot) scrambleBankArr.find(t=>t.id===slot.id).used = false; });
+  scrambleAnswerArr = new Array(scrambleWord.w.length).fill(null);
+  scrambleBankArr = shuffle(scrambleBankArr);
+  renderScramble();
+});
+el("scrambleHint").addEventListener("click", () => {
+  if (scrambleLocked) return;
+  const emptyIdx = scrambleAnswerArr.findIndex((s) => s === null);
+  if (emptyIdx === -1) return;
+  const correctLetter = scrambleWord.w[emptyIdx];
+  const tile = scrambleBankArr.find((t) => !t.used && t.ch === correctLetter);
+  if (tile) { scrambleAnswerArr[emptyIdx] = tile; tile.used = true; renderScramble(); addXP(-1); }
+});
+el("scrambleCheck").addEventListener("click", () => {
+  if (scrambleLocked) return;
+  if (scrambleAnswerArr.includes(null)) return;
+  const guess = scrambleAnswerArr.map((s) => s.ch).join("");
+  const correct = guess === scrambleWord.w;
+  scrambleLocked = true;
+  if (correct) addXP(5);
+  el("scrambleFeedback").innerHTML = correct
+    ? `<div class="result-banner good"><strong>Correct!</strong>${scrambleWord.w} — ${scrambleWord.def}</div>`
+    : `<div class="result-banner bad"><strong>Not quite</strong>The word was <strong style="display:inline;">${scrambleWord.w}</strong> — ${scrambleWord.def}</div>`;
+  setTimeout(() => { scrambleIdx++; loadScrambleQuestion(); }, 1400);
+});
+
+/* ================= 2. MEMORY MATCH ================= */
+let memPairs = [], memFlipped = [], memMatchedCount = 0, memMoves = 0, memBusy = false;
+
+function startMemory() {
+  const picks = shuffle(WORDS).slice(0, 6);
+  const cards = [];
+  picks.forEach((p, i) => {
+    cards.push({ key: i, type: "word", label: p.w });
+    cards.push({ key: i, type: "def", label: p.def });
+  });
+  memPairs = shuffle(cards);
+  memFlipped = [];
+  memMatchedCount = 0;
+  memMoves = 0;
+  memBusy = false;
+  el("memoryMeta").textContent = "0 moves";
+  el("memoryPairs").textContent = `0 / ${picks.length} pairs`;
+  el("memoryStatus").textContent = "Tap two cards";
+  el("memoryNewRound").classList.add("hidden");
+  renderMemory();
+}
+function renderMemory() {
+  const grid = el("memoryGrid");
+  grid.innerHTML = "";
+  memPairs.forEach((card, idx) => {
+    const d = document.createElement("button");
+    d.type = "button";
+    d.className = "mem-card" + (card.type === "word" ? " word" : "") + (card.flipped || card.matched ? " flipped" : "") + (card.matched ? " matched" : "");
+    d.innerHTML = `<span class="mem-back">📱</span><span class="mem-front">${card.label}</span>`;
+    d.addEventListener("click", () => flipMemCard(idx));
+    grid.appendChild(d);
+  });
+}
+function flipMemCard(idx) {
+  const card = memPairs[idx];
+  if (memBusy || card.flipped || card.matched) return;
+  card.flipped = true;
+  memFlipped.push(idx);
+  renderMemory();
+  if (memFlipped.length === 2) {
+    memBusy = true;
+    memMoves++;
+    el("memoryMeta").textContent = memMoves + " moves";
+    const [i1, i2] = memFlipped;
+    const c1 = memPairs[i1], c2 = memPairs[i2];
+    const isMatch = c1.key === c2.key && c1.type !== c2.type;
+    setTimeout(() => {
+      if (isMatch) {
+        c1.matched = true; c2.matched = true;
+        memMatchedCount++;
+        el("memoryPairs").textContent = `${memMatchedCount} / ${memPairs.length/2} pairs`;
+        el("memoryStatus").textContent = "Matched! 🔗";
+        addXP(4);
+        if (memMatchedCount === memPairs.length/2) {
+          el("memoryStatus").textContent = `Complete in ${memMoves} moves!`;
+          el("memoryNewRound").classList.remove("hidden");
+          addXP(6);
+        }
+      } else {
+        c1.flipped = false; c2.flipped = false;
+        el("memoryStatus").textContent = "Not a pair — try again";
+      }
+      memFlipped = [];
+      memBusy = false;
+      renderMemory();
+    }, 750);
+  }
+}
+el("memoryNewRound").addEventListener("click", startMemory);
+
+/* ================= 3. TYPE IT ================= */
+let typeQueue = [], typeIdx = 0, typeHintUsed = false, typeLocked = false;
+
+function startTypeIt() {
+  typeQueue = shuffle(WORDS).slice(0, 10);
+  typeIdx = 0;
+  loadTypeQuestion();
+}
+function loadTypeQuestion() {
+  if (typeIdx >= typeQueue.length) {
+    el("typeClue").textContent = "All done! 🎉";
+    el("typePos").textContent = "complete";
+    el("typeInput").classList.add("hidden");
+    el("typeCheck").classList.add("hidden");
+    el("typeHint").classList.add("hidden");
+    el("typeFeedback").innerHTML = `<div class="result-banner good"><strong>Round complete</strong>You typed ${typeQueue.length} words from memory.</div>`;
+    return;
+  }
+  typeLocked = false;
+  typeHintUsed = false;
+  const q = typeQueue[typeIdx];
+  el("typeMeta").textContent = `${typeIdx+1}/${typeQueue.length}`;
+  el("typePos").textContent = q.pos;
+  el("typeClue").innerHTML = q.ex.replace("___", "<u>______</u>") + `<br><span style="color:var(--text-dim);font-size:13px;">(${q.def})</span>`;
+  el("typeInput").value = "";
+  el("typeInput").classList.remove("correct","incorrect");
+  el("typeHintDisplay").textContent = "";
+  el("typeFeedback").innerHTML = "";
+  el("typeInput").focus();
+}
+el("typeHint").addEventListener("click", () => {
+  const q = typeQueue[typeIdx];
+  if (!q || typeLocked) return;
+  typeHintUsed = true;
+  el("typeHintDisplay").textContent = `starts with "${q.w[0]}"`;
+});
+function submitTypeAnswer() {
+  if (typeLocked) return;
+  const q = typeQueue[typeIdx];
+  if (!q) return;
+  const guess = el("typeInput").value.trim().toLowerCase().replace(/[^a-z]/g,"");
+  const correct = guess === q.w;
+  typeLocked = true;
+  el("typeInput").classList.add(correct ? "correct" : "incorrect");
+  if (correct) addXP(typeHintUsed ? 3 : 5);
+  el("typeFeedback").innerHTML = correct
+    ? `<div class="result-banner good"><strong>Correct!</strong>${q.w} (${q.pos}) — ${q.def}</div>`
+    : `<div class="result-banner bad"><strong>Not quite</strong>The word was <strong style="display:inline;">${q.w}</strong> — ${q.def}</div>`;
+  setTimeout(() => { typeIdx++; loadTypeQuestion(); }, 1500);
+}
+el("typeCheck").addEventListener("click", submitTypeAnswer);
+el("typeInput").addEventListener("keydown", (e) => { if (e.key === "Enter") submitTypeAnswer(); });
+
+/* ================= 4. SWIPE CHECK ================= */
+let swipeQueue = [], swipeIdx = 0, swipeLocked = false;
+
+function startSwipe() {
+  swipeQueue = shuffle(WORDS).slice(0, 12).map((item) => {
+    const isMatch = Math.random() < 0.5;
+    let shownDef = item.def;
+    if (!isMatch) {
+      const other = shuffle(WORDS.filter((w) => w.w !== item.w))[0];
+      shownDef = other.def;
+    }
+    return { word: item.w, pos: item.pos, shownDef, isMatch };
+  });
+  swipeIdx = 0;
+  el("swipeFeedback").innerHTML = "";
+  renderSwipeCard();
+}
+function renderSwipeCard() {
+  const stage = el("swipeStage");
+  if (swipeIdx >= swipeQueue.length) {
+    stage.innerHTML = `<div class="swipe-card" style="position:static;"><div class="sw-word">All done! 🎉</div><div class="sw-def">You checked ${swipeQueue.length} word/definition pairs.</div></div>`;
+    el("swipeYes").disabled = true; el("swipeNo").disabled = true;
+    return;
+  }
+  swipeLocked = false;
+  const q = swipeQueue[swipeIdx];
+  el("swipeMeta").textContent = `${swipeIdx+1}/${swipeQueue.length}`;
+  stage.innerHTML = `<div class="swipe-card" id="curSwipeCard">
+      <div class="sw-word">${q.word}</div>
+      <div class="sw-pos">${q.pos}</div>
+      <div class="sw-def">${q.shownDef}</div>
+    </div>`;
+  el("swipeFeedback").innerHTML = "";
+}
+function answerSwipe(userSaysMatch) {
+  if (swipeLocked) return;
+  swipeLocked = true;
+  const q = swipeQueue[swipeIdx];
+  const correct = userSaysMatch === q.isMatch;
+  if (correct) addXP(3);
+  const card = el("curSwipeCard");
+  if (card) card.classList.add(userSaysMatch ? "fly-yes" : "fly-no");
+  el("swipeFeedback").innerHTML = correct
+    ? `<div class="result-banner good"><strong>Correct!</strong>${q.isMatch ? "That definition does match." : "Right — that definition belonged to another word."}</div>`
+    : `<div class="result-banner bad"><strong>Not quite</strong>${q.isMatch ? "That definition did match " + q.word + "." : "That definition was for a different word."}</div>`;
+  setTimeout(() => { swipeIdx++; renderSwipeCard(); }, 900);
+}
+el("swipeYes").addEventListener("click", () => answerSwipe(true));
+el("swipeNo").addEventListener("click", () => answerSwipe(false));
+</script>
+</body>
+</html>
