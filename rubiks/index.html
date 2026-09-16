@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verb Speedcube — Grammar Solve</title>
+<style>
+  :root{
+    --white:#f5f6f0; --yellow:#ffd500; --red:#c8102e; --orange:#ff5f00;
+    --blue:#0046ad; --green:#009b48;
+    --bg:#0c0f16; --panel:#161b26; --panel2:#1e2532; --ink:#eef1f8; --dim:#8b93a7;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; background:
+      radial-gradient(circle at 15% 10%, #1a2233 0%, transparent 45%),
+      radial-gradient(circle at 85% 90%, #241826 0%, transparent 45%),
+      var(--bg);
+    color:var(--ink); font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    display:flex; justify-content:center; padding:20px;
+  }
+  #app{ width:100%; max-width:760px; }
+
+  .card{ background:var(--panel); border-radius:18px; padding:26px; box-shadow:0 10px 40px rgba(0,0,0,.4); border:1px solid #262e3f; }
+
+  h1{ font-size:1.6em; margin:0 0 4px; letter-spacing:.5px; }
+  .sub{ color:var(--dim); margin:0 0 18px; font-size:.95em; }
+
+  .cube-logo{ display:flex; gap:5px; margin-bottom:14px; }
+  .cube-logo span{ width:22px; height:22px; border-radius:5px; display:inline-block; box-shadow:inset 0 0 0 1px rgba(0,0,0,.25); }
+
+  .btn{
+    appearance:none; border:none; cursor:pointer; font-weight:700; font-size:1em;
+    padding:14px 22px; border-radius:12px; color:#fff; background:linear-gradient(135deg,#3d6bff,#5a3dff);
+    box-shadow:0 6px 18px rgba(61,107,255,.35); transition:transform .12s ease;
+  }
+  .btn:hover{ transform:translateY(-2px); }
+  .btn:active{ transform:translateY(0); }
+  .btn.ghost{ background:transparent; box-shadow:none; border:1px solid #313c52; color:var(--ink); }
+  .btn.block{ width:100%; }
+
+  .scramble{
+    font-family:'Consolas',monospace; letter-spacing:2px; color:var(--yellow);
+    background:#0000; border:1px dashed #3a4358; border-radius:10px; padding:8px 12px;
+    display:inline-block; font-size:.85em; margin-bottom:16px;
+  }
+
+  .event-list{ display:flex; flex-direction:column; gap:12px; margin:18px 0; }
+  .event{
+    background:var(--panel2); border-radius:12px; padding:14px 16px; border:1px solid #2a3244;
+    display:flex; align-items:center; gap:12px;
+  }
+  .event .swatch{ width:34px; height:34px; border-radius:8px; flex:0 0 auto; }
+  .event .info{ flex:1; }
+  .event .info b{ display:block; }
+  .event .info span{ color:var(--dim); font-size:.85em; }
+
+  /* header bar during play */
+  .playbar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:8px;}
+  .timerbox{
+    font-family:'Consolas',monospace; font-size:1.7em; font-weight:700; color:var(--green);
+    background:#0d1420; padding:6px 16px; border-radius:10px; border:1px solid #253045; min-width:130px; text-align:center;
+  }
+  .progress-dots{ display:flex; gap:4px; flex-wrap:wrap; max-width:280px; }
+  .progress-dots i{ width:10px; height:10px; border-radius:3px; background:#2a3244; display:inline-block; }
+  .progress-dots i.done-correct{ background:var(--green); }
+  .progress-dots i.done-wrong{ background:var(--red); }
+  .progress-dots i.current{ background:var(--yellow); }
+
+  .roundtitle{ font-size:1.1em; font-weight:700; margin-bottom:2px; }
+  .roundsub{ color:var(--dim); font-size:.85em; margin-bottom:14px; }
+
+  .prompt{
+    background:var(--panel2); border-radius:14px; padding:22px; font-size:1.15em; line-height:1.5;
+    margin-bottom:20px; border:1px solid #2a3244;
+  }
+  .prompt strong.verb{ color:var(--yellow); border-bottom:2px solid var(--yellow); padding-bottom:1px; }
+
+  .catgrid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; }
+  .catbtn{
+    cursor:pointer; border-radius:14px; padding:16px 10px; text-align:center; font-weight:700;
+    color:#111; border:none; font-size:.95em; box-shadow:0 6px 0 rgba(0,0,0,.25); transition:transform .1s;
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+  }
+  .catbtn small{ font-weight:500; opacity:.75; font-size:.78em; }
+  .catbtn:active{ transform:translateY(4px); box-shadow:0 2px 0 rgba(0,0,0,.25); }
+  .catbtn.dim{ opacity:.35; pointer-events:none; }
+
+  .mcqgrid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:560px){ .mcqgrid{ grid-template-columns:1fr; } }
+  .mcqbtn{
+    cursor:pointer; text-align:left; border-radius:14px; padding:16px; background:var(--panel2);
+    border:2px solid #2a3244; color:var(--ink); font-size:.98em; line-height:1.4; transition:.12s;
+  }
+  .mcqbtn:hover{ border-color:#4a5a80; }
+  .mcqbtn .tag{ display:inline-block; font-size:.72em; font-weight:800; letter-spacing:1px; color:var(--dim); margin-bottom:6px; }
+
+  .feedback{ margin-top:16px; padding:14px 16px; border-radius:12px; font-size:.95em; line-height:1.45; display:none; }
+  .feedback.show{ display:block; }
+  .feedback.correct{ background:rgba(0,155,72,.15); border:1px solid var(--green); color:#c8f5da; }
+  .feedback.wrong{ background:rgba(200,16,46,.15); border:1px solid var(--red); color:#ffd6dc; }
+
+  .resultwrap{ text-align:center; }
+  .resultwrap .bigtime{ font-family:'Consolas',monospace; font-size:2.6em; font-weight:800; color:var(--yellow); margin:10px 0; }
+  .statrow{ display:flex; justify-content:center; gap:24px; margin:18px 0; flex-wrap:wrap; }
+  .stat{ background:var(--panel2); padding:14px 20px; border-radius:12px; min-width:110px; border:1px solid #2a3244; }
+  .stat b{ display:block; font-size:1.4em; }
+  .stat span{ color:var(--dim); font-size:.8em; }
+  .rating{ font-size:1.15em; font-weight:800; margin:14px 0 6px; }
+  .ratingsub{ color:var(--dim); font-size:.9em; margin-bottom:20px; }
+
+  .mistakes{ text-align:left; margin-top:10px; }
+  .mistakes h3{ font-size:.95em; color:var(--dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
+  .mrow{ background:var(--panel2); border-left:4px solid var(--red); border-radius:8px; padding:10px 14px; margin-bottom:8px; font-size:.92em; }
+  .mrow b{ color:var(--yellow); }
+
+  footer.note{ color:var(--dim); font-size:.78em; text-align:center; margin-top:18px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ---------------- DATA ---------------- */
+
+const CATS = {
+  ing:  { label:"Verb + -ing",            short:"-ING",  color:"var(--green)"  },
+  to:   { label:"to + Infinitive",        short:"TO +",  color:"var(--red)"    },
+  noun: { label:"Noun + to + Infinitive", short:"N+TO",  color:"var(--yellow)" },
+  base: { label:"Base Form (no 'to')",    short:"BASE",  color:"var(--blue)"   }
+};
+
+const round1Items = [
+  {s:"We avoided going out because of the snow.", v:"avoided", a:"ing"},
+  {s:"The doctor advised me to stay home.", v:"advised", a:"noun"},
+  {s:"I could not afford to buy the shirt.", v:"afford", a:"to"},
+  {s:"We did not begin eating until nine o'clock.", v:"begin", a:"ing"},
+  {s:"My dad taught my sister to ride a bike.", v:"taught", a:"noun"},
+  {s:"The manager denied doing anything wrong.", v:"denied", a:"ing"},
+  {s:"Let's discuss changing the whole programme.", v:"discuss", a:"ing"},
+  {s:"We were permitted to wear casual clothes instead of school uniform.", v:"permitted", a:"to"},
+  {s:"The team arranged to meet an hour before the match.", v:"arranged", a:"to"},
+  {s:"I enjoy eating in Japanese restaurants.", v:"enjoy", a:"ing"},
+  {s:"The teacher urged the students to study harder.", v:"urged", a:"noun"},
+  {s:"I suggested spending less time on social media.", v:"suggested", a:"ing"},
+  {s:"The rules allow us to use calculators in the exam.", v:"allow", a:"noun"},
+  {s:"I'm considering changing my job next year.", v:"considering", a:"ing"},
+  {s:"She demanded to see the manager immediately.", v:"demanded", a:"to"},
+  {s:"He dislikes waiting in long queues.", v:"dislikes", a:"ing"},
+  {s:"They forced him to sign the contract.", v:"forced", a:"noun"},
+  {s:"I dread speaking in public.", v:"dread", a:"ing"},
+  {s:"Would you mind closing the door?", v:"mind", a:"ing"},
+  {s:"The teacher recommended reading more widely.", v:"recommended", a:"ing"},
+  {s:"The company threatened to sue if we didn't pay.", v:"threatened", a:"to"},
+  {s:"I miss living near the beach.", v:"miss", a:"ing"},
+  {s:"He resents having to work weekends.", v:"resents", a:"ing"}
+];
+
+const round2Items = [
+  {s:"I remembered watching the movie.", a:"I recalled that I had already seen it — the watching happened in the past.", b:"I didn't forget, and I watched it as planned.", correct:"a", explain:"remember + -ing = recall a past action that already happened."},
+  {s:"I remembered to watch the movie.", a:"I recalled that I had already seen it before.", b:"I didn't forget, and I watched it as planned.", correct:"b", explain:"remember + to infinitive = not forgetting to do something you needed to do."},
+  {s:"She stopped smoking last year.", a:"She quit the habit completely.", b:"She paused another activity in order to smoke.", correct:"a", explain:"stop + -ing = give up / cease that activity."},
+  {s:"He stopped to smoke a cigarette.", a:"He gave up smoking completely.", b:"He paused what he was doing in order to smoke.", correct:"b", explain:"stop + to infinitive = pause one activity in order to do another."},
+  {s:"I'll never forget meeting her for the first time.", a:"I remember it clearly — it did happen.", b:"I failed to meet her.", correct:"a", explain:"forget + -ing (often with 'never') = recall a memorable past event."},
+  {s:"Don't forget to lock the door.", a:"Remember to do this before you go — it hasn't happened yet.", b:"Remember that you already locked it.", correct:"a", explain:"forget + to infinitive = fail (or risk failing) to do a necessary task."},
+  {s:"I regret telling him the secret.", a:"I'm sorry about something I already did.", b:"I'm formally announcing bad news right now.", correct:"a", explain:"regret + -ing = feel sorry about a past action."},
+  {s:"We regret to inform you that your application was unsuccessful.", a:"We're sorry about something we did in the past.", b:"A formal way to announce unwelcome news now.", correct:"b", explain:"regret + to infinitive = a formal way of introducing bad news."},
+  {s:"I tried calling her three times, but she didn't answer.", a:"I experimented with an action to see what would happen.", b:"I made every possible effort, whatever it took.", correct:"a", explain:"try + -ing = experiment with an action to see the result."},
+  {s:"She went on talking for another hour.", a:"She continued the same activity.", b:"She moved on to a new, different activity.", correct:"a", explain:"go on + -ing = continue the same activity."}
+];
+
+const round3Items = [
+  {s:"Can't we go to the cinema?", a:"base"},
+  {s:"I think we should go to the cinema.", a:"base"},
+  {s:"I'd rather go to the cinema.", a:"base"},
+  {s:"What do you think about going to the cinema?", a:"ing"},
+  {s:"Would you like to go to the cinema?", a:"to"},
+  {s:"I'd prefer to go to the cinema.", a:"to"},
+  {s:"I suggest going to the cinema.", a:"ing"},
+  {s:"I suggest we go to the cinema.", a:"base"},
+  {s:"I'd like to go to the cinema.", a:"to"},
+  {s:"Let's go to the cinema.", a:"base"},
+  {s:"Do you feel like going to the cinema?", a:"ing"},
+  {s:"I don't feel like going to the cinema.", a:"ing"}
+];
+
+const ROUNDS = [
+  { key:"r1", type:"sort", title:"Solve 1 — Full Sort", eventName:"3×3 Category Solve",
+    subtitle:"Click the sticker that matches the verb pattern.",
+    cats:["ing","to","noun"], items:round1Items, swatch:"var(--green)" },
+  { key:"r2", type:"mcq", title:"Solve 2 — Meaning Match", eventName:"One-Handed Meaning Solve",
+    subtitle:"Same verb, different form, different meaning. Pick what the sentence really means.",
+    items:round2Items, swatch:"var(--red)" },
+  { key:"r3", type:"sort", title:"Solve 3 — Suggestion Relay", eventName:"Relay Sort",
+    subtitle:"Sort each suggestion phrase by the verb pattern it uses.",
+    cats:["to","ing","base"], items:round3Items, swatch:"var(--blue)" }
+];
+
+function scramble(n){
+  const moves = ["R","R'","U","U'","F","F'","L","L'","D","D'","B","B'","R2","U2","F2","L2"];
+  let out=[], last="";
+  for(let i=0;i<n;i++){
+    let m;
+    do{ m = moves[Math.floor(Math.random()*moves.length)]; } while(m[0]===last[0]);
+    last=m; out.push(m);
+  }
+  return out.join(" ");
+}
+
+/* ---------------- STATE ---------------- */
+let state = {
+  screen:"start",
+  roundIdx:0,
+  itemIdx:0,
+  itemStart:0,
+  timerHandle:null,
+  results: ROUNDS.map(()=>({ time:0, correct:0, total:0, mistakes:[], answers:[] }))
+};
+
+const app = document.getElementById("app");
+
+function fmt(ms){
+  const s = ms/1000;
+  return s.toFixed(2)+"s";
+}
+
+/* ---------------- SCREENS ---------------- */
+
+function renderStart(){
+  stopTimer();
+  app.innerHTML = `
+    <div class="card">
+      <div class="cube-logo">
+        <span style="background:var(--white)"></span><span style="background:var(--yellow)"></span>
+        <span style="background:var(--red)"></span><span style="background:var(--orange)"></span>
+        <span style="background:var(--blue)"></span><span style="background:var(--green)"></span>
+      </div>
+      <h1>Verb Speedcube</h1>
+      <p class="sub">Grammar Solve — Verbs Followed by Other Verbs</p>
+      <div class="scramble">${scramble(8)}</div>
+      <p>Three timed solves. Categorize verb patterns and read meanings as fast — and as accurately — as you can, just like a real speedcuber racing the clock.</p>
+      <div class="event-list">
+        ${ROUNDS.map(r=>`
+          <div class="event">
+            <div class="swatch" style="background:${r.swatch}"></div>
+            <div class="info"><b>${r.eventName}</b><span>${r.subtitle}</span></div>
+          </div>`).join("")}
+      </div>
+      <button class="btn block" onclick="beginRound(0)">Inspect &amp; Start Solve 1 →</button>
+      <footer class="note">Based on the IGCSE Language Focus: Verbs followed by other verbs</footer>
+    </div>
+  `;
+}
+
+function beginRound(idx){
+  state.roundIdx = idx;
+  state.itemIdx = 0;
+  state.results[idx] = { time:0, correct:0, total:ROUNDS[idx].items.length, mistakes:[], answers:[] };
+  renderInspection();
+}
+
+function renderInspection(){
+  const r = ROUNDS[state.roundIdx];
+  app.innerHTML = `
+    <div class="card resultwrap">
+      <div class="scramble">${scramble(9)}</div>
+      <h1>${r.eventName}</h1>
+      <p class="sub">${r.subtitle}</p>
+      <p>${r.items.length} solves in this round. Timer starts the moment you hit go.</p>
+      <button class="btn block" onclick="startRoundTimer()">🟢 GO</button>
+    </div>
+  `;
+}
+
+function startRoundTimer(){
+  state.roundStart = performance.now();
+  renderItem();
+}
+
+function stopTimer(){
+  if(state.timerHandle){ clearInterval(state.timerHandle); state.timerHandle=null; }
+}
+
+function renderItem(){
+  const r = ROUNDS[state.roundIdx];
+  const i = state.itemIdx;
+  const item = r.items[i];
+  state.itemStart = performance.now();
+
+  const dotsHtml = r.items.map((_,idx)=>{
+    if(idx < i) {
+      const wasCorrect = state.results[state.roundIdx].answers[idx];
+      return `<i class="${wasCorrect ? 'done-correct':'done-wrong'}"></i>`;
+    }
+    if(idx === i) return `<i class="current"></i>`;
+    return `<i></i>`;
+  }).join("");
+
+  let bodyHtml;
+  if(r.type === "sort"){
+    const sentenceHtml = item.v ? item.s.replace(item.v, `<strong class="verb">${item.v}</strong>`) : item.s;
+    bodyHtml = `
+      <div class="prompt">${sentenceHtml}</div>
+      <div class="catgrid" id="catgrid">
+        ${r.cats.map(ck=>{
+          const c = CATS[ck];
+          return `<button class="catbtn" style="background:${c.color}" onclick="answerSort('${ck}')">
+            ${c.label}<small>${c.short}</small>
+          </button>`;
+        }).join("")}
+      </div>
+    `;
+  } else {
+    bodyHtml = `
+      <div class="prompt">${item.s}</div>
+      <div class="mcqgrid">
+        <div class="mcqbtn" onclick="answerMcq('a')"><span class="tag">Option A</span>${item.a}</div>
+        <div class="mcqbtn" onclick="answerMcq('b')"><span class="tag">Option B</span>${item.b}</div>
+      </div>
+    `;
+  }
+
+  app.innerHTML = `
+    <div class="card">
+      <div class="playbar">
+        <div>
+          <div class="roundtitle">${r.title}</div>
+          <div class="roundsub">Solve ${i+1} of ${r.items.length}</div>
+        </div>
+        <div class="timerbox" id="timerbox">0.00s</div>
+      </div>
+      <div class="progress-dots">${dotsHtml}</div>
+      <div style="height:14px"></div>
+      ${bodyHtml}
+      <div class="feedback" id="feedback"></div>
+    </div>
+  `;
+
+  stopTimer();
+  state.timerHandle = setInterval(()=>{
+    const el = document.getElementById("timerbox");
+    if(el) el.textContent = fmt(performance.now() - state.itemStart);
+  }, 30);
+}
+
+function lockAnswer(isCorrect, explainHtml, disableExtra){
+  stopTimer();
+  const elapsed = performance.now() - state.itemStart;
+  const res = state.results[state.roundIdx];
+  res.time += elapsed;
+  res.answers.push(isCorrect);
+  if(isCorrect) res.correct++;
+  if(disableExtra) disableExtra();
+
+  const fb = document.getElementById("feedback");
+  fb.className = "feedback show " + (isCorrect ? "correct":"wrong");
+  fb.innerHTML = (isCorrect ? "✅ Correct! " : "❌ Not quite. ") + explainHtml + `<br><span style="color:var(--dim)">(${fmt(elapsed)})</span>`;
+
+  const timerbox = document.getElementById("timerbox");
+  if(timerbox) timerbox.style.color = isCorrect ? "var(--green)" : "var(--red)";
+
+  setTimeout(()=>{
+    state.itemIdx++;
+    if(state.itemIdx >= ROUNDS[state.roundIdx].items.length){
+      renderRoundSummary();
+    } else {
+      renderItem();
+    }
+  }, isCorrect ? 950 : 1900);
+}
+
+function answerSort(chosen){
+  const r = ROUNDS[state.roundIdx];
+  const item = r.items[state.itemIdx];
+  const correct = chosen === item.a;
+  const buttons = document.querySelectorAll("#catgrid .catbtn");
+  buttons.forEach(b=>b.classList.add("dim"));
+  if(!correct){
+    const res = state.results[state.roundIdx];
+    res.mistakes.push({ text: item.s, correctLabel: CATS[item.a].label, chosenLabel: CATS[chosen].label });
+  }
+  lockAnswer(correct, `This is <b style="color:${CATS[item.a].color}">${CATS[item.a].label}</b>.`);
+}
+
+function answerMcq(chosen){
+  const r = ROUNDS[state.roundIdx];
+  const item = r.items[state.itemIdx];
+  const correct = chosen === item.correct;
+  document.querySelectorAll(".mcqbtn").forEach(b=>b.style.pointerEvents="none");
+  if(!correct){
+    const res = state.results[state.roundIdx];
+    res.mistakes.push({ text: item.s, correctLabel: item[item.correct], explain: item.explain });
+  }
+  lockAnswer(correct, item.explain);
+}
+
+function renderRoundSummary(){
+  const r = ROUNDS[state.roundIdx];
+  const res = state.results[state.roundIdx];
+  const acc = Math.round((res.correct/res.total)*100);
+  const isLast = state.roundIdx === ROUNDS.length - 1;
+
+  app.innerHTML = `
+    <div class="card resultwrap">
+      <div class="scramble">${scramble(6)}</div>
+      <h1>${r.eventName} — Complete</h1>
+      <div class="bigtime">${fmt(res.time)}</div>
+      <div class="statrow">
+        <div class="stat"><b>${res.correct}/${res.total}</b><span>Correct</span></div>
+        <div class="stat"><b>${acc}%</b><span>Accuracy</span></div>
+        <div class="stat"><b>${fmt(res.time/res.total)}</b><span>Avg / solve</span></div>
+      </div>
+      ${res.mistakes.length ? `
+        <div class="mistakes">
+          <h3>Review these before the next solve</h3>
+          ${res.mistakes.map(m=>`<div class="mrow">"${m.text}" — <b>${m.correctLabel}</b>${m.explain ? '<br>'+m.explain : ''}</div>`).join("")}
+        </div>` : `<p style="color:var(--green)">Clean solve — no mistakes! 🎉</p>`}
+      <div style="height:10px"></div>
+      <button class="btn block" onclick="${isLast ? 'renderFinal()' : `beginRound(${state.roundIdx+1})`}">
+        ${isLast ? 'See Final Results →' : `Inspect Solve ${state.roundIdx+2} →`}
+      </button>
+    </div>
+  `;
+}
+
+function renderFinal(){
+  const times = state.results.map(r=>r.time);
+  const totalCorrect = state.results.reduce((a,r)=>a+r.correct,0);
+  const totalItems = state.results.reduce((a,r)=>a+r.total,0);
+  const acc = Math.round((totalCorrect/totalItems)*100);
+  const mo3 = times.reduce((a,b)=>a+b,0)/times.length;
+
+  let rating, ratingSub;
+  if(acc >= 95){ rating="🏆 World Champion Solve"; ratingSub="Near-perfect accuracy. That's a podium-worthy grammar run."; }
+  else if(acc >= 85){ rating="🥇 Sub-20 Grammar Solver"; ratingSub="Fast and accurate — you clearly know these patterns."; }
+  else if(acc >= 70){ rating="🥈 Solid Competition Solve"; ratingSub="Good pace, a few pattern mix-ups. Review the mistakes above each round."; }
+  else if(acc >= 50){ rating="🥉 Getting the Algorithm Down"; ratingSub="You're learning the moves — drill the mistakes and try again."; }
+  else{ rating="🔁 Scramble Again"; ratingSub="These patterns need more practice. Try another attempt!"; }
+
+  app.innerHTML = `
+    <div class="card resultwrap">
+      <div class="cube-logo" style="justify-content:center">
+        <span style="background:var(--white)"></span><span style="background:var(--yellow)"></span>
+        <span style="background:var(--red)"></span><span style="background:var(--orange)"></span>
+        <span style="background:var(--blue)"></span><span style="background:var(--green)"></span>
+      </div>
+      <h1>Final Results</h1>
+      <p class="sub">Mo3 — Mean of your 3 solves</p>
+      <div class="bigtime">${fmt(mo3)}</div>
+      <div class="statrow">
+        <div class="stat"><b>${totalCorrect}/${totalItems}</b><span>Total Correct</span></div>
+        <div class="stat"><b>${acc}%</b><span>Overall Accuracy</span></div>
+      </div>
+      <div class="statrow">
+        ${ROUNDS.map((r,i)=>`<div class="stat"><b>${fmt(times[i])}</b><span>${r.eventName}</span></div>`).join("")}
+      </div>
+      <div class="rating">${rating}</div>
+      <div class="ratingsub">${ratingSub}</div>
+      <button class="btn block" onclick="renderStart()">↺ Restart — New Attempt</button>
+      <footer class="note">Verbs followed by other verbs — verb+-ing, to+infinitive, noun+to+infinitive, meaning-change verbs, and suggestion phrases.</footer>
+    </div>
+  `;
+}
+
+renderStart();
+</script>
+</body>
+</html>
