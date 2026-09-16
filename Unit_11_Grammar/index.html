@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alone in the Ice — Past Perfect Survival Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-void:#071620;
+    --bg-panel:#0E2836;
+    --bg-panel-2:#122F3F;
+    --frost:#EAF6FB;
+    --frost-dim:#B9D3DD;
+    --ice-mid:#7FC4DE;
+    --ice-glow:#3FA9CE;
+    --volcanic:#15100D;
+    --volcanic-2:#1E1713;
+    --danger:#E2572B;
+    --success:#6EE7B7;
+    --border:rgba(234,246,251,0.12);
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(63,169,206,0.16), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 10%, rgba(110,231,183,0.08), transparent 55%),
+      var(--bg-void);
+    color:var(--frost);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  .display{font-family:'Big Shoulders Display',sans-serif; text-transform:uppercase; letter-spacing:0.02em;}
+
+  .app{
+    max-width:960px;
+    margin:0 auto;
+    padding:28px 20px 80px;
+    display:grid;
+    grid-template-columns:1fr;
+    gap:20px;
+  }
+
+  header.top{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:16px;
+    border-bottom:1px solid var(--border);
+    padding-bottom:18px;
+    flex-wrap:wrap;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--ice-mid);
+    margin:0 0 6px;
+  }
+  h1.title{
+    font-size:clamp(34px,6vw,54px);
+    line-height:0.92;
+    margin:0;
+    font-weight:800;
+    color:var(--frost);
+  }
+  .subtitle{
+    color:var(--frost-dim);
+    font-size:14px;
+    margin-top:6px;
+    max-width:38ch;
+  }
+
+  main{position:relative;}
+
+  .layout{
+    display:grid;
+    grid-template-columns:1fr 220px;
+    gap:22px;
+    align-items:start;
+  }
+  @media (max-width:720px){
+    .layout{grid-template-columns:1fr;}
+    .gauge{order:-1;}
+  }
+
+  /* ---- Signature element: survival gauge ---- */
+  .gauge{
+    background:linear-gradient(180deg,var(--bg-panel),var(--volcanic));
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:18px 16px;
+    position:sticky;
+    top:20px;
+  }
+  .gauge h3{
+    margin:0 0 14px;
+    font-size:12px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--frost-dim);
+    font-weight:600;
+    border-bottom:1px solid var(--border);
+    padding-bottom:10px;
+  }
+  .stat{margin-bottom:16px;}
+  .stat:last-child{margin-bottom:0;}
+  .stat-label{
+    font-size:10px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--frost-dim);
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:6px;
+  }
+  .stat-value{font-family:'IBM Plex Mono',monospace; font-weight:600;}
+  .bar-track{
+    height:8px;
+    border-radius:5px;
+    background:rgba(234,246,251,0.08);
+    overflow:hidden;
+  }
+  .bar-fill{
+    height:100%;
+    border-radius:5px;
+    transition:width 0.5s ease, background 0.5s ease;
+  }
+  .temp-fill{background:linear-gradient(90deg,var(--danger),var(--ice-glow));}
+  .dist-fill{background:linear-gradient(90deg,var(--ice-glow),var(--success));}
+  .gauge-note{
+    font-size:11px;
+    color:var(--frost-dim);
+    margin-top:14px;
+    line-height:1.5;
+    border-top:1px solid var(--border);
+    padding-top:12px;
+  }
+
+  /* ---- Cards ---- */
+  .card{
+    background:var(--bg-panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:26px;
+  }
+  .round-tag{
+    display:inline-block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--ice-mid);
+    background:rgba(63,169,206,0.12);
+    border:1px solid rgba(63,169,206,0.3);
+    border-radius:20px;
+    padding:4px 12px;
+    margin-bottom:14px;
+  }
+  .q-count{
+    color:var(--frost-dim);
+    font-size:12px;
+    font-family:'IBM Plex Mono',monospace;
+    margin-bottom:10px;
+  }
+  .q-text{
+    font-size:19px;
+    line-height:1.5;
+    margin:0 0 22px;
+    font-weight:500;
+  }
+  .q-text u{text-decoration-color:var(--ice-mid); text-decoration-thickness:2px; text-underline-offset:4px;}
+  .q-text b{color:var(--frost);}
+
+  .options{display:grid; gap:10px;}
+  .opt{
+    text-align:left;
+    background:var(--bg-panel-2);
+    border:1px solid var(--border);
+    color:var(--frost);
+    padding:13px 16px;
+    border-radius:10px;
+    font-size:15px;
+    cursor:pointer;
+    font-family:inherit;
+    transition:border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+  }
+  .opt:hover:not(:disabled){border-color:var(--ice-mid); background:#153347;}
+  .opt:focus-visible{outline:2px solid var(--ice-glow); outline-offset:2px;}
+  .opt:active:not(:disabled){transform:scale(0.99);}
+  .opt:disabled{cursor:default;}
+  .opt.correct{border-color:var(--success); background:rgba(110,231,183,0.12); color:var(--success);}
+  .opt.incorrect{border-color:var(--danger); background:rgba(226,87,43,0.12); color:#FFB199;}
+
+  .blank-row{display:flex; gap:10px; margin-bottom:6px; flex-wrap:wrap;}
+  .blank-input{
+    flex:1;
+    min-width:220px;
+    background:var(--bg-panel-2);
+    border:1px solid var(--border);
+    color:var(--frost);
+    padding:12px 14px;
+    border-radius:10px;
+    font-size:15px;
+    font-family:'IBM Plex Mono',monospace;
+  }
+  .blank-input:focus-visible{outline:2px solid var(--ice-glow); outline-offset:1px; border-color:var(--ice-glow);}
+  .blank-input.correct{border-color:var(--success); color:var(--success);}
+  .blank-input.incorrect{border-color:var(--danger); color:#FFB199;}
+  .verb-hint{color:var(--frost-dim); font-size:12px; margin-top:4px;}
+
+  .feedback{
+    margin-top:16px;
+    padding:12px 14px;
+    border-radius:10px;
+    font-size:13.5px;
+    line-height:1.5;
+    display:none;
+  }
+  .feedback.show{display:block;}
+  .feedback.good{background:rgba(110,231,183,0.1); border:1px solid rgba(110,231,183,0.35); color:var(--success);}
+  .feedback.bad{background:rgba(226,87,43,0.1); border:1px solid rgba(226,87,43,0.35); color:#FFB199;}
+
+  .actions{display:flex; justify-content:flex-end; margin-top:22px; gap:10px;}
+  button.primary{
+    background:var(--ice-glow);
+    color:var(--volcanic);
+    border:none;
+    padding:12px 22px;
+    border-radius:10px;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+    font-family:'Inter',sans-serif;
+    transition:background 0.15s ease, transform 0.1s ease;
+  }
+  button.primary:hover{background:var(--ice-mid);}
+  button.primary:active{transform:scale(0.98);}
+  button.primary:disabled{opacity:0.35; cursor:not-allowed;}
+  button.primary:focus-visible{outline:2px solid var(--frost); outline-offset:2px;}
+
+  button.ghost{
+    background:transparent;
+    color:var(--frost-dim);
+    border:1px solid var(--border);
+    padding:12px 20px;
+    border-radius:10px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    font-family:'Inter',sans-serif;
+  }
+  button.ghost:hover{border-color:var(--ice-mid); color:var(--frost);}
+
+  /* ---- Intro / End screens ---- */
+  .story{
+    color:var(--frost-dim);
+    font-size:14.5px;
+    line-height:1.7;
+    margin-bottom:22px;
+  }
+  .story b{color:var(--frost);}
+  .start-btn-row{display:flex; justify-content:flex-start;}
+
+  .end-headline{font-size:clamp(28px,5vw,40px); margin:0 0 10px; font-weight:800;}
+  .score-row{
+    display:flex;
+    gap:16px;
+    margin:18px 0 22px;
+    flex-wrap:wrap;
+  }
+  .score-box{
+    background:var(--bg-panel-2);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:16px 20px;
+    min-width:140px;
+  }
+  .score-box .n{font-family:'IBM Plex Mono',monospace; font-size:26px; font-weight:600; color:var(--ice-glow);}
+  .score-box .l{font-size:11px; color:var(--frost-dim); text-transform:uppercase; letter-spacing:0.08em; margin-top:4px;}
+
+  .review-list{list-style:none; margin:0; padding:0;}
+  .review-item{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    padding:9px 0;
+    border-bottom:1px solid var(--border);
+    font-size:13.5px;
+  }
+  .review-item:last-child{border-bottom:none;}
+  .review-item .mark{font-family:'IBM Plex Mono',monospace; font-weight:600;}
+  .mark.ok{color:var(--success);}
+  .mark.no{color:var(--danger);}
+
+  .fact-box{
+    margin-top:24px;
+    padding:16px 18px;
+    background:linear-gradient(180deg, rgba(110,231,183,0.08), transparent);
+    border:1px solid rgba(110,231,183,0.25);
+    border-radius:10px;
+    font-size:13.5px;
+    color:var(--frost-dim);
+    line-height:1.6;
+  }
+  .fact-box b{color:var(--success);}
+
+  .hidden{display:none !important;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important; animation:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div>
+      <p class="eyebrow">Past Perfect Simple vs. Past Perfect Continuous</p>
+      <h1 class="title display">Alone in<br>the Ice</h1>
+      <p class="subtitle">Based on the survival story of Guðlaugur Friðþórsson</p>
+    </div>
+  </header>
+
+  <main>
+    <div class="layout">
+      <div id="panel-col">
+
+        <!-- INTRO -->
+        <section id="screen-intro" class="card">
+          <span class="round-tag">Before you begin</span>
+          <p class="story">
+            In March 1984, a fishing boat capsized off the coast of the Westman Islands, Iceland.
+            <b>Guðlaugur Friðþórsson</b> swam for hours through near-freezing water, then walked barefoot
+            across sharp volcanic rock to find help. Every sentence in this quiz retells a piece of his
+            story &mdash; and every answer depends on knowing when to use the <b>past perfect simple</b>
+            (had + past participle) and when to use the <b>past perfect continuous</b> (had been + -ing).
+          </p>
+          <p class="story">
+            <b>Round 1</b> — identify the tense in five sentences.<br>
+            <b>Round 2</b> — complete ten sentences with the correct form.<br>
+            Every wrong answer costs you body heat. Every correct answer carries you closer to shore.
+          </p>
+          <div class="start-btn-row">
+            <button class="primary" id="btn-start">Begin the Swim</button>
+          </div>
+        </section>
+
+        <!-- ROUND 1: MULTIPLE CHOICE -->
+        <section id="screen-mc" class="card hidden">
+          <span class="round-tag">Round 1 · Identify the Tense</span>
+          <p class="q-count" id="mc-count"></p>
+          <p class="q-text" id="mc-question"></p>
+          <div class="options" id="mc-options"></div>
+          <div class="feedback" id="mc-feedback"></div>
+          <div class="actions">
+            <button class="primary" id="mc-next" disabled>Next</button>
+          </div>
+        </section>
+
+        <!-- ROUND 2: FILL IN THE BLANK -->
+        <section id="screen-blank" class="card hidden">
+          <span class="round-tag">Round 2 · Complete the Sentence</span>
+          <p class="q-count" id="bl-count"></p>
+          <p class="q-text" id="bl-question"></p>
+          <div class="blank-row">
+            <input class="blank-input" id="bl-input" type="text" autocomplete="off" placeholder="Type the missing verb form…">
+            <button class="primary" id="bl-check">Check</button>
+          </div>
+          <p class="verb-hint" id="bl-hint"></p>
+          <div class="feedback" id="bl-feedback"></div>
+          <div class="actions">
+            <button class="primary hidden" id="bl-next">Next</button>
+          </div>
+        </section>
+
+        <!-- END -->
+        <section id="screen-end" class="card hidden">
+          <span class="round-tag">Shore reached</span>
+          <h2 class="end-headline display" id="end-headline"></h2>
+          <p class="story" id="end-summary"></p>
+          <div class="score-row">
+            <div class="score-box"><div class="n" id="end-score">0/15</div><div class="l">Correct answers</div></div>
+            <div class="score-box"><div class="n" id="end-temp">37.0°C</div><div class="l">Final body temp</div></div>
+            <div class="score-box"><div class="n" id="end-time">9h</div><div class="l">Time in the water</div></div>
+          </div>
+          <ul class="review-list" id="review-list"></ul>
+          <div class="fact-box">
+            Real ending: doctors expected Guðlaugur's core temperature to be fatally low, but found it
+            near normal. Researchers later suggested his body fat had a chemical structure closer to a
+            <b>seal's</b> than a typical human's — part of why he survived a swim that should have killed him.
+          </div>
+          <div class="actions">
+            <button class="ghost" id="btn-restart">Swim again</button>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- Signature: survival gauge -->
+      <aside class="gauge" id="gauge">
+        <h3>Survival Readout</h3>
+        <div class="stat">
+          <div class="stat-label"><span>Body temp</span><span class="stat-value" id="gauge-temp">37.0°C</span></div>
+          <div class="bar-track"><div class="bar-fill temp-fill" id="gauge-temp-fill" style="width:100%"></div></div>
+        </div>
+        <div class="stat">
+          <div class="stat-label"><span>Distance to shore</span><span class="stat-value" id="gauge-dist">6.0 km</span></div>
+          <div class="bar-track"><div class="bar-fill dist-fill" id="gauge-dist-fill" style="width:0%"></div></div>
+        </div>
+        <div class="stat">
+          <div class="stat-label"><span>Score</span><span class="stat-value" id="gauge-score">0 / 15</span></div>
+        </div>
+        <p class="gauge-note">Correct answers pull you toward the shore. Mistakes drop your core temperature — the real danger Guðlaugur faced.</p>
+      </aside>
+    </div>
+  </main>
+</div>
+
+<script>
+(function(){
+  // ---------- Data ----------
+  const mcQuestions = [
+    {
+      text: 'By the time he reached the shore, Guðlaugur <u>had swum</u> for more than five hours.',
+      options: ['Past perfect simple', 'Past perfect continuous', 'Simple past', 'Past continuous'],
+      correct: 0,
+      explanation: '"had swum" — a completed action before another past point. Past perfect simple.'
+    },
+    {
+      text: 'Before the boat sank, the fishermen <u>had been fishing</u> in freezing waters for hours.',
+      options: ['Past perfect simple', 'Past perfect continuous', 'Simple past', 'Present perfect'],
+      correct: 1,
+      explanation: '"had been fishing" — an ongoing action leading up to the sinking. Past perfect continuous.'
+    },
+    {
+      text: 'His clothes, which <u>had been soaked</u> with seawater, were frozen to his skin.',
+      options: ['Simple past', 'Past perfect continuous', 'Past perfect simple', 'Past continuous'],
+      correct: 2,
+      explanation: '"had been soaked" is a passive past perfect simple — a completed state before the main past event.'
+    },
+    {
+      text: 'He <u>had been losing</u> vital fluid in his lungs, which wasn\'t being replaced.',
+      options: ['Past perfect simple', 'Simple past', 'Present perfect continuous', 'Past perfect continuous'],
+      correct: 3,
+      explanation: '"had been losing" — an ongoing process happening over time before the past moment. Past perfect continuous.'
+    },
+    {
+      text: 'When the medical staff examined him, they found that his body temperature <u>had dropped</u> below 34°C.',
+      options: ['Past perfect continuous', 'Past perfect simple', 'Simple past', 'Past continuous'],
+      correct: 1,
+      explanation: '"had dropped" — a completed change of state before the examination. Past perfect simple.'
+    }
+  ];
+
+  const blankQuestions = [
+    { text: 'Before the boat capsized, the men BLANK for several hours.', verb: 'fish', answers: ['had been fishing'] },
+    { text: 'By the time he reached land, Guðlaugur BLANK six kilometres.', verb: 'swim', answers: ['had swum'] },
+    { text: 'He was freezing because his clothes BLANK in seawater.', verb: 'soak', answers: ['had been soaked'] },
+    { text: 'The two other fishermen BLANK before Guðlaugur even reached the shore.', verb: 'disappear', answers: ['had disappeared'] },
+    { text: 'He BLANK fluid through his breath for hours, so he badly needed water.', verb: 'lose', answers: ['had been losing'] },
+    { text: 'By the time he found the bathtub, he BLANK for hours without stopping.', verb: 'travel', answers: ['had been travelling', 'had been traveling'] },
+    { text: 'Doctors discovered that his body temperature BLANK below 34°C.', verb: 'drop', answers: ['had dropped'] },
+    { text: 'Before he found the bathtub, he BLANK for fresh water.', verb: 'search', answers: ['had been searching'] },
+    { text: 'He realised that the sharp volcanic rock BLANK his bare feet badly.', verb: 'cut', answers: ['had cut'] },
+    { text: 'By 7 a.m., he BLANK nine hours in freezing conditions.', verb: 'survive', answers: ['had survived'] }
+  ];
+
+  const TOTAL_Q = mcQuestions.length + blankQuestions.length; // 15
+  const START_TEMP = 37.0;
+  const TEMP_DROP = 0.75; // per wrong answer
+  const MIN_TEMP = 30.0;
+  const TOTAL_KM = 6.0;
+
+  let state = {
+    mcIndex: 0,
+    blankIndex: 0,
+    score: 0,
+    temp: START_TEMP,
+    answered: 0,
+    log: [] // {label, correct}
+  };
+
+  // ---------- Elements ----------
+  const screens = {
+    intro: document.getElementById('screen-intro'),
+    mc: document.getElementById('screen-mc'),
+    blank: document.getElementById('screen-blank'),
+    end: document.getElementById('screen-end')
+  };
+
+  function showScreen(name){
+    Object.values(screens).forEach(s => s.classList.add('hidden'));
+    screens[name].classList.remove('hidden');
+  }
+
+  function updateGauge(){
+    const tempPct = Math.max(0, Math.min(100, ((state.temp - MIN_TEMP) / (START_TEMP - MIN_TEMP)) * 100));
+    document.getElementById('gauge-temp').textContent = state.temp.toFixed(1) + '°C';
+    document.getElementById('gauge-temp-fill').style.width = tempPct + '%';
+
+    const kmLeft = Math.max(0, TOTAL_KM * (1 - state.score / TOTAL_Q));
+    const distPct = Math.min(100, (state.score / TOTAL_Q) * 100);
+    document.getElementById('gauge-dist').textContent = kmLeft.toFixed(1) + ' km';
+    document.getElementById('gauge-dist-fill').style.width = distPct + '%';
+
+    document.getElementById('gauge-score').textContent = state.score + ' / ' + TOTAL_Q;
+  }
+
+  function registerAnswer(correct, label){
+    state.answered++;
+    if(correct){
+      state.score++;
+    } else {
+      state.temp = Math.max(MIN_TEMP, state.temp - TEMP_DROP);
+    }
+    state.log.push({label, correct});
+    updateGauge();
+  }
+
+  // ---------- Round 1: Multiple choice ----------
+  function renderMC(){
+    const q = mcQuestions[state.mcIndex];
+    document.getElementById('mc-count').textContent = 'Question ' + (state.mcIndex + 1) + ' of ' + mcQuestions.length;
+    document.getElementById('mc-question').innerHTML = q.text;
+    const optWrap = document.getElementById('mc-options');
+    optWrap.innerHTML = '';
+    const fb = document.getElementById('mc-feedback');
+    fb.className = 'feedback';
+    fb.textContent = '';
+    document.getElementById('mc-next').disabled = true;
+
+    q.options.forEach((optText, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.type = 'button';
+      btn.textContent = optText;
+      btn.addEventListener('click', () => handleMCAnswer(i));
+      optWrap.appendChild(btn);
+    });
+  }
+
+  function handleMCAnswer(i){
+    const q = mcQuestions[state.mcIndex];
+    const buttons = document.querySelectorAll('#mc-options .opt');
+    buttons.forEach((b, idx) => {
+      b.disabled = true;
+      if(idx === q.correct) b.classList.add('correct');
+      if(idx === i && i !== q.correct) b.classList.add('incorrect');
+    });
+    const correct = (i === q.correct);
+    const fb = document.getElementById('mc-feedback');
+    fb.classList.add('show', correct ? 'good' : 'bad');
+    fb.textContent = (correct ? 'Correct. ' : 'Not quite. ') + q.explanation;
+    registerAnswer(correct, 'Round 1, Q' + (state.mcIndex + 1));
+    document.getElementById('mc-next').disabled = false;
+  }
+
+  document.getElementById('mc-next').addEventListener('click', () => {
+    state.mcIndex++;
+    if(state.mcIndex < mcQuestions.length){
+      renderMC();
+    } else {
+      showScreen('blank');
+      renderBlank();
+    }
+  });
+
+  // ---------- Round 2: Fill in the blank ----------
+  function renderBlank(){
+    const q = blankQuestions[state.blankIndex];
+    document.getElementById('bl-count').textContent = 'Question ' + (state.blankIndex + 1) + ' of ' + blankQuestions.length;
+    document.getElementById('bl-question').innerHTML = q.text.replace('BLANK', '<b>____________</b>');
+    document.getElementById('bl-hint').textContent = 'Verb in brackets: (' + q.verb + ')';
+    const input = document.getElementById('bl-input');
+    input.value = '';
+    input.className = 'blank-input';
+    input.disabled = false;
+    input.focus();
+    const fb = document.getElementById('bl-feedback');
+    fb.className = 'feedback';
+    fb.textContent = '';
+    document.getElementById('bl-check').classList.remove('hidden');
+    document.getElementById('bl-next').classList.add('hidden');
+  }
+
+  function normalize(str){
+    return str.toLowerCase().trim().replace(/[.,!?]/g, '').replace(/\s+/g, ' ');
+  }
+
+  function checkBlank(){
+    const q = blankQuestions[state.blankIndex];
+    const input = document.getElementById('bl-input');
+    const userVal = normalize(input.value);
+    const correct = q.answers.some(a => normalize(a) === userVal);
+
+    input.disabled = true;
+    input.classList.add(correct ? 'correct' : 'incorrect');
+
+    const fb = document.getElementById('bl-feedback');
+    fb.classList.add('show', correct ? 'good' : 'bad');
+    fb.textContent = correct
+      ? 'Correct.'
+      : 'Not quite — the expected answer was "' + q.answers[0] + '".';
+
+    registerAnswer(correct, 'Round 2, Q' + (state.blankIndex + 1));
+    document.getElementById('bl-check').classList.add('hidden');
+    document.getElementById('bl-next').classList.remove('hidden');
+  }
+
+  document.getElementById('bl-check').addEventListener('click', checkBlank);
+  document.getElementById('bl-input').addEventListener('keydown', (e) => {
+    if(e.key === 'Enter' && !document.getElementById('bl-check').classList.contains('hidden')){
+      checkBlank();
+    }
+  });
+
+  document.getElementById('bl-next').addEventListener('click', () => {
+    state.blankIndex++;
+    if(state.blankIndex < blankQuestions.length){
+      renderBlank();
+    } else {
+      finishGame();
+    }
+  });
+
+  // ---------- End screen ----------
+  function finishGame(){
+    showScreen('end');
+    const pct = state.score / TOTAL_Q;
+    let headline, summary;
+    if(pct === 1){
+      headline = 'You reached the shore.';
+      summary = 'A perfect swim — every tense correct, just like Guðlaugur\'s fifteen-hour ordeal, you didn\'t lose your footing once.';
+    } else if(pct >= 0.8){
+      headline = 'You made it to the rocks.';
+      summary = 'Strong swimming. A couple of tenses slipped, but you had more than enough to reach shore.';
+    } else if(pct >= 0.5){
+      headline = 'You\'re still swimming.';
+      summary = 'You\'re making progress, but the cold is catching up. Review the tenses you missed below and try again.';
+    } else {
+      headline = 'The water is winning.';
+      summary = 'This one\'s tough — past perfect simple vs. continuous takes practice. Look over the review below, then swim again.';
+    }
+    document.getElementById('end-headline').textContent = headline;
+    document.getElementById('end-summary').textContent = summary;
+    document.getElementById('end-score').textContent = state.score + '/' + TOTAL_Q;
+    document.getElementById('end-temp').textContent = state.temp.toFixed(1) + '°C';
+
+    const list = document.getElementById('review-list');
+    list.innerHTML = '';
+    state.log.forEach(item => {
+      const li = document.createElement('li');
+      li.className = 'review-item';
+      li.innerHTML = '<span>' + item.label + '</span><span class="mark ' + (item.correct ? 'ok' : 'no') + '">' + (item.correct ? 'Correct' : 'Missed') + '</span>';
+      list.appendChild(li);
+    });
+  }
+
+  document.getElementById('btn-restart').addEventListener('click', () => {
+    state = { mcIndex: 0, blankIndex: 0, score: 0, temp: START_TEMP, answered: 0, log: [] };
+    updateGauge();
+    showScreen('mc');
+    renderMC();
+  });
+
+  // ---------- Start ----------
+  document.getElementById('btn-start').addEventListener('click', () => {
+    showScreen('mc');
+    renderMC();
+    updateGauge();
+  });
+
+  updateGauge();
+})();
+</script>
+</body>
+</html>
