@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Volunteer Word Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1D2B22;
+    --paper: #F3F1E7;
+    --paper-card: #FFFDF6;
+    --green-deep: #2C4A3B;
+    --green-mid: #4C7A5F;
+    --gold: #D9A441;
+    --gold-deep: #B9822B;
+    --clay: #C4633F;
+    --line: rgba(29, 43, 34, 0.16);
+    --shadow: rgba(29, 43, 34, 0.14);
+    --correct: #3E7D4C;
+    --incorrect: #B4472F;
+    --font-display: "Fraunces", serif;
+    --font-body: "Public Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      --ink: #ECE7D6;
+      --paper: #1B2420;
+      --paper-card: #23302A;
+      --green-deep: #A9C9B4;
+      --green-mid: #8FB89E;
+      --gold: #E7B75B;
+      --gold-deep: #F0C878;
+      --clay: #E08A66;
+      --line: rgba(236, 231, 214, 0.18);
+      --shadow: rgba(0, 0, 0, 0.4);
+      --correct: #6FCB84;
+      --incorrect: #E08877;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ink: #ECE7D6;
+    --paper: #1B2420;
+    --paper-card: #23302A;
+    --green-deep: #A9C9B4;
+    --green-mid: #8FB89E;
+    --gold: #E7B75B;
+    --gold-deep: #F0C878;
+    --clay: #E08A66;
+    --line: rgba(236, 231, 214, 0.18);
+    --shadow: rgba(0, 0, 0, 0.4);
+    --correct: #6FCB84;
+    --incorrect: #E08877;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height: 1.55;
+  }
+
+  body {
+    min-height: 100vh;
+  }
+
+  img, svg { max-width: 100%; }
+
+  .wrap {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  /* ---------- Header ---------- */
+
+  .hero {
+    background: linear-gradient(180deg, var(--green-deep) 0%, #223A2E 100%);
+    color: #F3F1E7;
+    padding: 56px 0 44px;
+    position: relative;
+    overflow: hidden;
+  }
+  :root[data-theme="dark"] .hero, .hero {
+    color: #F3F1E7;
+  }
+
+  .hero::before {
+    content: "";
+    position: absolute;
+    right: -60px;
+    top: -60px;
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(217,164,65,0.35) 0%, rgba(217,164,65,0) 70%);
+  }
+
+  .hero-kicker {
+    font-family: var(--font-body);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--gold);
+    font-size: 0.95rem;
+    margin: 0 0 10px;
+  }
+
+  .hero h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(2.1rem, 5vw, 3.2rem);
+    margin: 0 0 14px;
+    max-width: 14ch;
+  }
+
+  .hero p {
+    max-width: 56ch;
+    font-size: 1.08rem;
+    margin: 0 0 22px;
+    color: #E7E4D6;
+  }
+
+  .stat-row {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .stat-pill {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.22);
+    border-radius: 999px;
+    padding: 8px 16px;
+    font-size: 0.92rem;
+    font-weight: 500;
+  }
+
+  .stat-pill strong {
+    color: var(--gold);
+  }
+
+  /* ---------- Sticky nav ---------- */
+
+  .stationnav {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--paper);
+    border-bottom: 1px solid var(--line);
+    padding: 10px 0;
+  }
+
+  .stationnav-inner {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .stationnav-inner::-webkit-scrollbar { display: none; }
+
+  .navpill {
+    flex: 0 0 auto;
+    font-family: var(--font-body);
+    text-decoration: none;
+    color: var(--ink);
+    background: transparent;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .navpill:hover, .navpill:focus-visible {
+    background: var(--green-deep);
+    color: #F3F1E7;
+    border-color: var(--green-deep);
+  }
+
+  .navpill.active {
+    background: var(--gold);
+    border-color: var(--gold-deep);
+    color: var(--ink);
+  }
+
+  /* ---------- Sections ---------- */
+
+  section.station {
+    padding: 54px 0 30px;
+    border-bottom: none;
+    display: none;
+  }
+
+  section.station.active {
+    display: block;
+  }
+
+  .screen-controls {
+    position: sticky;
+    bottom: 0;
+    z-index: 15;
+    background: var(--paper);
+    border-top: 1px solid var(--line);
+    padding: 12px 0 16px;
+  }
+
+  .screen-controls-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+  }
+
+  .screen-progress {
+    font-size: 0.88rem;
+    font-weight: 600;
+    opacity: 0.75;
+    white-space: nowrap;
+  }
+
+  .station-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--gold-deep);
+    margin: 0 0 8px;
+  }
+
+  .station h2 {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 3.4vw, 2.1rem);
+    margin: 0 0 12px;
+    font-weight: 600;
+  }
+
+  .station-intro {
+    max-width: 62ch;
+    margin: 0 0 30px;
+    color: var(--ink);
+    opacity: 0.85;
+  }
+
+  /* ---------- Word bank cards ---------- */
+
+  .bank-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 16px;
+  }
+
+  .bank-card {
+    background: var(--paper-card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 18px;
+    box-shadow: 0 3px 0 var(--shadow);
+    position: relative;
+  }
+
+  .bank-card::before {
+    content: "";
+    position: absolute;
+    top: -7px;
+    left: 20px;
+    width: 34px;
+    height: 14px;
+    background: var(--gold);
+    opacity: 0.75;
+    transform: rotate(-3deg);
+    border-radius: 2px;
+  }
+
+  .bank-card .term {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.15rem;
+    color: var(--green-deep);
+    margin: 4px 0 6px;
+  }
+  :root[data-theme="dark"] .bank-card .term { color: var(--gold); }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .bank-card .term { color: var(--gold); }
+  }
+
+  .bank-card .def {
+    font-size: 0.95rem;
+    opacity: 0.88;
+  }
+
+  /* ---------- Buttons ---------- */
+
+  .btn {
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.95rem;
+    border: none;
+    border-radius: 8px;
+    padding: 11px 20px;
+    cursor: pointer;
+    background: var(--green-deep);
+    color: #F3F1E7;
+    transition: transform 0.12s ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+  .btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+  .btn.secondary {
+    background: transparent;
+    color: var(--green-deep);
+    border: 1.5px solid var(--green-deep);
+  }
+  :root[data-theme="dark"] .btn.secondary { color: var(--green-deep); border-color: var(--green-deep); }
+
+  .btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+  }
+
+  /* ---------- Game 1: Match-up ---------- */
+
+  .match-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 12px;
+  }
+
+  .match-card {
+    aspect-ratio: 4 / 3;
+    perspective: 800px;
+    cursor: pointer;
+  }
+
+  .match-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.45s;
+    transform-style: preserve-3d;
+  }
+
+  .match-card.flipped .match-card-inner,
+  .match-card.matched .match-card-inner {
+    transform: rotateY(180deg);
+  }
+
+  .match-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8px;
+    backface-visibility: hidden;
+    font-size: 0.85rem;
+  }
+
+  .match-face.front {
+    background: var(--green-deep);
+    color: var(--gold);
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+  }
+
+  .match-face.back {
+    background: var(--paper-card);
+    border: 1.5px solid var(--line);
+    transform: rotateY(180deg);
+    color: var(--ink);
+  }
+
+  .match-card.matched .match-face.back {
+    border-color: var(--correct);
+    background: color-mix(in srgb, var(--correct) 14%, var(--paper-card));
+  }
+
+  .match-status {
+    margin-top: 16px;
+    font-weight: 600;
+  }
+
+  /* ---------- Game 2: Story ---------- */
+
+  .story-box {
+    background: var(--paper-card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 28px 26px;
+    font-size: 1.06rem;
+    line-height: 1.9;
+    box-shadow: 0 3px 0 var(--shadow);
+  }
+
+  select.blank {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.98rem;
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1.5px solid var(--green-mid);
+    background: var(--paper);
+    color: var(--ink);
+    margin: 0 2px;
+  }
+
+  select.blank.correct { border-color: var(--correct); background: color-mix(in srgb, var(--correct) 16%, var(--paper)); }
+  select.blank.incorrect { border-color: var(--incorrect); background: color-mix(in srgb, var(--incorrect) 16%, var(--paper)); }
+
+  .story-result {
+    margin-top: 18px;
+    font-weight: 700;
+  }
+
+  /* ---------- Game 3: Detective ---------- */
+
+  .detective-box {
+    background: var(--paper-card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 26px;
+    box-shadow: 0 3px 0 var(--shadow);
+    max-width: 620px;
+  }
+
+  .clue-list {
+    list-style: none;
+    margin: 0 0 18px;
+    padding: 0;
+  }
+
+  .clue-list li {
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--line);
+    font-size: 1rem;
+  }
+  .clue-list li:last-child { border-bottom: none; }
+  .clue-list li .clue-num {
+    font-weight: 700;
+    color: var(--gold-deep);
+    margin-right: 8px;
+  }
+
+  .guess-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 6px;
+  }
+
+  input[type="text"] {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1.5px solid var(--line);
+    background: var(--paper);
+    color: var(--ink);
+    flex: 1 1 200px;
+  }
+  input[type="text"]:focus-visible { outline: 3px solid var(--gold); outline-offset: 1px; }
+
+  .feedback {
+    margin-top: 14px;
+    font-weight: 700;
+    min-height: 1.4em;
+  }
+  .feedback.correct { color: var(--correct); }
+  .feedback.incorrect { color: var(--incorrect); }
+
+  .progress-line {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    opacity: 0.75;
+  }
+
+  /* ---------- Game 4: Journey ---------- */
+
+  .trail {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 26px;
+  }
+
+  .trail-dot {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--paper-card);
+    border: 2px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--ink);
+    opacity: 0.6;
+    flex: 0 0 auto;
+  }
+
+  .trail-dot.done {
+    background: var(--green-deep);
+    border-color: var(--green-deep);
+    color: var(--gold);
+    opacity: 1;
+  }
+
+  .trail-dot.current {
+    border-color: var(--gold-deep);
+    opacity: 1;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 35%, transparent);
+  }
+
+  .station-card {
+    background: var(--paper-card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 26px;
+    box-shadow: 0 3px 0 var(--shadow);
+    max-width: 640px;
+  }
+
+  .station-card h3 {
+    font-family: var(--font-display);
+    margin: 0 0 6px;
+    font-size: 1.3rem;
+  }
+
+  .journey-prompt {
+    margin: 0 0 16px;
+    opacity: 0.85;
+  }
+
+  .choice-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .choice-btn {
+    text-align: left;
+    background: var(--paper);
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: var(--font-body);
+    font-size: 0.96rem;
+    cursor: pointer;
+    color: var(--ink);
+  }
+
+  .choice-btn:hover { border-color: var(--green-mid); }
+  .choice-btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 1px; }
+
+  .choice-btn.correct { border-color: var(--correct); background: color-mix(in srgb, var(--correct) 16%, var(--paper)); }
+  .choice-btn.incorrect { border-color: var(--incorrect); background: color-mix(in srgb, var(--incorrect) 16%, var(--paper)); }
+  .choice-btn:disabled { cursor: default; }
+
+  .journey-complete {
+    text-align: center;
+    padding: 20px 0;
+  }
+  .journey-complete .big {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    color: var(--green-deep);
+  }
+  :root[data-theme="dark"] .journey-complete .big { color: var(--gold); }
+
+  footer {
+    text-align: center;
+    padding: 40px 20px 60px;
+    font-size: 0.88rem;
+    opacity: 0.65;
+  }
+
+  @media (max-width: 560px) {
+    .hero { padding: 42px 0 34px; }
+    section.station { padding: 40px 0; }
+    .match-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="hero-kicker">🌱 A vocabulary practice game</p>
+    <h1>Volunteer Word Hub</h1>
+    <p>Twelve words show up again and again in volunteer work — from the nursery to the farm to the outreach van. Look them over, then visit four stations to put them to use.</p>
+    <div class="stat-row">
+      <span class="stat-pill"><strong>12</strong> words</span>
+      <span class="stat-pill"><strong>4</strong> stations</span>
+      <span class="stat-pill"><strong id="totalScoreDisplay">0</strong> points earned</span>
+    </div>
+  </div>
+</header>
+
+<nav class="stationnav">
+  <div class="wrap stationnav-inner" id="navPills">
+    <button type="button" class="navpill" data-index="0">Word Bank</button>
+    <button type="button" class="navpill" data-index="1">1 · Match-Up</button>
+    <button type="button" class="navpill" data-index="2">2 · Newsletter</button>
+    <button type="button" class="navpill" data-index="3">3 · Word Detective</button>
+    <button type="button" class="navpill" data-index="4">4 · Volunteer Trail</button>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <section class="station" id="bank">
+    <p class="station-label">REFERENCE</p>
+    <h2>Word bank</h2>
+    <p class="station-intro">Read through these before you start playing. You can scroll back up here any time.</p>
+    <div class="bank-grid" id="bankGrid"></div>
+  </section>
+
+  <section class="station" id="station1">
+    <p class="station-label">STATION 1</p>
+    <h2>Match-up</h2>
+    <p class="station-intro">Flip two cards at a time. Match each word to its definition. Clear the board to finish the station.</p>
+    <div class="match-grid" id="matchGrid"></div>
+    <p class="match-status" id="matchStatus">0 of 12 pairs found · 0 flips</p>
+    <div class="btn-row">
+      <button class="btn secondary" id="matchReset">Shuffle &amp; restart</button>
+    </div>
+  </section>
+
+  <section class="station" id="station2">
+    <p class="station-label">STATION 2</p>
+    <h2>Fill in the newsletter</h2>
+    <p class="station-intro">This short volunteer newsletter is missing some words. Choose the best word for each blank, then check your answers.</p>
+    <div class="story-box" id="storyBox"></div>
+    <div class="btn-row">
+      <button class="btn" id="storyCheck">Check answers</button>
+      <button class="btn secondary" id="storyReset">Reset</button>
+    </div>
+    <p class="story-result" id="storyResult"></p>
+  </section>
+
+  <section class="station" id="station3">
+    <p class="station-label">STATION 3</p>
+    <h2>Word detective</h2>
+    <p class="station-intro">Reveal clues one at a time and guess the word. Fewer clues used earns more points.</p>
+    <div class="detective-box">
+      <p class="progress-line" id="detProgress">Word 1 of 12</p>
+      <ul class="clue-list" id="clueList"></ul>
+      <div class="guess-row">
+        <input type="text" id="detInput" placeholder="Type your guess..." autocomplete="off">
+        <button class="btn" id="detGuess">Guess</button>
+        <button class="btn secondary" id="detReveal">Reveal next clue</button>
+      </div>
+      <p class="feedback" id="detFeedback"></p>
+    </div>
+  </section>
+
+  <section class="station" id="station4">
+    <p class="station-label">STATION 4</p>
+    <h2>The volunteer trail</h2>
+    <p class="station-intro">Follow the trail through a volunteer's day. Answer each stop correctly to move forward.</p>
+    <div class="trail" id="trail"></div>
+    <div id="journeyArea"></div>
+  </section>
+
+</main>
+
+<div class="screen-controls">
+  <div class="wrap screen-controls-inner">
+    <button class="btn secondary" id="prevScreen">← Back</button>
+    <span class="screen-progress" id="screenProgress">Screen 1 of 5</span>
+    <button class="btn" id="nextScreen">Next →</button>
+  </div>
+</div>
+
+<footer>Made for vocabulary practice · works best when you read the word bank first</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  const WORDS = [
+    { term: "agriculture", def: "farming" },
+    { term: "based", def: "to be focused on or in a particular place" },
+    { term: "boost", def: "to improve or increase something" },
+    { term: "confidence", def: "certainty about your ability to do something" },
+    { term: "currently", def: "at the present time" },
+    { term: "nurseries", def: "places where plants and trees are grown" },
+    { term: "outreach", def: "medical or other services that are brought to people at home or to where they spend time" },
+    { term: "range", def: "a set of things of similar type" },
+    { term: "caring for", def: "protecting or looking after something or someone" },
+    { term: "craft", def: "an activity where something is made by hand" },
+    { term: "throughout", def: "during the whole time" },
+    { term: "unique", def: "the only one of its kind" }
+  ];
+
+  let totalScore = 0;
+  const totalScoreDisplay = document.getElementById("totalScoreDisplay");
+  function addScore(n){
+    totalScore += n;
+    totalScoreDisplay.textContent = totalScore;
+  }
+
+  function shuffle(arr){
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  /* ---------------- Word bank ---------------- */
+  const bankGrid = document.getElementById("bankGrid");
+  WORDS.forEach(w => {
+    const card = document.createElement("div");
+    card.className = "bank-card";
+    card.innerHTML = `<div class="term">${w.term}</div><div class="def">${w.def}</div>`;
+    bankGrid.appendChild(card);
+  });
+
+  /* ---------------- Station 1: Match-up ---------------- */
+  const matchGrid = document.getElementById("matchGrid");
+  const matchStatus = document.getElementById("matchStatus");
+  let flipped = [];
+  let matchedCount = 0;
+  let flipCount = 0;
+  let lockBoard = false;
+
+  function buildMatchGame(){
+    matchGrid.innerHTML = "";
+    flipped = [];
+    matchedCount = 0;
+    flipCount = 0;
+    lockBoard = false;
+    matchStatus.textContent = "0 of 12 pairs found · 0 flips";
+
+    let cards = [];
+    WORDS.forEach((w, i) => {
+      cards.push({ id: i, type: "term", label: w.term });
+      cards.push({ id: i, type: "def", label: w.def });
+    });
+    cards = shuffle(cards);
+
+    cards.forEach(c => {
+      const cardEl = document.createElement("div");
+      cardEl.className = "match-card";
+      cardEl.dataset.id = c.id;
+      cardEl.dataset.type = c.type;
+      cardEl.innerHTML = `
+        <div class="match-card-inner">
+          <div class="match-face front">🌿</div>
+          <div class="match-face back">${c.label}</div>
+        </div>`;
+      cardEl.addEventListener("click", () => onMatchCardClick(cardEl));
+      matchGrid.appendChild(cardEl);
+    });
+  }
+
+  function onMatchCardClick(cardEl){
+    if (lockBoard) return;
+    if (cardEl.classList.contains("flipped") || cardEl.classList.contains("matched")) return;
+    if (flipped.length === 2) return;
+
+    cardEl.classList.add("flipped");
+    flipped.push(cardEl);
+
+    if (flipped.length === 2){
+      flipCount++;
+      const [a, b] = flipped;
+      const isMatch = a.dataset.id === b.dataset.id && a.dataset.type !== b.dataset.type;
+      if (isMatch){
+        a.classList.add("matched");
+        b.classList.add("matched");
+        matchedCount++;
+        addScore(5);
+        flipped = [];
+        updateMatchStatus();
+        if (matchedCount === WORDS.length){
+          matchStatus.textContent = `All 12 pairs found in ${flipCount} flips! 🎉`;
+        }
+      } else {
+        lockBoard = true;
+        setTimeout(() => {
+          a.classList.remove("flipped");
+          b.classList.remove("flipped");
+          flipped = [];
+          lockBoard = false;
+          updateMatchStatus();
+        }, 900);
+      }
+    }
+    updateMatchStatus();
+  }
+
+  function updateMatchStatus(){
+    if (matchedCount < WORDS.length){
+      matchStatus.textContent = `${matchedCount} of ${WORDS.length} pairs found · ${flipCount} flips`;
+    }
+  }
+
+  document.getElementById("matchReset").addEventListener("click", buildMatchGame);
+  buildMatchGame();
+
+  /* ---------------- Station 2: Story fill-in-the-blank ---------------- */
+  // order of correct answers as they appear in the story
+  const storyAnswers = [
+    "based", "throughout", "currently", "agriculture", "caring for",
+    "nurseries", "craft", "range", "confidence", "boost", "outreach", "unique"
+  ];
+
+  const storyTemplate = [
+    "Our community center is ", 0, " in the heart of downtown, but our volunteers work ",
+    1, " the entire year to serve people nearby. We are ", 2,
+    " running a fall program that combines ", 3, " education with hands-on garden work. ",
+    "Every Saturday, a small team spends the morning ", 4, " the vegetable beds behind the community ",
+    5, ", where young plants are grown before they're replanted around town. In the afternoon, ",
+    "volunteers switch to a ", 6, " workshop, teaching kids to make simple decorations from recycled materials. ",
+    "This wide ", 7, " of activities helps volunteers build ", 8, " in new skills while they ",
+    9, " local pride in the neighborhood. Our ", 10, " team also visits elderly residents who can't leave their homes, ",
+    "bringing supplies and conversation. Each project is ", 11, ", but together they show how small acts of service add up."
+  ];
+
+  const storyBox = document.getElementById("storyBox");
+  const storyResult = document.getElementById("storyResult");
+  const optionWords = WORDS.map(w => w.term);
+
+  function buildStory(){
+    storyBox.innerHTML = "";
+    storyResult.textContent = "";
+    storyTemplate.forEach(part => {
+      if (typeof part === "string"){
+        storyBox.appendChild(document.createTextNode(part));
+      } else {
+        const select = document.createElement("select");
+        select.className = "blank";
+        select.dataset.answer = storyAnswers[part];
+        select.dataset.blankIndex = part;
+        const blankOpt = document.createElement("option");
+        blankOpt.value = "";
+        blankOpt.textContent = "choose...";
+        select.appendChild(blankOpt);
+        shuffle(optionWords).forEach(word => {
+          const opt = document.createElement("option");
+          opt.value = word;
+          opt.textContent = word;
+          select.appendChild(opt);
+        });
+        select.addEventListener("change", () => {
+          select.classList.remove("correct", "incorrect");
+        });
+        storyBox.appendChild(select);
+      }
+    });
+  }
+
+  let storyScored = false;
+  document.getElementById("storyCheck").addEventListener("click", () => {
+    const selects = storyBox.querySelectorAll("select.blank");
+    let correctCount = 0;
+    selects.forEach(sel => {
+      const ok = sel.value === sel.dataset.answer;
+      sel.classList.toggle("correct", ok);
+      sel.classList.toggle("incorrect", !ok && sel.value !== "");
+      if (ok) correctCount++;
+    });
+    storyResult.textContent = `${correctCount} of ${selects.length} correct.`;
+    if (correctCount === selects.length && !storyScored){
+      addScore(20);
+      storyScored = true;
+      storyResult.textContent += " Nice work — the whole newsletter makes sense now!";
+    }
+  });
+
+  document.getElementById("storyReset").addEventListener("click", () => {
+    storyScored = false;
+    buildStory();
+  });
+
+  buildStory();
+
+  /* ---------------- Station 3: Word detective ---------------- */
+  const detOrder = shuffle(WORDS);
+  let detIndex = 0;
+  let clueLevel = 0;
+  let detSolved = false;
+
+  const clueList = document.getElementById("clueList");
+  const detProgress = document.getElementById("detProgress");
+  const detFeedback = document.getElementById("detFeedback");
+  const detInput = document.getElementById("detInput");
+  const detRevealBtn = document.getElementById("detReveal");
+
+  function cluesFor(word){
+    const letters = word.term.replace(/\s/g, "").length;
+    return [
+      `This word has ${letters} letters and starts with "${word.term[0].toUpperCase()}".`,
+      `Definition: ${word.def}`,
+      `You'd likely hear this word used in a conversation about volunteering or community projects.`
+    ];
+  }
+
+  function renderDetective(){
+    const word = detOrder[detIndex];
+    detProgress.textContent = `Word ${detIndex + 1} of ${detOrder.length}`;
+    clueList.innerHTML = "";
+    const clues = cluesFor(word);
+    for (let i = 0; i <= clueLevel; i++){
+      const li = document.createElement("li");
+      li.innerHTML = `<span class="clue-num">Clue ${i + 1}</span>${clues[i]}`;
+      clueList.appendChild(li);
+    }
+    detFeedback.textContent = "";
+    detFeedback.className = "feedback";
+    detInput.value = "";
+    detInput.disabled = false;
+    detRevealBtn.disabled = clueLevel >= clues.length - 1;
+  }
+
+  function nextDetectiveWord(){
+    detIndex++;
+    clueLevel = 0;
+    detSolved = false;
+    if (detIndex >= detOrder.length){
+      clueList.innerHTML = "<li>You've been through every word! 🕵️ Nice detective work.</li>";
+      detProgress.textContent = `All ${detOrder.length} words complete`;
+      detInput.disabled = true;
+      detRevealBtn.disabled = true;
+      document.getElementById("detGuess").disabled = true;
+      return;
+    }
+    renderDetective();
+  }
+
+  document.getElementById("detReveal").addEventListener("click", () => {
+    const clues = cluesFor(detOrder[detIndex]);
+    if (clueLevel < clues.length - 1){
+      clueLevel++;
+      renderDetective();
+    }
+  });
+
+  document.getElementById("detGuess").addEventListener("click", submitGuess);
+  detInput.addEventListener("keydown", (e) => { if (e.key === "Enter") submitGuess(); });
+
+  function submitGuess(){
+    if (detSolved) return;
+    const guess = detInput.value.trim().toLowerCase();
+    const answer = detOrder[detIndex].term.toLowerCase();
+    if (!guess) return;
+    if (guess === answer){
+      const points = Math.max(10 - clueLevel * 3, 4);
+      addScore(points);
+      detFeedback.textContent = `Correct! "${answer}" — +${points} points.`;
+      detFeedback.className = "feedback correct";
+      detSolved = true;
+      detInput.disabled = true;
+      setTimeout(nextDetectiveWord, 1300);
+    } else {
+      detFeedback.textContent = "Not quite — try another clue or guess again.";
+      detFeedback.className = "feedback incorrect";
+    }
+  }
+
+  renderDetective();
+
+  /* ---------------- Station 4: Volunteer trail ---------------- */
+  const stationNames = [
+    "Community garden", "Front desk", "Fall program", "Family farm",
+    "Vegetable beds", "Plant nursery", "Craft table", "Activity board",
+    "Skills workshop", "Neighborhood drive", "Home visits", "Closing circle"
+  ];
+
+  const trailWords = shuffle(WORDS);
+  let trailIndex = 0;
+
+  const trailEl = document.getElementById("trail");
+  const journeyArea = document.getElementById("journeyArea");
+
+  function renderTrailDots(){
+    trailEl.innerHTML = "";
+    trailWords.forEach((w, i) => {
+      const dot = document.createElement("div");
+      dot.className = "trail-dot";
+      if (i < trailIndex) dot.classList.add("done");
+      if (i === trailIndex) dot.classList.add("current");
+      dot.textContent = i + 1;
+      trailEl.appendChild(dot);
+    });
+  }
+
+  function makeChoices(correctWord){
+    const others = shuffle(WORDS.filter(w => w.term !== correctWord.term)).slice(0, 3);
+    return shuffle([correctWord, ...others]);
+  }
+
+  function renderJourney(){
+    renderTrailDots();
+    if (trailIndex >= trailWords.length){
+      journeyArea.innerHTML = `
+        <div class="station-card journey-complete">
+          <div class="big">Trail complete! 🌾</div>
+          <p>You made it through all ${trailWords.length} stops on the volunteer trail.</p>
+        </div>`;
+      return;
+    }
+    const word = trailWords[trailIndex];
+    const stationName = stationNames[trailIndex % stationNames.length];
+    const choices = makeChoices(word);
+
+    journeyArea.innerHTML = "";
+    const card = document.createElement("div");
+    card.className = "station-card";
+    card.innerHTML = `
+      <h3>Stop ${trailIndex + 1}: ${stationName}</h3>
+      <p class="journey-prompt">Which definition matches <strong>${word.term}</strong>?</p>
+      <div class="choice-list" id="choiceList"></div>`;
+    journeyArea.appendChild(card);
+
+    const choiceList = card.querySelector("#choiceList");
+    choices.forEach(choice => {
+      const btn = document.createElement("button");
+      btn.className = "choice-btn";
+      btn.textContent = choice.def;
+      btn.addEventListener("click", () => {
+        const allButtons = choiceList.querySelectorAll(".choice-btn");
+        allButtons.forEach(b => b.disabled = true);
+        if (choice.term === word.term){
+          btn.classList.add("correct");
+          addScore(8);
+          setTimeout(() => {
+            trailIndex++;
+            renderJourney();
+          }, 700);
+        } else {
+          btn.classList.add("incorrect");
+          allButtons.forEach(b => {
+            if (b.textContent === word.def) b.classList.add("correct");
+          });
+          setTimeout(() => {
+            allButtons.forEach(b => { b.disabled = false; b.classList.remove("incorrect", "correct"); });
+          }, 1100);
+        }
+      });
+      choiceList.appendChild(btn);
+    });
+  }
+
+  renderJourney();
+
+  /* ---------------- Screen navigation (one section at a time) ---------------- */
+  const screens = Array.from(document.querySelectorAll("main .station"));
+  const navPills = Array.from(document.querySelectorAll(".navpill"));
+  const prevBtn = document.getElementById("prevScreen");
+  const nextBtn = document.getElementById("nextScreen");
+  const screenProgress = document.getElementById("screenProgress");
+  let currentScreen = 0;
+
+  function showScreen(i){
+    currentScreen = Math.max(0, Math.min(screens.length - 1, i));
+    screens.forEach((s, idx) => s.classList.toggle("active", idx === currentScreen));
+    navPills.forEach((p, idx) => p.classList.toggle("active", idx === currentScreen));
+    prevBtn.disabled = currentScreen === 0;
+    nextBtn.textContent = currentScreen === screens.length - 1 ? "Finish" : "Next →";
+    screenProgress.textContent = `Screen ${currentScreen + 1} of ${screens.length}`;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  navPills.forEach(p => p.addEventListener("click", () => showScreen(parseInt(p.dataset.index, 10))));
+  prevBtn.addEventListener("click", () => showScreen(currentScreen - 1));
+  nextBtn.addEventListener("click", () => {
+    if (currentScreen === screens.length - 1){
+      showScreen(0);
+    } else {
+      showScreen(currentScreen + 1);
+    }
+  });
+
+  showScreen(0);
+
+})();
+</script>
+</body>
+</html>
