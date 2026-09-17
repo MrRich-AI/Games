@@ -50,10 +50,14 @@
     font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
+  html {
+    overflow-y: auto;
+  }
   body {
     min-height: 100vh;
-    display: flex; align-items: center; justify-content: center;
-    padding: 28px 14px;
+    display: flex; align-items: flex-start; justify-content: center;
+    padding: 20px 14px;
+    overflow-y: auto;
   }
   button { font-family: inherit; }
   button:focus-visible, .tile:focus-visible, .letter-tile:focus-visible, .app-icon:focus-visible, .swipe-card:focus-visible {
@@ -67,7 +71,7 @@
     width: 100%;
     max-width: 400px;
     height: 780px;
-    max-height: 92vh;
+    flex-shrink: 0;
     border-radius: 42px;
     padding: 12px;
     background: linear-gradient(160deg, #2A2160, #100B28);
@@ -107,7 +111,9 @@
     display: flex;
     flex-direction: column;
     padding: 6px 20px 0;
-    overflow: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    min-height: 0;
   }
   .home-heading { padding: 6px 2px 14px; }
   .home-eyebrow {
