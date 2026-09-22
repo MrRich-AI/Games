@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Blog or article? — Digital Life</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #FAF6EF;
+    --paper-card: #FFFFFF;
+    --ink: #2B2620;
+    --ink-soft: #5C554A;
+    --line: #E4DCCB;
+    --blog-accent: #D8577A;
+    --blog-accent-dark: #8E3350;
+    --blog-tint: #FBEAF0;
+    --article-accent: #2C4A63;
+    --article-accent-dark: #16293A;
+    --article-tint: #E6EEF3;
+    --correct: #3B6D11;
+    --correct-bg: #EAF3DE;
+    --wrong: #A32D2D;
+    --wrong-bg: #FCEBEB;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); height: 100%; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #1C1914;
+      --paper-card: #262119;
+      --ink: #F1ECE1;
+      --ink-soft: #C9C0AE;
+      --line: #3B342A;
+      --blog-tint: #3A2530;
+      --article-tint: #22323E;
+      --correct-bg: #1C2A10;
+      --wrong-bg: #331414;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #1C1914;
+    --paper-card: #262119;
+    --ink: #F1ECE1;
+    --ink-soft: #C9C0AE;
+    --line: #3B342A;
+    --blog-tint: #3A2530;
+    --article-tint: #22323E;
+    --correct-bg: #1C2A10;
+    --wrong-bg: #331414;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-text-size-adjust: 100%;
+    min-height: 100%;
+  }
+  .app {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 20px 20px 24px;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .progress-bar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 22px;
+  }
+  .progress-seg {
+    flex: 1;
+    height: 4px;
+    border-radius: 4px;
+    background: var(--line);
+  }
+  .progress-seg.done { background: var(--blog-accent); }
+  .progress-seg.current { background: var(--article-accent); }
+
+  .screen {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+  }
+  .screen.active { display: flex; }
+
+  .masthead {
+    text-align: center;
+    padding-bottom: 20px;
+    margin-bottom: 22px;
+    border-bottom: 3px solid var(--ink);
+  }
+  .masthead .kicker {
+    font-family: 'Kalam', cursive;
+    font-size: 15px;
+    color: var(--blog-accent-dark);
+    margin: 0 0 4px;
+  }
+  .masthead h1 {
+    font-family: 'Source Serif 4', serif;
+    font-weight: 600;
+    font-size: clamp(26px, 6vw, 38px);
+    margin: 0 0 6px;
+    line-height: 1.15;
+  }
+  .masthead p { color: var(--ink-soft); margin: 0; font-size: 15px; }
+
+  .definition {
+    background: var(--paper-card);
+    border: 1px solid var(--line);
+    border-left: 5px solid var(--blog-accent);
+    border-radius: 4px;
+    padding: 20px 22px;
+  }
+  .definition h2 {
+    font-family: 'Kalam', cursive;
+    font-size: 20px;
+    margin: 0 0 8px;
+    color: var(--blog-accent-dark);
+  }
+  .definition p { margin: 0; line-height: 1.7; font-size: 17px; }
+  .definition-article {
+    margin-top: 14px;
+    border-left-color: var(--article-accent);
+  }
+  .definition-article h2 {
+    font-family: 'Source Serif 4', serif;
+    font-weight: 600;
+    color: var(--article-accent-dark);
+  }
+
+  .cheatsheet h2 {
+    font-family: 'Source Serif 4', serif;
+    font-weight: 600;
+    font-size: 20px;
+    margin: 0 0 14px;
+  }
+  .clue-grid { display: flex; flex-direction: column; gap: 12px; }
+  .clue {
+    background: var(--paper-card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .clue .q { font-weight: 600; font-size: 14px; margin: 0 0 8px; }
+  .clue .row { display: flex; align-items: center; gap: 6px; font-size: 13px; margin: 4px 0; }
+  .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+  .tag.blog { background: var(--blog-tint); color: var(--blog-accent-dark); }
+  .tag.article { background: var(--article-tint); color: var(--article-accent-dark); }
+  .clue .row span.desc { color: var(--ink-soft); }
+  .tip { margin-top: 12px; font-family: 'Kalam', cursive; font-size: 15px; color: var(--ink-soft); }
+
+  .game-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .game-header h2 {
+    font-family: 'Source Serif 4', serif;
+    font-weight: 600;
+    font-size: 19px;
+    margin: 0;
+  }
+  .score {
+    font-size: 14px;
+    font-weight: 600;
+    background: var(--paper-card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 5px 14px;
+    white-space: nowrap;
+  }
+
+  .card {
+    background: var(--paper-card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 20px 22px;
+  }
+  .card .label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    color: var(--ink-soft);
+    margin: 0 0 10px;
+  }
+  .card blockquote {
+    margin: 0 0 18px;
+    font-family: 'Source Serif 4', serif;
+    font-size: 18px;
+    line-height: 1.6;
+    padding: 0 0 0 14px;
+    border-left: 3px solid var(--line);
+  }
+  .choices { display: flex; gap: 10px; flex-wrap: wrap; }
+  .choice-btn {
+    flex: 1 1 140px;
+    min-width: 130px;
+    padding: 11px 14px;
+    border-radius: 8px;
+    border: 1.5px solid var(--line);
+    background: transparent;
+    color: var(--ink);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .choice-btn:hover { border-color: var(--ink-soft); }
+  .choice-btn:disabled { cursor: default; }
+  .choice-btn.blog-btn { color: var(--blog-accent-dark); }
+  .choice-btn.article-btn { color: var(--article-accent-dark); }
+
+  .feedback {
+    margin-top: 16px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.5;
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.correct { background: var(--correct-bg); color: var(--correct); }
+  .feedback.wrong { background: var(--wrong-bg); color: var(--wrong); }
+  .feedback strong { display: block; margin-bottom: 3px; font-size: 14px; }
+
+  .choice-btn.picked-correct { background: var(--correct-bg); border-color: var(--correct); }
+  .choice-btn.picked-wrong { background: var(--wrong-bg); border-color: var(--wrong); }
+  .choice-btn.reveal-correct { border-color: var(--correct); }
+
+  .finish {
+    text-align: center;
+    padding: 24px 20px;
+    border-radius: 12px;
+    background: var(--paper-card);
+    border: 1px solid var(--line);
+    margin: auto 0;
+  }
+  .finish h3 { font-family: 'Source Serif 4', serif; font-size: 22px; margin: 0 0 6px; }
+  .finish p { color: var(--ink-soft); margin: 0 0 16px; font-size: 14px; }
+
+  .nav-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 22px;
+    gap: 10px;
+  }
+  .nav-btn {
+    padding: 10px 20px;
+    border-radius: 20px;
+    border: 1.5px solid var(--ink);
+    background: transparent;
+    color: var(--ink);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .nav-btn.primary { background: var(--ink); color: var(--paper); }
+  .nav-btn:disabled { opacity: 0.35; cursor: default; }
+  .nav-btn.hidden { visibility: hidden; }
+  .step-count { font-size: 13px; color: var(--ink-soft); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="progress-bar" id="progress-bar"></div>
+
+  <div id="screens"></div>
+
+  <div class="nav-row">
+    <button class="nav-btn" id="back-btn">Back</button>
+    <span class="step-count" id="step-count"></span>
+    <button class="nav-btn primary" id="next-btn">Next</button>
+  </div>
+
+</div>
+
+<script>
+  var texts = [
+    { id: "A", quote: "I'll admit it — I checked my phone four times while writing this sentence. Is that normal? Probably not. But honestly, who isn't a little addicted to their screen these days?", answer: "blog", why: "First person (\"I\"), casual questions, and a personal confession — the writer is speaking directly to you." },
+    { id: "B", quote: "Recent studies indicate that the average teenager checks their smartphone over 90 times per day, raising concerns among researchers about the long-term effects of frequent screen engagement.", answer: "article", why: "No personal pronouns, a cited study, and a formal, distant tone." },
+    { id: "C", quote: "Honestly, I deleted Instagram for a week and I have never felt so bored in my life. Ten out of ten do not recommend (okay, maybe five out of ten).", answer: "blog", why: "Personal experience, humor, and an informal aside — this is one person's own story." },
+    { id: "D", quote: "A new report from the Digital Wellbeing Institute found that 68% of users experience increased anxiety within the first 48 hours of quitting social media apps.", answer: "article", why: "Statistics from a named institute, no personal voice — this is reporting, not opinion." },
+    { id: "E", quote: "Experts warn that excessive screen time among adolescents may be linked to disrupted sleep patterns, according to a peer-reviewed study published this year.", answer: "article", why: "\"Experts warn\" and a peer-reviewed study signal formal, evidence-based reporting." },
+    { id: "F", quote: "So my little brother just beat my Wordle streak and I'm not okay. We need to talk about how competitive this family has become over a word game.", answer: "blog", why: "A personal, funny anecdote about family life, written in a casual, talking-to-a-friend tone." },
+    { id: "G", quote: "I read a stat last week that said 68% of people check social media within five minutes of waking up, and honestly? I'm one of them — I'm just embarrassed to admit it took a study to make me notice. So I tried leaving my phone in another room overnight. Reader, it was rough.", answer: "blog", why: "It cites a statistic, but stays personal — \"I'm one of them\" and a direct aside to the reader (\"Reader, it was rough\"). A blog can reference data; the voice around it is still personal." }
+  ];
+
+  var screensEl = document.getElementById('screens');
+  var progressEl = document.getElementById('progress-bar');
+  var backBtn = document.getElementById('back-btn');
+  var nextBtn = document.getElementById('next-btn');
+  var stepCountEl = document.getElementById('step-count');
+
+  var answered = {};
+  var correctCount = 0;
+
+  var screenDefs = ['intro', 'definition', 'cheatsheet'].concat(
+    texts.map(function (t) { return 'text-' + t.id; })
+  ).concat(['finish']);
+
+  var current = 0;
+
+  function buildScreens() {
+    var html = '';
+
+    html += '<div class="screen" data-screen="intro">' +
+      '<header class="masthead">' +
+        '<h1>Blog or Article?</h1>' +
+      '</header>' +
+      '</div>';
+
+    html += '<div class="screen" data-screen="definition">' +
+      '<section class="definition">' +
+        '<h2>What is a blog?</h2>' +
+        '<p>A blog is a website or page where someone writes short, informal posts — often about their own life, opinions, or experiences — and shares them regularly online.</p>' +
+      '</section>' +
+      '<section class="definition definition-article">' +
+        '<h2>What is a news article?</h2>' +
+        '<p>A news article is a piece of writing, usually by a journalist, that reports facts and events in a formal, objective way — often backed by research, data, or expert sources.</p>' +
+      '</section>' +
+      '</div>';
+
+    html += '<div class="screen" data-screen="cheatsheet">' +
+      '<section class="cheatsheet">' +
+        '<h2>How to spot the difference</h2>' +
+        '<div class="clue-grid">' +
+          '<div class="clue"><p class="q">Who is &quot;speaking&quot;?</p>' +
+            '<p class="row"><span class="tag blog">Blog</span><span class="desc">says &quot;I&quot; or &quot;me&quot;</span></p>' +
+            '<p class="row"><span class="tag article">Article</span><span class="desc">avoids personal words, sounds distant</span></p></div>' +
+          '<div class="clue"><p class="q">How does it sound?</p>' +
+            '<p class="row"><span class="tag blog">Blog</span><span class="desc">casual, like someone talking to you</span></p>' +
+            '<p class="row"><span class="tag article">Article</span><span class="desc">formal and serious</span></p></div>' +
+          '<div class="clue"><p class="q">What kind of proof does it use?</p>' +
+            '<p class="row"><span class="tag blog">Blog</span><span class="desc">a personal story or opinion</span></p>' +
+            '<p class="row"><span class="tag article">Article</span><span class="desc">numbers, studies, expert quotes</span></p></div>' +
+        '</div>' +
+        '<p class="tip">Quick tip: if it feels like a friend talking to you, it&rsquo;s a blog. If it feels like a report, it&rsquo;s a news article.</p>' +
+      '</section>' +
+      '</div>';
+
+    texts.forEach(function (item) {
+      html += '<div class="screen" data-screen="text-' + item.id + '">' +
+        '<div class="game-header"><h2>Read the text. Which one is it?</h2><div class="score" id="score">' + correctCount + ' / ' + texts.length + '</div></div>' +
+        '<div class="card">' +
+          '<p class="label">Text ' + item.id + '</p>' +
+          '<blockquote>' + item.quote + '</blockquote>' +
+          '<div class="choices">' +
+            '<button class="choice-btn blog-btn" type="button" data-choice="blog" data-id="' + item.id + '">Blog</button>' +
+            '<button class="choice-btn article-btn" type="button" data-choice="article" data-id="' + item.id + '">News article</button>' +
+          '</div>' +
+          '<div class="feedback" id="feedback-' + item.id + '"></div>' +
+        '</div>' +
+        '</div>';
+    });
+
+    html += '<div class="screen" data-screen="finish">' +
+      '<div class="finish">' +
+        '<h3 id="finish-title"></h3>' +
+        '<p id="finish-sub"></p>' +
+      '</div>' +
+      '</div>';
+
+    screensEl.innerHTML = html;
+
+    var progHtml = '';
+    for (var i = 0; i < screenDefs.length; i++) {
+      progHtml += '<div class="progress-seg" data-idx="' + i + '"></div>';
+    }
+    progressEl.innerHTML = progHtml;
+
+    screensEl.querySelectorAll('.choice-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.getAttribute('data-id');
+        var choice = btn.getAttribute('data-choice');
+        handleChoice(id, choice);
+      });
+    });
+  }
+
+  function isTextScreenAnswered(name) {
+    if (name.indexOf('text-') !== 0) return true;
+    var id = name.slice(5);
+    return !!answered[id];
+  }
+
+  function updateScoreDisplays() {
+    screensEl.querySelectorAll('.score').forEach(function (el) {
+      el.textContent = correctCount + ' / ' + texts.length;
+    });
+  }
+
+  function handleChoice(id, chosen) {
+    if (answered[id]) return;
+    var item = texts.filter(function (t) { return t.id === id; })[0];
+    answered[id] = true;
+
+    var screen = screensEl.querySelector('[data-screen="text-' + id + '"]');
+    var blogBtn = screen.querySelector('[data-choice="blog"]');
+    var articleBtn = screen.querySelector('[data-choice="article"]');
+    var feedbackEl = document.getElementById('feedback-' + id);
+
+    blogBtn.disabled = true;
+    articleBtn.disabled = true;
+
+    var isCorrect = chosen === item.answer;
+    var chosenBtn = chosen === 'blog' ? blogBtn : articleBtn;
+    var correctBtn = item.answer === 'blog' ? blogBtn : articleBtn;
+
+    if (isCorrect) {
+      chosenBtn.classList.add('picked-correct');
+      correctCount += 1;
+    } else {
+      chosenBtn.classList.add('picked-wrong');
+      correctBtn.classList.add('reveal-correct');
+    }
+
+    feedbackEl.classList.add('show', isCorrect ? 'correct' : 'wrong');
+    feedbackEl.innerHTML = '<strong>' + (isCorrect ? 'Correct — it\'s a ' : 'Not quite — it\'s a ') + item.answer + '.</strong>' + item.why;
+
+    updateScoreDisplays();
+    updateNav();
+  }
+
+  function renderFinish() {
+    var title = document.getElementById('finish-title');
+    var sub = document.getElementById('finish-sub');
+    title.textContent = correctCount === texts.length ? 'Nice work — all correct!' : correctCount + ' out of ' + texts.length + ' correct';
+    sub.textContent = correctCount === texts.length
+      ? 'You can spot the tell-tale signs of a blog post, even when it references data.'
+      : 'Go back through the texts to review the feedback.';
+  }
+
+  function showScreen(idx) {
+    current = idx;
+    var name = screenDefs[current];
+
+    screensEl.querySelectorAll('.screen').forEach(function (s) {
+      s.classList.toggle('active', s.getAttribute('data-screen') === name);
+    });
+
+    progressEl.querySelectorAll('.progress-seg').forEach(function (seg, i) {
+      seg.classList.remove('done', 'current');
+      if (i < current) seg.classList.add('done');
+      else if (i === current) seg.classList.add('current');
+    });
+
+    if (name === 'finish') renderFinish();
+
+    stepCountEl.textContent = (current + 1) + ' / ' + screenDefs.length;
+    updateNav();
+  }
+
+  function updateNav() {
+    var name = screenDefs[current];
+    backBtn.classList.toggle('hidden', current === 0);
+    if (current === screenDefs.length - 1) {
+      nextBtn.classList.add('hidden');
+    } else {
+      nextBtn.classList.remove('hidden');
+      nextBtn.disabled = !isTextScreenAnswered(name);
+      nextBtn.textContent = current === 0 ? 'Start' : 'Next';
+    }
+  }
+
+  backBtn.addEventListener('click', function () {
+    if (current > 0) showScreen(current - 1);
+  });
+  nextBtn.addEventListener('click', function () {
+    if (current < screenDefs.length - 1) showScreen(current + 1);
+  });
+
+  buildScreens();
+  showScreen(0);
+</script>
+</body>
+</html>
