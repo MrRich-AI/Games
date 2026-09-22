@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Clause Detective — Non-Defining Relative Clauses</title>
+<style>
+  :root{
+    --paper:#FAF6EE;
+    --paper-2:#F1EADA;
+    --ink:#25302B;
+    --ink-soft:#5B6660;
+    --navy:#26433F;
+    --gold:#C9982E;
+    --gold-light:#EAD9AC;
+    --teal:#3A7268;
+    --teal-light:#DCEAE6;
+    --rust:#B24A34;
+    --rust-light:#F3DCD5;
+    --radius:14px;
+    --safe-t: env(safe-area-inset-top, 0px);
+    --safe-b: env(safe-area-inset-bottom, 0px);
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    height:100%;
+    margin:0;
+  }
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    padding-top:var(--safe-t);
+    padding-bottom:var(--safe-b);
+  }
+  h1,h2,h3{
+    font-family:Georgia,"Times New Roman",serif;
+    margin:0 0 6px 0;
+    color:var(--navy);
+    font-weight:700;
+  }
+  /* ---------- TOP BAR ---------- */
+  .topbar{
+    flex:0 0 auto;
+    padding:14px 18px 10px 18px;
+    background:var(--navy);
+    color:var(--paper);
+  }
+  .topbar-row{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom:8px;
+  }
+  .topbar-title{
+    font-family:Georgia,serif;
+    font-size:15px;
+    letter-spacing:0.02em;
+    opacity:0.9;
+  }
+  .topbar-score{
+    font-size:13px;
+    color:var(--gold-light);
+    font-weight:600;
+    white-space:nowrap;
+  }
+  .dots{
+    display:flex;
+    gap:6px;
+    margin-bottom:8px;
+  }
+  .dot{
+    flex:1;
+    height:5px;
+    border-radius:3px;
+    background:rgba(250,246,238,0.22);
+    overflow:hidden;
+  }
+  .dot-fill{
+    height:100%;
+    width:0%;
+    background:var(--gold);
+    transition:width .3s ease;
+  }
+  .section-label{
+    font-size:12px;
+    color:var(--paper);
+    opacity:0.75;
+  }
+  /* ---------- SCREEN AREA (scrolls) ---------- */
+  .screen-wrap{
+    flex:1 1 auto;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    padding:20px 18px 24px 18px;
+  }
+  .card{
+    max-width:520px;
+    margin:0 auto;
+  }
+  .eyebrow{
+    display:inline-block;
+    font-size:12px;
+    color:var(--teal);
+    background:var(--teal-light);
+    padding:3px 10px;
+    border-radius:999px;
+    margin-bottom:10px;
+    font-weight:600;
+  }
+  p{ line-height:1.55; }
+  .lede{ color:var(--ink-soft); margin-bottom:18px; }
+
+  /* guide table */
+  .guide-table{
+    width:100%;
+    border-collapse:collapse;
+    background:#fff;
+    border-radius:var(--radius);
+    overflow:hidden;
+    box-shadow:0 1px 0 rgba(0,0,0,0.05);
+    margin-bottom:18px;
+  }
+  .guide-table th, .guide-table td{
+    text-align:left;
+    padding:10px 10px;
+    font-size:14px;
+    vertical-align:top;
+    border-bottom:1px solid var(--paper-2);
+  }
+  .guide-table th{
+    background:var(--paper-2);
+    color:var(--navy);
+    font-size:12px;
+  }
+  .guide-table tr:last-child td{ border-bottom:none; }
+  .pronoun-pill{
+    display:inline-block;
+    background:var(--gold-light);
+    color:var(--navy);
+    font-weight:700;
+    padding:1px 7px;
+    border-radius:6px;
+  }
+  .trick-box{
+    background:var(--teal-light);
+    border-radius:var(--radius);
+    padding:14px 16px;
+    font-size:14px;
+    color:var(--navy);
+  }
+  .trick-box b{ color:var(--teal); }
+
+  /* question card */
+  .q-sentence{
+    background:#fff;
+    border-radius:var(--radius);
+    padding:18px;
+    font-size:17px;
+    line-height:1.6;
+    margin-bottom:16px;
+    box-shadow:0 1px 0 rgba(0,0,0,0.04);
+  }
+  .blank{
+    display:inline-block;
+    min-width:64px;
+    border-bottom:2px solid var(--gold);
+    text-align:center;
+    font-weight:700;
+    color:var(--navy);
+  }
+  .q-meta{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+  }
+
+  .opt-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+  .opt-grid.single-col{ grid-template-columns:1fr; }
+  .opt-btn{
+    background:#fff;
+    border:1.5px solid var(--paper-2);
+    border-radius:var(--radius);
+    padding:13px 12px;
+    font-size:15px;
+    color:var(--ink);
+    text-align:left;
+    cursor:pointer;
+    transition:border-color .15s, background .15s, transform .1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .opt-btn:active{ transform:scale(0.98); }
+  .opt-btn.correct{
+    background:var(--teal-light);
+    border-color:var(--teal);
+    color:var(--navy);
+    font-weight:700;
+  }
+  .opt-btn.incorrect{
+    background:var(--rust-light);
+    border-color:var(--rust);
+    color:var(--rust);
+    font-weight:700;
+  }
+  .opt-btn[disabled]{ cursor:default; }
+  .opt-btn:not([disabled]):hover{ border-color:var(--gold); }
+
+  .feedback{
+    margin-top:14px;
+    font-size:14px;
+    padding:12px 14px;
+    border-radius:var(--radius);
+    display:none;
+  }
+  .feedback.show{ display:block; }
+  .feedback.good{ background:var(--teal-light); color:var(--navy); }
+  .feedback.bad{ background:var(--rust-light); color:#7a3323; }
+
+  textarea{
+    width:100%;
+    min-height:80px;
+    border-radius:var(--radius);
+    border:1.5px solid var(--paper-2);
+    padding:12px;
+    font-size:15px;
+    font-family:inherit;
+    resize:vertical;
+    margin-bottom:12px;
+    background:#fff;
+    color:var(--ink);
+  }
+  textarea:focus{ outline:none; border-color:var(--gold); }
+
+  .model-answer{
+    background:var(--paper-2);
+    border-left:4px solid var(--gold);
+    padding:12px 14px;
+    border-radius:8px;
+    font-size:15px;
+    margin-bottom:14px;
+    display:none;
+  }
+  .model-answer.show{ display:block; }
+  .model-answer .label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:var(--ink-soft);
+    display:block;
+    margin-bottom:4px;
+  }
+
+  .btn-row{ display:flex; gap:10px; }
+  .btn{
+    flex:1;
+    padding:12px;
+    border-radius:var(--radius);
+    border:none;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn.secondary{ background:var(--paper-2); color:var(--navy); }
+  .btn.self-right{ background:var(--teal); color:#fff; }
+  .btn.self-wrong{ background:#fff; color:var(--rust); border:1.5px solid var(--rust); }
+
+  /* welcome + results */
+  .center-card{
+    max-width:480px;
+    margin:20px auto 0 auto;
+    text-align:center;
+  }
+  .badge-icon{ font-size:46px; margin-bottom:6px; }
+  .start-btn, .primary-btn{
+    display:inline-block;
+    margin-top:18px;
+    background:var(--gold);
+    color:var(--navy);
+    font-weight:800;
+    border:none;
+    padding:14px 26px;
+    border-radius:999px;
+    font-size:16px;
+    cursor:pointer;
+  }
+  .score-big{
+    font-family:Georgia,serif;
+    font-size:44px;
+    color:var(--navy);
+    margin:14px 0 4px 0;
+  }
+  .tier-msg{ color:var(--ink-soft); margin-bottom:6px; }
+
+  /* ---------- FOOTER NAV ---------- */
+  .footbar{
+    flex:0 0 auto;
+    padding:12px 18px calc(12px + var(--safe-b)) 18px;
+    background:var(--paper);
+    border-top:1px solid var(--paper-2);
+    display:flex;
+    gap:10px;
+  }
+  .nav-btn{
+    flex:1;
+    padding:14px;
+    border-radius:999px;
+    border:none;
+    font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav-btn.back{
+    background:var(--paper-2);
+    color:var(--navy);
+    flex:0 0 90px;
+  }
+  .nav-btn.back[disabled]{ opacity:0.35; }
+  .nav-btn.next{
+    background:var(--navy);
+    color:var(--paper);
+  }
+  .nav-btn.next[disabled]{
+    background:var(--paper-2);
+    color:var(--ink-soft);
+    cursor:default;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-row">
+    <div class="topbar-title">🔎 Clause Detective</div>
+    <div class="topbar-score" id="scoreDisplay">Score: 0/31</div>
+  </div>
+  <div class="dots" id="dots"></div>
+  <div class="section-label" id="sectionLabel">Field Guide</div>
+</div>
+
+<div class="screen-wrap" id="screenWrap">
+  <div class="card" id="card"></div>
+</div>
+
+<div class="footbar">
+  <button class="nav-btn back" id="backBtn">Back</button>
+  <button class="nav-btn next" id="nextBtn" disabled>Next</button>
+</div>
+
+<script>
+/* ============ DATA ============ */
+
+const guideRows = [
+  ["who","people — subject","My teacher, <b>who</b> teaches Biology, is very strict."],
+  ["whom","people — object (formal)","My uncle, <b>to whom</b> I write every month, lives abroad."],
+  ["whose","possession","The author, <b>whose</b> book won an award, visited our school."],
+  ["which","things / animals","My phone, <b>which</b> is new, already broke."],
+  ["where","places","The café, <b>where</b> we met, has closed down."],
+  ["when","times","1990, <b>when</b> the internet became public, changed everything."]
+];
+
+const ex2 = [
+ {s:"My best friend, ___ lives next door, is moving to Canada next month.", a:"who"},
+ {s:"The novel, ___ I finished last night, kept me awake until 2 a.m.", a:"which"},
+ {s:"Singapore, ___ streets are famously clean, is a popular tourist destination.", a:"whose"},
+ {s:"My uncle works at the hospital, ___ my sister was born.", a:"where"},
+ {s:"The teacher, ___ class I really enjoy, is starting a new project.", a:"whose"},
+ {s:"Electric cars, ___ are becoming more affordable, may soon replace petrol cars.", a:"which"},
+ {s:"My grandfather, ___ I owe so much, taught me how to fish.", a:"whom"},
+ {s:"2020, ___ the pandemic began, changed the way we work and study.", a:"when"},
+ {s:"Mr. Tan, ___ I greatly admire, is retiring next year.", a:"whom"},
+ {s:"The bakery, ___ my mother used to work, closed down last year.", a:"where"},
+ {s:"My sister, ___ birthday is next week, wants a new bicycle.", a:"whose"},
+ {s:"The Eiffel Tower, ___ was built in 1889, attracts millions of visitors.", a:"which"},
+ {s:"Our neighbor, ___ dog barks all night, apologized to us.", a:"whose"},
+ {s:"Last summer, ___ we traveled to Japan, was unforgettable.", a:"when"},
+ {s:"Dr. Lopez, ___ I was referred to, specializes in sports injuries.", a:"whom"}
+];
+const ex2Options = ["who","whom","whose","which","where","when"];
+
+const ex1 = [
+ {a:"Mount Everest is the tallest mountain in the world.", b:"It attracts thousands of climbers every year.",
+  model:"Mount Everest, which attracts thousands of climbers every year, is the tallest mountain in the world."},
+ {a:"My grandmother taught me to cook.", b:"She is 85 years old.",
+  model:"My grandmother, who is 85 years old, taught me to cook."},
+ {a:"The Amazon rainforest produces 20% of the world's oxygen.", b:"It is under serious threat from deforestation.",
+  model:"The Amazon rainforest, which is under serious threat from deforestation, produces 20% of the world's oxygen."},
+ {a:"Marie Curie discovered radium.", b:"She won two Nobel Prizes.",
+  model:"Marie Curie, who won two Nobel Prizes, discovered radium."},
+ {a:"Our school library has just been renovated.", b:"It now has a reading garden.",
+  model:"Our school library, which now has a reading garden, has just been renovated."},
+ {a:"Mr. Alvarez is retiring this year.", b:"His classroom is always full of plants.",
+  model:"Mr. Alvarez, whose classroom is always full of plants, is retiring this year."},
+ {a:"Jakarta is the capital of Indonesia.", b:"Its population exceeds 10 million people.",
+  model:"Jakarta, whose population exceeds 10 million people, is the capital of Indonesia."},
+ {a:"The new smartphone sold out in one day.", b:"It costs over $1,000.",
+  model:"The new smartphone, which costs over $1,000, sold out in one day."}
+];
+
+const ex4 = [
+ {plain:"The woman who called you this morning left a message.",
+  correct:"The woman who called you this morning left a message.",
+  wrong:"The woman, who called you this morning, left a message.", commasNeeded:false},
+ {plain:"My father who worked as an engineer for 30 years just retired.",
+  correct:"My father, who worked as an engineer for 30 years, just retired.",
+  wrong:"My father who worked as an engineer for 30 years just retired.", commasNeeded:true},
+ {plain:"Students who arrive late must sign in at the office.",
+  correct:"Students who arrive late must sign in at the office.",
+  wrong:"Students, who arrive late, must sign in at the office.", commasNeeded:false},
+ {plain:"Bangkok which I visited last summer is famous for its street food.",
+  correct:"Bangkok, which I visited last summer, is famous for its street food.",
+  wrong:"Bangkok which I visited last summer is famous for its street food.", commasNeeded:true},
+ {plain:"The book that is on the table belongs to me.",
+  correct:"The book that is on the table belongs to me.",
+  wrong:"The book, that is on the table, belongs to me.", commasNeeded:false},
+ {plain:"My mother who lives in Chicago is a doctor.",
+  correct:"My mother, who lives in Chicago, is a doctor.",
+  wrong:"My mother who lives in Chicago is a doctor.", commasNeeded:true},
+ {plain:"The scientist who discovered penicillin was Alexander Fleming.",
+  correct:"The scientist who discovered penicillin was Alexander Fleming.",
+  wrong:"The scientist, who discovered penicillin, was Alexander Fleming.", commasNeeded:false},
+ {plain:"Paris which is the capital of France attracts millions of tourists.",
+  correct:"Paris, which is the capital of France, attracts millions of tourists.",
+  wrong:"Paris which is the capital of France attracts millions of tourists.", commasNeeded:true}
+];
+
+/* ============ BUILD FLAT STEP LIST ============ */
+const steps = [];
+steps.push({type:"guide"});
+ex2.forEach((q,i)=> steps.push({type:"mcq", data:q, idx:i, total:ex2.length, section:"Exercise 2 · Gap-Fill"}));
+ex1.forEach((q,i)=> steps.push({type:"combine", data:q, idx:i, total:ex1.length, section:"Exercise 1 · Sentence Combining"}));
+steps.push({type:"definingIntro"});
+ex4.forEach((q,i)=> steps.push({type:"punct", data:q, idx:i, total:ex4.length, section:"Exercise 4 · Defining vs. Non-Defining"}));
+steps.push({type:"results"});
+
+const SECTION_ORDER = ["Field Guide","Exercise 2 · Gap-Fill","Exercise 1 · Sentence Combining","Defining vs. Non-Defining","Exercise 4 · Defining vs. Non-Defining","Results"];
+const TOTAL_SCORABLE = ex2.length + ex1.length + ex4.length;
+
+let stepIndex = 0;
+let score = 0;
+let answered = new Array(steps.length).fill(false);
+let correctFlag = new Array(steps.length).fill(false);
+
+const card = document.getElementById("card");
+const backBtn = document.getElementById("backBtn");
+const nextBtn = document.getElementById("nextBtn");
+const dotsWrap = document.getElementById("dots");
+const sectionLabel = document.getElementById("sectionLabel");
+const scoreDisplay = document.getElementById("scoreDisplay");
+
+/* build 4 dots for the 4 main sections (guide/ex2/ex1/ex4) */
+function currentMainSectionIdx(){
+  const step = steps[stepIndex];
+  if(step.type==="guide") return 0;
+  if(step.type==="mcq") return 1;
+  if(step.type==="combine") return 2;
+  if(step.type==="definingIntro" || step.type==="punct") return 3;
+  return 4;
+}
+function renderDots(){
+  dotsWrap.innerHTML = "";
+  const mainIdx = currentMainSectionIdx();
+  for(let i=0;i<4;i++){
+    const d = document.createElement("div");
+    d.className="dot";
+    const fill = document.createElement("div");
+    fill.className="dot-fill";
+    if(i<mainIdx) fill.style.width="100%";
+    else if(i===mainIdx){
+      const step = steps[stepIndex];
+      if(step.type==="guide") fill.style.width="100%";
+      else if(step.type==="definingIntro") fill.style.width="0%";
+      else fill.style.width = Math.round(((step.idx+1)/step.total)*100)+"%";
+    } else fill.style.width="0%";
+    d.appendChild(fill);
+    dotsWrap.appendChild(d);
+  }
+}
+
+function renderStep(){
+  const step = steps[stepIndex];
+  sectionLabel.textContent = step.type==="results" ? "Case Closed" :
+    step.type==="guide" ? "Field Guide" :
+    step.type==="definingIntro" ? "Defining vs. Non-Defining" :
+    step.section + " — Q" + (step.idx+1) + " of " + step.total;
+  scoreDisplay.textContent = "Score: " + score + "/" + TOTAL_SCORABLE;
+  renderDots();
+  document.getElementById("screenWrap").scrollTop = 0;
+
+  backBtn.disabled = stepIndex===0;
+  nextBtn.disabled = !answered[stepIndex] && step.type!=="guide";
+  nextBtn.textContent = stepIndex===steps.length-2 ? "See Results" : "Next";
+
+  if(step.type==="guide") renderGuide();
+  else if(step.type==="mcq") renderMcq(step);
+  else if(step.type==="combine") renderCombine(step);
+  else if(step.type==="definingIntro") renderDefiningIntro();
+  else if(step.type==="punct") renderPunct(step);
+  else if(step.type==="results") renderResults();
+}
+
+function renderGuide(){
+  answered[stepIndex]=true;
+  let rows = guideRows.map(r=>
+    `<tr><td><span class="pronoun-pill">${r[0]}</span></td><td>${r[1]}</td><td>${r[2]}</td></tr>`
+  ).join("");
+  card.innerHTML = `
+    <span class="eyebrow">Before you start</span>
+    <h2>Which relative pronoun?</h2>
+    <p class="lede">A quick reference before the case files begin. Non-defining relative clauses always sit between commas — they add <i>extra</i>, non-essential information.</p>
+    <table class="guide-table">
+      <tr><th>Pronoun</th><th>Used for</th><th>Example</th></tr>
+      ${rows}
+    </table>
+    <div class="trick-box">
+      <b>Simple trick — who vs. whom:</b> if you can replace it with <i>he / she / they</i>, use <b>who</b>. If you can replace it with <i>him / her / them</i>, use <b>whom</b>.<br><br>
+      <i>She is my teacher</i> → <b>who</b> &nbsp;·&nbsp; <i>I write to him</i> → <b>to whom</b><br><br>
+      <i>Note: "whom" is formal and rare in everyday speech, but it still appears in exams.</i>
+    </div>
+  `;
+  nextBtn.disabled = false;
+}
+
+function renderDefiningIntro(){
+  answered[stepIndex]=true;
+  card.innerHTML = `
+    <span class="eyebrow">Before Exercise 4</span>
+    <h2>Defining vs. Non-Defining</h2>
+    <p class="lede">Every relative clause does one of two jobs. Telling them apart decides whether you need commas.</p>
+
+    <table class="guide-table">
+      <tr><th>Defining</th><th>Non-defining</th></tr>
+      <tr>
+        <td><b>Identifies</b> which person or thing we mean. Essential — remove it and the sentence loses its meaning. <b>No commas.</b></td>
+        <td>Adds <b>extra</b> information about someone/something already identified. Non-essential — remove it and the sentence still makes sense. <b>Commas required.</b></td>
+      </tr>
+      <tr>
+        <td>The woman <b>who called you</b> left a message.<br><i>(Tells us which woman — without it, we don't know who.)</i></td>
+        <td>My mother, <b>who lives in Chicago</b>, is a doctor.<br><i>(We already know who "my mother" is — the clause just adds a detail.)</i></td>
+      </tr>
+      <tr>
+        <td>Students <b>who arrive late</b> must sign in.<br><i>(Only refers to late students — a specific group.)</i></td>
+        <td>Paris, <b>which is the capital of France</b>, attracts millions of tourists.<br><i>(There's only one Paris — the fact is extra, not identifying.)</i></td>
+      </tr>
+    </table>
+
+    <div class="trick-box">
+      <b>Quick test:</b> can you delete the clause without losing essential meaning?<br>
+      Yes → it's <b>extra info</b> → non-defining → use commas.<br>
+      No → it's <b>identifying</b> → defining → no commas.
+    </div>
+  `;
+  nextBtn.disabled = false;
+}
+
+function renderMcq(step){
+  const q = step.data;
+  const already = answered[stepIndex];
+  let optsHtml = ex2Options.map(opt=>{
+    let cls="opt-btn";
+    if(already){
+      if(opt===q.a) cls+=" correct";
+      else if(opt===step._picked) cls+=" incorrect";
+    }
+    return `<button class="${cls}" ${already?"disabled":""} data-opt="${opt}">${opt}</button>`;
+  }).join("");
+
+  card.innerHTML = `
+    <span class="eyebrow">Exercise 2 · Gap-Fill</span>
+    <div class="q-meta">Question ${step.idx+1} of ${step.total}</div>
+    <div class="q-sentence">${q.s.replace("___", '<span class="blank">'+(already?q.a:"___")+'</span>')}</div>
+    <div class="opt-grid">${optsHtml}</div>
+    <div class="feedback ${already?'show':''} ${already ? (step._picked===q.a?'good':'bad') : ''}" id="fb">
+      ${already ? (step._picked===q.a ? "✓ Correct!" : "The correct answer is <b>"+q.a+"</b>.") : ""}
+    </div>
+  `;
+  if(!already){
+    card.querySelectorAll(".opt-btn").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const picked = btn.getAttribute("data-opt");
+        step._picked = picked;
+        answered[stepIndex]=true;
+        if(picked===q.a){ correctFlag[stepIndex]=true; score++; }
+        renderStep();
+      });
+    });
+  }
+}
+
+function renderCombine(step){
+  const q = step.data;
+  const already = answered[stepIndex];
+  card.innerHTML = `
+    <span class="eyebrow">Exercise 1 · Sentence Combining</span>
+    <div class="q-meta">Question ${step.idx+1} of ${step.total}</div>
+    <div class="q-sentence">
+      1. ${q.a}<br>2. ${q.b}
+    </div>
+    <textarea id="combineInput" placeholder="Combine into one sentence, using commas...">${step._typed||""}</textarea>
+    <div class="model-answer ${already?'show':''}" id="modelBox">
+      <span class="label">Model answer</span>${q.model}
+    </div>
+    <div class="btn-row" id="btnRow">
+      ${already ? "" : `<button class="btn secondary" id="showAnswerBtn">Show model answer</button>`}
+      ${already ? `<button class="btn self-right" id="rightBtn" disabled>I got it right ✓</button>` : ""}
+    </div>
+  `;
+  if(!already){
+    const inp = document.getElementById("combineInput");
+    inp.addEventListener("input", ()=>{ step._typed = inp.value; });
+    document.getElementById("showAnswerBtn").addEventListener("click", ()=>{
+      document.getElementById("modelBox").classList.add("show");
+      document.getElementById("btnRow").innerHTML = `
+        <button class="btn self-wrong" id="wrongBtn">Needed practice</button>
+        <button class="btn self-right" id="rightBtn">I got it right ✓</button>
+      `;
+      document.getElementById("rightBtn").addEventListener("click", ()=>{
+        answered[stepIndex]=true; correctFlag[stepIndex]=true; score++; renderStep();
+      });
+      document.getElementById("wrongBtn").addEventListener("click", ()=>{
+        answered[stepIndex]=true; correctFlag[stepIndex]=false; renderStep();
+      });
+    });
+  }
+}
+
+function renderPunct(step){
+  const q = step.data;
+  const already = answered[stepIndex];
+  const opts = [
+    {text:q.commasNeeded ? q.wrong : q.correct, isCorrect: !q.commasNeeded},
+    {text:q.commasNeeded ? q.correct : q.wrong, isCorrect: q.commasNeeded}
+  ];
+  // shuffle deterministically by index parity so it's not always in the same order
+  if(step.idx % 2 === 1) opts.reverse();
+
+  let optsHtml = opts.map((o,i)=>{
+    let cls="opt-btn";
+    if(already){
+      if(o.isCorrect) cls+=" correct";
+      else if(step._picked===i) cls+=" incorrect";
+    }
+    return `<button class="${cls}" ${already?"disabled":""} data-i="${i}">${o.text}</button>`;
+  }).join("");
+
+  card.innerHTML = `
+    <span class="eyebrow">Exercise 4 · Defining vs. Non-Defining</span>
+    <div class="q-meta">Question ${step.idx+1} of ${step.total} — tap the correctly punctuated version</div>
+    <div class="q-sentence" style="font-size:15px;color:var(--ink-soft);">"${q.plain}"</div>
+    <div class="opt-grid single-col">${optsHtml}</div>
+    <div class="feedback ${already?'show':''} ${already ? (opts[step._picked] && opts[step._picked].isCorrect ? 'good':'bad') : ''}">
+      ${already ? (q.commasNeeded ? "This clause gives <b>extra</b> (non-essential) info, so it needs commas." : "This clause <b>identifies</b> which one, so no commas are needed.") : ""}
+    </div>
+  `;
+  if(!already){
+    card.querySelectorAll(".opt-btn").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const i = parseInt(btn.getAttribute("data-i"));
+        step._picked = i;
+        answered[stepIndex]=true;
+        if(opts[i].isCorrect){ correctFlag[stepIndex]=true; score++; }
+        renderStep();
+      });
+    });
+  }
+}
+
+function renderResults(){
+  answered[stepIndex]=true;
+  const pct = Math.round((score/TOTAL_SCORABLE)*100);
+  let tier;
+  if(pct>=90) tier="Master Detective! Outstanding work. 🕵️‍♀️";
+  else if(pct>=70) tier="Nice work — you're cracking the case.";
+  else if(pct>=50) tier="Good effort — review the Field Guide and try again.";
+  else tier="Keep practicing — revisit the Field Guide first.";
+  card.innerHTML = `
+    <div class="center-card">
+      <div class="badge-icon">🏅</div>
+      <h2>Case Closed!</h2>
+      <div class="score-big">${score}/${TOTAL_SCORABLE}</div>
+      <div class="tier-msg">${tier}</div>
+      <button class="primary-btn" id="restartBtn">Play Again</button>
+    </div>
+  `;
+  document.getElementById("restartBtn").addEventListener("click", restart);
+  nextBtn.style.visibility="hidden";
+}
+
+function restart(){
+  stepIndex=0; score=0;
+  answered = new Array(steps.length).fill(false);
+  correctFlag = new Array(steps.length).fill(false);
+  steps.forEach(s=>{ delete s._picked; delete s._typed; });
+  nextBtn.style.visibility="visible";
+  renderStep();
+}
+
+backBtn.addEventListener("click", ()=>{
+  if(stepIndex>0){ stepIndex--; renderStep(); }
+});
+nextBtn.addEventListener("click", ()=>{
+  if(stepIndex<steps.length-1){ stepIndex++; renderStep(); }
+});
+
+renderStep();
+</script>
+</body>
+</html>
