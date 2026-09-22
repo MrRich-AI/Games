@@ -2,715 +2,398 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Clause Detective — Non-Defining Relative Clauses</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vocabulary Crossword</title>
 <style>
-  :root{
-    --paper:#FAF6EE;
-    --paper-2:#F1EADA;
-    --ink:#25302B;
-    --ink-soft:#5B6660;
-    --navy:#26433F;
-    --gold:#C9982E;
-    --gold-light:#EAD9AC;
-    --teal:#3A7268;
-    --teal-light:#DCEAE6;
-    --rust:#B24A34;
-    --rust-light:#F3DCD5;
-    --radius:14px;
-    --safe-t: env(safe-area-inset-top, 0px);
-    --safe-b: env(safe-area-inset-bottom, 0px);
+  :root {
+    --navy: #1d3557;
+    --red: #e63946;
+    --cream: #f1faee;
+    --sky: #a8dadc;
+    --steel: #457b9d;
+    --cell-size: 32px;
   }
-  *{box-sizing:border-box;}
-  html,body{
-    height:100%;
-    margin:0;
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--cream);
+    margin: 0;
+    padding: 20px;
+    color: var(--navy);
   }
-  body{
-    background:var(--paper);
-    color:var(--ink);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    display:flex;
-    flex-direction:column;
-    overflow:hidden;
-    padding-top:var(--safe-t);
-    padding-bottom:var(--safe-b);
+  h1 {
+    text-align: center;
+    color: var(--red);
+    margin-bottom: 4px;
+    font-size: 1.8em;
   }
-  h1,h2,h3{
-    font-family:Georgia,"Times New Roman",serif;
-    margin:0 0 6px 0;
-    color:var(--navy);
-    font-weight:700;
+  .subtitle {
+    text-align: center;
+    color: var(--steel);
+    margin-bottom: 20px;
+    font-size: 0.95em;
   }
-  /* ---------- TOP BAR ---------- */
-  .topbar{
-    flex:0 0 auto;
-    padding:14px 18px 10px 18px;
-    background:var(--navy);
-    color:var(--paper);
+  .wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    justify-content: center;
+    align-items: flex-start;
+    max-width: 1200px;
+    margin: 0 auto;
   }
-  .topbar-row{
-    display:flex;
-    align-items:baseline;
-    justify-content:space-between;
-    margin-bottom:8px;
+  #grid-container {
+    overflow-x: auto;
+    padding: 8px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(29,53,87,0.15);
   }
-  .topbar-title{
-    font-family:Georgia,serif;
-    font-size:15px;
-    letter-spacing:0.02em;
-    opacity:0.9;
+  #grid {
+    border-collapse: collapse;
   }
-  .topbar-score{
-    font-size:13px;
-    color:var(--gold-light);
-    font-weight:600;
-    white-space:nowrap;
+  #grid td {
+    width: var(--cell-size);
+    height: var(--cell-size);
+    padding: 0;
+    position: relative;
   }
-  .dots{
-    display:flex;
-    gap:6px;
-    margin-bottom:8px;
+  .cell-block {
+    width: 100%;
+    height: 100%;
+    background: transparent;
   }
-  .dot{
-    flex:1;
-    height:5px;
-    border-radius:3px;
-    background:rgba(250,246,238,0.22);
-    overflow:hidden;
+  .cell {
+    width: 100%;
+    height: 100%;
+    border: 1px solid var(--navy);
+    background: white;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 0;
+    color: var(--navy);
+    outline: none;
   }
-  .dot-fill{
-    height:100%;
-    width:0%;
-    background:var(--gold);
-    transition:width .3s ease;
+  .cell.correct {
+    background: #d4edda;
+    color: #1d7a30;
   }
-  .section-label{
-    font-size:12px;
-    color:var(--paper);
-    opacity:0.75;
+  .cell.incorrect {
+    background: #f8d7da;
+    color: #a10000;
   }
-  /* ---------- SCREEN AREA (scrolls) ---------- */
-  .screen-wrap{
-    flex:1 1 auto;
-    overflow-y:auto;
-    -webkit-overflow-scrolling:touch;
-    padding:20px 18px 24px 18px;
+  .cell.highlight {
+    background: var(--sky);
   }
-  .card{
-    max-width:520px;
-    margin:0 auto;
+  .cell:focus {
+    background: #ffe8a3;
   }
-  .eyebrow{
-    display:inline-block;
-    font-size:12px;
-    color:var(--teal);
-    background:var(--teal-light);
-    padding:3px 10px;
-    border-radius:999px;
-    margin-bottom:10px;
-    font-weight:600;
+  .cell-number {
+    position: absolute;
+    top: 1px;
+    left: 2px;
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--steel);
+    pointer-events: none;
+    z-index: 2;
   }
-  p{ line-height:1.55; }
-  .lede{ color:var(--ink-soft); margin-bottom:18px; }
-
-  /* guide table */
-  .guide-table{
-    width:100%;
-    border-collapse:collapse;
-    background:#fff;
-    border-radius:var(--radius);
-    overflow:hidden;
-    box-shadow:0 1px 0 rgba(0,0,0,0.05);
-    margin-bottom:18px;
+  #clues {
+    max-width: 420px;
+    min-width: 300px;
   }
-  .guide-table th, .guide-table td{
-    text-align:left;
-    padding:10px 10px;
-    font-size:14px;
-    vertical-align:top;
-    border-bottom:1px solid var(--paper-2);
+  .clue-group h2 {
+    color: var(--red);
+    border-bottom: 2px solid var(--red);
+    padding-bottom: 4px;
+    font-size: 1.1em;
+    margin-top: 18px;
+    margin-bottom: 8px;
   }
-  .guide-table th{
-    background:var(--paper-2);
-    color:var(--navy);
-    font-size:12px;
+  .clue-item {
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(29,53,87,0.1);
+    transition: background 0.15s;
+    font-size: 0.92em;
+    line-height: 1.35;
   }
-  .guide-table tr:last-child td{ border-bottom:none; }
-  .pronoun-pill{
-    display:inline-block;
-    background:var(--gold-light);
-    color:var(--navy);
-    font-weight:700;
-    padding:1px 7px;
-    border-radius:6px;
+  .clue-item:hover {
+    background: var(--sky);
   }
-  .trick-box{
-    background:var(--teal-light);
-    border-radius:var(--radius);
-    padding:14px 16px;
-    font-size:14px;
-    color:var(--navy);
+  .clue-item.active {
+    background: #ffe8a3;
+    font-weight: 600;
   }
-  .trick-box b{ color:var(--teal); }
-
-  /* question card */
-  .q-sentence{
-    background:#fff;
-    border-radius:var(--radius);
-    padding:18px;
-    font-size:17px;
-    line-height:1.6;
-    margin-bottom:16px;
-    box-shadow:0 1px 0 rgba(0,0,0,0.04);
+  .clue-num {
+    color: var(--red);
+    font-weight: 700;
+    margin-right: 4px;
   }
-  .blank{
-    display:inline-block;
-    min-width:64px;
-    border-bottom:2px solid var(--gold);
-    text-align:center;
-    font-weight:700;
-    color:var(--navy);
+  #controls {
+    text-align: center;
+    margin: 18px 0;
   }
-  .q-meta{
-    font-size:12px;
-    color:var(--ink-soft);
-    margin-bottom:6px;
+  button {
+    background: var(--red);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 0 6px;
+    border-radius: 6px;
+    font-size: 0.95em;
+    cursor: pointer;
+    font-weight: 600;
   }
-
-  .opt-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
+  button:hover {
+    background: #c5303c;
   }
-  .opt-grid.single-col{ grid-template-columns:1fr; }
-  .opt-btn{
-    background:#fff;
-    border:1.5px solid var(--paper-2);
-    border-radius:var(--radius);
-    padding:13px 12px;
-    font-size:15px;
-    color:var(--ink);
-    text-align:left;
-    cursor:pointer;
-    transition:border-color .15s, background .15s, transform .1s;
-    -webkit-tap-highlight-color: transparent;
+  button.secondary {
+    background: var(--steel);
   }
-  .opt-btn:active{ transform:scale(0.98); }
-  .opt-btn.correct{
-    background:var(--teal-light);
-    border-color:var(--teal);
-    color:var(--navy);
-    font-weight:700;
+  button.secondary:hover {
+    background: #35617f;
   }
-  .opt-btn.incorrect{
-    background:var(--rust-light);
-    border-color:var(--rust);
-    color:var(--rust);
-    font-weight:700;
+  #status {
+    text-align: center;
+    font-weight: 600;
+    margin-top: 10px;
+    min-height: 24px;
+    color: var(--navy);
   }
-  .opt-btn[disabled]{ cursor:default; }
-  .opt-btn:not([disabled]):hover{ border-color:var(--gold); }
-
-  .feedback{
-    margin-top:14px;
-    font-size:14px;
-    padding:12px 14px;
-    border-radius:var(--radius);
-    display:none;
-  }
-  .feedback.show{ display:block; }
-  .feedback.good{ background:var(--teal-light); color:var(--navy); }
-  .feedback.bad{ background:var(--rust-light); color:#7a3323; }
-
-  textarea{
-    width:100%;
-    min-height:80px;
-    border-radius:var(--radius);
-    border:1.5px solid var(--paper-2);
-    padding:12px;
-    font-size:15px;
-    font-family:inherit;
-    resize:vertical;
-    margin-bottom:12px;
-    background:#fff;
-    color:var(--ink);
-  }
-  textarea:focus{ outline:none; border-color:var(--gold); }
-
-  .model-answer{
-    background:var(--paper-2);
-    border-left:4px solid var(--gold);
-    padding:12px 14px;
-    border-radius:8px;
-    font-size:15px;
-    margin-bottom:14px;
-    display:none;
-  }
-  .model-answer.show{ display:block; }
-  .model-answer .label{
-    font-size:11px;
-    text-transform:uppercase;
-    letter-spacing:0.05em;
-    color:var(--ink-soft);
-    display:block;
-    margin-bottom:4px;
-  }
-
-  .btn-row{ display:flex; gap:10px; }
-  .btn{
-    flex:1;
-    padding:12px;
-    border-radius:var(--radius);
-    border:none;
-    font-size:14px;
-    font-weight:700;
-    cursor:pointer;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .btn.secondary{ background:var(--paper-2); color:var(--navy); }
-  .btn.self-right{ background:var(--teal); color:#fff; }
-  .btn.self-wrong{ background:#fff; color:var(--rust); border:1.5px solid var(--rust); }
-
-  /* welcome + results */
-  .center-card{
-    max-width:480px;
-    margin:20px auto 0 auto;
-    text-align:center;
-  }
-  .badge-icon{ font-size:46px; margin-bottom:6px; }
-  .start-btn, .primary-btn{
-    display:inline-block;
-    margin-top:18px;
-    background:var(--gold);
-    color:var(--navy);
-    font-weight:800;
-    border:none;
-    padding:14px 26px;
-    border-radius:999px;
-    font-size:16px;
-    cursor:pointer;
-  }
-  .score-big{
-    font-family:Georgia,serif;
-    font-size:44px;
-    color:var(--navy);
-    margin:14px 0 4px 0;
-  }
-  .tier-msg{ color:var(--ink-soft); margin-bottom:6px; }
-
-  /* ---------- FOOTER NAV ---------- */
-  .footbar{
-    flex:0 0 auto;
-    padding:12px 18px calc(12px + var(--safe-b)) 18px;
-    background:var(--paper);
-    border-top:1px solid var(--paper-2);
-    display:flex;
-    gap:10px;
-  }
-  .nav-btn{
-    flex:1;
-    padding:14px;
-    border-radius:999px;
-    border:none;
-    font-size:15px;
-    font-weight:700;
-    cursor:pointer;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .nav-btn.back{
-    background:var(--paper-2);
-    color:var(--navy);
-    flex:0 0 90px;
-  }
-  .nav-btn.back[disabled]{ opacity:0.35; }
-  .nav-btn.next{
-    background:var(--navy);
-    color:var(--paper);
-  }
-  .nav-btn.next[disabled]{
-    background:var(--paper-2);
-    color:var(--ink-soft);
-    cursor:default;
+  @media (max-width: 700px) {
+    :root { --cell-size: 24px; }
+    .cell { font-size: 13px; }
   }
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="topbar-row">
-    <div class="topbar-title">🔎 Clause Detective</div>
-    <div class="topbar-score" id="scoreDisplay">Score: 0/31</div>
+<h1>Vocabulary Crossword</h1>
+<p class="subtitle">Answers from the vocabulary on p. 168</p>
+<p class="subtitle">Each word appears twice: once for its definition, once for a fill-in-the-blank sentence.</p>
+
+<div id="controls">
+  <button onclick="checkAnswers()">Check Answers</button>
+  <button class="secondary" onclick="revealAll()">Reveal All</button>
+  <button class="secondary" onclick="clearAll()">Clear</button>
+</div>
+<div id="status"></div>
+
+<div class="wrapper">
+  <div id="grid-container">
+    <table id="grid"></table>
   </div>
-  <div class="dots" id="dots"></div>
-  <div class="section-label" id="sectionLabel">Field Guide</div>
-</div>
-
-<div class="screen-wrap" id="screenWrap">
-  <div class="card" id="card"></div>
-</div>
-
-<div class="footbar">
-  <button class="nav-btn back" id="backBtn">Back</button>
-  <button class="nav-btn next" id="nextBtn" disabled>Next</button>
+  <div id="clues">
+    <div class="clue-group">
+      <h2>Across</h2>
+      <div id="across-clues"></div>
+    </div>
+    <div class="clue-group">
+      <h2>Down</h2>
+      <div id="down-clues"></div>
+    </div>
+  </div>
 </div>
 
 <script>
-/* ============ DATA ============ */
+const GRID_DATA = {"width": 18, "height": 17, "cells": {"13,6": "P", "13,7": "A", "13,8": "R", "13,9": "T", "13,10": "I", "13,11": "C", "13,12": "I", "13,13": "P", "13,14": "A", "13,15": "N", "13,16": "T", "13,17": "S", "5,7": "S", "6,7": "P", "7,7": "E", "8,7": "C", "9,7": "I", "10,7": "F", "11,7": "I", "12,7": "C", "14,7": "L", "15,7": "L", "16,7": "Y", "9,9": "D", "10,9": "U", "11,9": "R", "12,9": "A", "14,9": "I", "15,9": "O", "16,9": "N", "5,0": "E", "5,1": "M", "5,2": "B", "5,3": "R", "5,4": "A", "5,5": "C", "5,6": "E", "7,3": "L", "7,4": "E", "7,5": "A", "7,6": "D", "7,8": "R", "7,9": "S", "7,10": "H", "7,11": "I", "7,12": "P", "0,12": "P", "1,12": "A", "2,12": "R", "3,12": "T", "4,12": "I", "5,12": "C", "6,12": "I", "8,12": "A", "9,12": "N", "10,12": "T", "11,12": "S", "3,10": "M", "3,11": "U", "3,13": "U", "3,14": "A", "3,15": "L", "3,0": "S", "4,0": "P", "6,0": "C", "7,0": "I", "8,0": "F", "9,0": "I", "10,0": "C", "11,0": "A", "12,0": "L", "13,0": "L", "14,0": "Y", "3,4": "L", "4,4": "E", "6,4": "D", "8,4": "R", "9,4": "S", "10,4": "H", "11,4": "I", "12,4": "P", "9,16": "D", "10,16": "U", "11,16": "R", "12,16": "A", "14,16": "I", "15,16": "O", "16,16": "N", "1,8": "E", "1,9": "M", "1,10": "B", "1,11": "R", "1,13": "C", "1,14": "E", "1,15": "S", "9,14": "M", "10,14": "U", "11,14": "T", "12,14": "U", "14,14": "L"}};
+const ENTRIES = [{"number": 1, "direction": "down", "r": 0, "c": 12, "dr": 1, "dc": 0, "len": 12, "clue": "Definition: people who take part in an activity or event.", "answer": "PARTICIPANTS"}, {"number": 2, "direction": "across", "r": 1, "c": 8, "dr": 0, "dc": 1, "len": 8, "clue": "Fill in the blank: The new school policy ___ diversity and welcomes students from all backgrounds.", "answer": "EMBRACES"}, {"number": 3, "direction": "down", "r": 3, "c": 0, "dr": 1, "dc": 0, "len": 12, "clue": "Definition: in a way that relates to one particular thing; precisely.", "answer": "SPECIFICALLY"}, {"number": 4, "direction": "down", "r": 3, "c": 4, "dr": 1, "dc": 0, "len": 10, "clue": "Definition: the ability to guide, direct, or inspire a group of people.", "answer": "LEADERSHIP"}, {"number": 5, "direction": "across", "r": 3, "c": 10, "dr": 0, "dc": 1, "len": 6, "clue": "Fill in the blank: The two coaches have ___ respect for each other's teams.", "answer": "MUTUAL"}, {"number": 6, "direction": "across", "r": 5, "c": 0, "dr": 0, "dc": 1, "len": 8, "clue": "Definition: accepts or supports something willingly and enthusiastically.", "answer": "EMBRACES"}, {"number": 7, "direction": "down", "r": 5, "c": 7, "dr": 1, "dc": 0, "len": 12, "clue": "Fill in the blank: The teacher asked us to focus ___ on chapter three for the test.", "answer": "SPECIFICALLY"}, {"number": 8, "direction": "across", "r": 7, "c": 3, "dr": 0, "dc": 1, "len": 10, "clue": "Fill in the blank: Strong ___ helped the team finish the project on time.", "answer": "LEADERSHIP"}, {"number": 9, "direction": "down", "r": 9, "c": 9, "dr": 1, "dc": 0, "len": 8, "clue": "Definition: the length of time something lasts or continues.", "answer": "DURATION"}, {"number": 10, "direction": "down", "r": 9, "c": 14, "dr": 1, "dc": 0, "len": 6, "clue": "Definition: shared or felt equally by two or more people.", "answer": "MUTUAL"}, {"number": 11, "direction": "down", "r": 9, "c": 16, "dr": 1, "dc": 0, "len": 8, "clue": "Fill in the blank: The doctor asked about the ___ of her symptoms before making a diagnosis.", "answer": "DURATION"}, {"number": 12, "direction": "across", "r": 13, "c": 6, "dr": 0, "dc": 1, "len": 12, "clue": "Fill in the blank: All ___ received a certificate at the end of the workshop.", "answer": "PARTICIPANTS"}];
 
-const guideRows = [
-  ["who","people — subject","My teacher, <b>who</b> teaches Biology, is very strict."],
-  ["whom","people — object (formal)","My uncle, <b>to whom</b> I write every month, lives abroad."],
-  ["whose","possession","The author, <b>whose</b> book won an award, visited our school."],
-  ["which","things / animals","My phone, <b>which</b> is new, already broke."],
-  ["where","places","The café, <b>where</b> we met, has closed down."],
-  ["when","times","1990, <b>when</b> the internet became public, changed everything."]
-];
+const width = GRID_DATA.width;
+const height = GRID_DATA.height;
+const solutionCells = GRID_DATA.cells; // "r,c" -> letter
 
-const ex2 = [
- {s:"My best friend, ___ lives next door, is moving to Canada next month.", a:"who"},
- {s:"The novel, ___ I finished last night, kept me awake until 2 a.m.", a:"which"},
- {s:"Singapore, ___ streets are famously clean, is a popular tourist destination.", a:"whose"},
- {s:"My uncle works at the hospital, ___ my sister was born.", a:"where"},
- {s:"The teacher, ___ class I really enjoy, is starting a new project.", a:"whose"},
- {s:"Electric cars, ___ are becoming more affordable, may soon replace petrol cars.", a:"which"},
- {s:"My grandfather, ___ I owe so much, taught me how to fish.", a:"whom"},
- {s:"2020, ___ the pandemic began, changed the way we work and study.", a:"when"},
- {s:"Mr. Tan, ___ I greatly admire, is retiring next year.", a:"whom"},
- {s:"The bakery, ___ my mother used to work, closed down last year.", a:"where"},
- {s:"My sister, ___ birthday is next week, wants a new bicycle.", a:"whose"},
- {s:"The Eiffel Tower, ___ was built in 1889, attracts millions of visitors.", a:"which"},
- {s:"Our neighbor, ___ dog barks all night, apologized to us.", a:"whose"},
- {s:"Last summer, ___ we traveled to Japan, was unforgettable.", a:"when"},
- {s:"Dr. Lopez, ___ I was referred to, specializes in sports injuries.", a:"whom"}
-];
-const ex2Options = ["who","whom","whose","which","where","when"];
+// Determine which cells are part of the puzzle (occupied)
+const occupied = new Set(Object.keys(solutionCells));
 
-const ex1 = [
- {a:"Mount Everest is the tallest mountain in the world.", b:"It attracts thousands of climbers every year.",
-  model:"Mount Everest, which attracts thousands of climbers every year, is the tallest mountain in the world."},
- {a:"My grandmother taught me to cook.", b:"She is 85 years old.",
-  model:"My grandmother, who is 85 years old, taught me to cook."},
- {a:"The Amazon rainforest produces 20% of the world's oxygen.", b:"It is under serious threat from deforestation.",
-  model:"The Amazon rainforest, which is under serious threat from deforestation, produces 20% of the world's oxygen."},
- {a:"Marie Curie discovered radium.", b:"She won two Nobel Prizes.",
-  model:"Marie Curie, who won two Nobel Prizes, discovered radium."},
- {a:"Our school library has just been renovated.", b:"It now has a reading garden.",
-  model:"Our school library, which now has a reading garden, has just been renovated."},
- {a:"Mr. Alvarez is retiring this year.", b:"His classroom is always full of plants.",
-  model:"Mr. Alvarez, whose classroom is always full of plants, is retiring this year."},
- {a:"Jakarta is the capital of Indonesia.", b:"Its population exceeds 10 million people.",
-  model:"Jakarta, whose population exceeds 10 million people, is the capital of Indonesia."},
- {a:"The new smartphone sold out in one day.", b:"It costs over $1,000.",
-  model:"The new smartphone, which costs over $1,000, sold out in one day."}
-];
+// Build DOM grid
+const table = document.getElementById('grid');
+const inputRefs = {}; // "r,c" -> input element
 
-const ex4 = [
- {plain:"The woman who called you this morning left a message.",
-  correct:"The woman who called you this morning left a message.",
-  wrong:"The woman, who called you this morning, left a message.", commasNeeded:false},
- {plain:"My father who worked as an engineer for 30 years just retired.",
-  correct:"My father, who worked as an engineer for 30 years, just retired.",
-  wrong:"My father who worked as an engineer for 30 years just retired.", commasNeeded:true},
- {plain:"Students who arrive late must sign in at the office.",
-  correct:"Students who arrive late must sign in at the office.",
-  wrong:"Students, who arrive late, must sign in at the office.", commasNeeded:false},
- {plain:"Bangkok which I visited last summer is famous for its street food.",
-  correct:"Bangkok, which I visited last summer, is famous for its street food.",
-  wrong:"Bangkok which I visited last summer is famous for its street food.", commasNeeded:true},
- {plain:"The book that is on the table belongs to me.",
-  correct:"The book that is on the table belongs to me.",
-  wrong:"The book, that is on the table, belongs to me.", commasNeeded:false},
- {plain:"My mother who lives in Chicago is a doctor.",
-  correct:"My mother, who lives in Chicago, is a doctor.",
-  wrong:"My mother who lives in Chicago is a doctor.", commasNeeded:true},
- {plain:"The scientist who discovered penicillin was Alexander Fleming.",
-  correct:"The scientist who discovered penicillin was Alexander Fleming.",
-  wrong:"The scientist, who discovered penicillin, was Alexander Fleming.", commasNeeded:false},
- {plain:"Paris which is the capital of France attracts millions of tourists.",
-  correct:"Paris, which is the capital of France, attracts millions of tourists.",
-  wrong:"Paris which is the capital of France attracts millions of tourists.", commasNeeded:true}
-];
+for (let r = 0; r < height; r++) {
+  const tr = document.createElement('tr');
+  for (let c = 0; c < width; c++) {
+    const td = document.createElement('td');
+    const key = `${r},${c}`;
+    if (occupied.has(key)) {
+      const block = document.createElement('div');
+      block.className = 'cell-block';
 
-/* ============ BUILD FLAT STEP LIST ============ */
-const steps = [];
-steps.push({type:"guide"});
-ex2.forEach((q,i)=> steps.push({type:"mcq", data:q, idx:i, total:ex2.length, section:"Exercise 2 · Gap-Fill"}));
-ex1.forEach((q,i)=> steps.push({type:"combine", data:q, idx:i, total:ex1.length, section:"Exercise 1 · Sentence Combining"}));
-steps.push({type:"definingIntro"});
-ex4.forEach((q,i)=> steps.push({type:"punct", data:q, idx:i, total:ex4.length, section:"Exercise 4 · Defining vs. Non-Defining"}));
-steps.push({type:"results"});
+      // number label if any entry starts here
+      const entry = ENTRIES.find(e => e.r === r && e.c === c);
+      if (entry) {
+        const numDiv = document.createElement('div');
+        numDiv.className = 'cell-number';
+        numDiv.textContent = entry.number;
+        block.appendChild(numDiv);
+      }
 
-const SECTION_ORDER = ["Field Guide","Exercise 2 · Gap-Fill","Exercise 1 · Sentence Combining","Defining vs. Non-Defining","Exercise 4 · Defining vs. Non-Defining","Results"];
-const TOTAL_SCORABLE = ex2.length + ex1.length + ex4.length;
+      const input = document.createElement('input');
+      input.className = 'cell';
+      input.maxLength = 1;
+      input.dataset.r = r;
+      input.dataset.c = c;
+      input.autocomplete = 'off';
+      input.spellcheck = false;
 
-let stepIndex = 0;
-let score = 0;
-let answered = new Array(steps.length).fill(false);
-let correctFlag = new Array(steps.length).fill(false);
+      input.addEventListener('input', (e) => {
+        input.value = input.value.toUpperCase().replace(/[^A-Z]/g, '');
+        if (input.value) {
+          moveToNext(r, c);
+        }
+      });
+      input.addEventListener('keydown', (e) => handleKeydown(e, r, c));
+      input.addEventListener('focus', () => highlightWordAt(r, c));
 
-const card = document.getElementById("card");
-const backBtn = document.getElementById("backBtn");
-const nextBtn = document.getElementById("nextBtn");
-const dotsWrap = document.getElementById("dots");
-const sectionLabel = document.getElementById("sectionLabel");
-const scoreDisplay = document.getElementById("scoreDisplay");
-
-/* build 4 dots for the 4 main sections (guide/ex2/ex1/ex4) */
-function currentMainSectionIdx(){
-  const step = steps[stepIndex];
-  if(step.type==="guide") return 0;
-  if(step.type==="mcq") return 1;
-  if(step.type==="combine") return 2;
-  if(step.type==="definingIntro" || step.type==="punct") return 3;
-  return 4;
-}
-function renderDots(){
-  dotsWrap.innerHTML = "";
-  const mainIdx = currentMainSectionIdx();
-  for(let i=0;i<4;i++){
-    const d = document.createElement("div");
-    d.className="dot";
-    const fill = document.createElement("div");
-    fill.className="dot-fill";
-    if(i<mainIdx) fill.style.width="100%";
-    else if(i===mainIdx){
-      const step = steps[stepIndex];
-      if(step.type==="guide") fill.style.width="100%";
-      else if(step.type==="definingIntro") fill.style.width="0%";
-      else fill.style.width = Math.round(((step.idx+1)/step.total)*100)+"%";
-    } else fill.style.width="0%";
-    d.appendChild(fill);
-    dotsWrap.appendChild(d);
-  }
-}
-
-function renderStep(){
-  const step = steps[stepIndex];
-  sectionLabel.textContent = step.type==="results" ? "Case Closed" :
-    step.type==="guide" ? "Field Guide" :
-    step.type==="definingIntro" ? "Defining vs. Non-Defining" :
-    step.section + " — Q" + (step.idx+1) + " of " + step.total;
-  scoreDisplay.textContent = "Score: " + score + "/" + TOTAL_SCORABLE;
-  renderDots();
-  document.getElementById("screenWrap").scrollTop = 0;
-
-  backBtn.disabled = stepIndex===0;
-  nextBtn.disabled = !answered[stepIndex] && step.type!=="guide";
-  nextBtn.textContent = stepIndex===steps.length-2 ? "See Results" : "Next";
-
-  if(step.type==="guide") renderGuide();
-  else if(step.type==="mcq") renderMcq(step);
-  else if(step.type==="combine") renderCombine(step);
-  else if(step.type==="definingIntro") renderDefiningIntro();
-  else if(step.type==="punct") renderPunct(step);
-  else if(step.type==="results") renderResults();
-}
-
-function renderGuide(){
-  answered[stepIndex]=true;
-  let rows = guideRows.map(r=>
-    `<tr><td><span class="pronoun-pill">${r[0]}</span></td><td>${r[1]}</td><td>${r[2]}</td></tr>`
-  ).join("");
-  card.innerHTML = `
-    <span class="eyebrow">Before you start</span>
-    <h2>Which relative pronoun?</h2>
-    <p class="lede">A quick reference before the case files begin. Non-defining relative clauses always sit between commas — they add <i>extra</i>, non-essential information.</p>
-    <table class="guide-table">
-      <tr><th>Pronoun</th><th>Used for</th><th>Example</th></tr>
-      ${rows}
-    </table>
-    <div class="trick-box">
-      <b>Simple trick — who vs. whom:</b> if you can replace it with <i>he / she / they</i>, use <b>who</b>. If you can replace it with <i>him / her / them</i>, use <b>whom</b>.<br><br>
-      <i>She is my teacher</i> → <b>who</b> &nbsp;·&nbsp; <i>I write to him</i> → <b>to whom</b><br><br>
-      <i>Note: "whom" is formal and rare in everyday speech, but it still appears in exams.</i>
-    </div>
-  `;
-  nextBtn.disabled = false;
-}
-
-function renderDefiningIntro(){
-  answered[stepIndex]=true;
-  card.innerHTML = `
-    <span class="eyebrow">Before Exercise 4</span>
-    <h2>Defining vs. Non-Defining</h2>
-    <p class="lede">Every relative clause does one of two jobs. Telling them apart decides whether you need commas.</p>
-
-    <table class="guide-table">
-      <tr><th>Defining</th><th>Non-defining</th></tr>
-      <tr>
-        <td><b>Identifies</b> which person or thing we mean. Essential — remove it and the sentence loses its meaning. <b>No commas.</b></td>
-        <td>Adds <b>extra</b> information about someone/something already identified. Non-essential — remove it and the sentence still makes sense. <b>Commas required.</b></td>
-      </tr>
-      <tr>
-        <td>The woman <b>who called you</b> left a message.<br><i>(Tells us which woman — without it, we don't know who.)</i></td>
-        <td>My mother, <b>who lives in Chicago</b>, is a doctor.<br><i>(We already know who "my mother" is — the clause just adds a detail.)</i></td>
-      </tr>
-      <tr>
-        <td>Students <b>who arrive late</b> must sign in.<br><i>(Only refers to late students — a specific group.)</i></td>
-        <td>Paris, <b>which is the capital of France</b>, attracts millions of tourists.<br><i>(There's only one Paris — the fact is extra, not identifying.)</i></td>
-      </tr>
-    </table>
-
-    <div class="trick-box">
-      <b>Quick test:</b> can you delete the clause without losing essential meaning?<br>
-      Yes → it's <b>extra info</b> → non-defining → use commas.<br>
-      No → it's <b>identifying</b> → defining → no commas.
-    </div>
-  `;
-  nextBtn.disabled = false;
-}
-
-function renderMcq(step){
-  const q = step.data;
-  const already = answered[stepIndex];
-  let optsHtml = ex2Options.map(opt=>{
-    let cls="opt-btn";
-    if(already){
-      if(opt===q.a) cls+=" correct";
-      else if(opt===step._picked) cls+=" incorrect";
+      block.appendChild(input);
+      td.appendChild(block);
+      inputRefs[key] = input;
     }
-    return `<button class="${cls}" ${already?"disabled":""} data-opt="${opt}">${opt}</button>`;
-  }).join("");
-
-  card.innerHTML = `
-    <span class="eyebrow">Exercise 2 · Gap-Fill</span>
-    <div class="q-meta">Question ${step.idx+1} of ${step.total}</div>
-    <div class="q-sentence">${q.s.replace("___", '<span class="blank">'+(already?q.a:"___")+'</span>')}</div>
-    <div class="opt-grid">${optsHtml}</div>
-    <div class="feedback ${already?'show':''} ${already ? (step._picked===q.a?'good':'bad') : ''}" id="fb">
-      ${already ? (step._picked===q.a ? "✓ Correct!" : "The correct answer is <b>"+q.a+"</b>.") : ""}
-    </div>
-  `;
-  if(!already){
-    card.querySelectorAll(".opt-btn").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        const picked = btn.getAttribute("data-opt");
-        step._picked = picked;
-        answered[stepIndex]=true;
-        if(picked===q.a){ correctFlag[stepIndex]=true; score++; }
-        renderStep();
-      });
-    });
+    tr.appendChild(td);
   }
+  table.appendChild(tr);
 }
 
-function renderCombine(step){
-  const q = step.data;
-  const already = answered[stepIndex];
-  card.innerHTML = `
-    <span class="eyebrow">Exercise 1 · Sentence Combining</span>
-    <div class="q-meta">Question ${step.idx+1} of ${step.total}</div>
-    <div class="q-sentence">
-      1. ${q.a}<br>2. ${q.b}
-    </div>
-    <textarea id="combineInput" placeholder="Combine into one sentence, using commas...">${step._typed||""}</textarea>
-    <div class="model-answer ${already?'show':''}" id="modelBox">
-      <span class="label">Model answer</span>${q.model}
-    </div>
-    <div class="btn-row" id="btnRow">
-      ${already ? "" : `<button class="btn secondary" id="showAnswerBtn">Show model answer</button>`}
-      ${already ? `<button class="btn self-right" id="rightBtn" disabled>I got it right ✓</button>` : ""}
-    </div>
-  `;
-  if(!already){
-    const inp = document.getElementById("combineInput");
-    inp.addEventListener("input", ()=>{ step._typed = inp.value; });
-    document.getElementById("showAnswerBtn").addEventListener("click", ()=>{
-      document.getElementById("modelBox").classList.add("show");
-      document.getElementById("btnRow").innerHTML = `
-        <button class="btn self-wrong" id="wrongBtn">Needed practice</button>
-        <button class="btn self-right" id="rightBtn">I got it right ✓</button>
-      `;
-      document.getElementById("rightBtn").addEventListener("click", ()=>{
-        answered[stepIndex]=true; correctFlag[stepIndex]=true; score++; renderStep();
-      });
-      document.getElementById("wrongBtn").addEventListener("click", ()=>{
-        answered[stepIndex]=true; correctFlag[stepIndex]=false; renderStep();
-      });
-    });
-  }
-}
+// current active direction tracking for arrow navigation & highlight
+let currentDir = 'across';
 
-function renderPunct(step){
-  const q = step.data;
-  const already = answered[stepIndex];
-  const opts = [
-    {text:q.commasNeeded ? q.wrong : q.correct, isCorrect: !q.commasNeeded},
-    {text:q.commasNeeded ? q.correct : q.wrong, isCorrect: q.commasNeeded}
-  ];
-  // shuffle deterministically by index parity so it's not always in the same order
-  if(step.idx % 2 === 1) opts.reverse();
-
-  let optsHtml = opts.map((o,i)=>{
-    let cls="opt-btn";
-    if(already){
-      if(o.isCorrect) cls+=" correct";
-      else if(step._picked===i) cls+=" incorrect";
+function entriesAt(r, c) {
+  return ENTRIES.filter(e => {
+    for (let i = 0; i < e.len; i++) {
+      const rr = e.r + e.dr * i;
+      const cc = e.c + e.dc * i;
+      if (rr === r && cc === c) return true;
     }
-    return `<button class="${cls}" ${already?"disabled":""} data-i="${i}">${o.text}</button>`;
-  }).join("");
+    return false;
+  });
+}
 
-  card.innerHTML = `
-    <span class="eyebrow">Exercise 4 · Defining vs. Non-Defining</span>
-    <div class="q-meta">Question ${step.idx+1} of ${step.total} — tap the correctly punctuated version</div>
-    <div class="q-sentence" style="font-size:15px;color:var(--ink-soft);">"${q.plain}"</div>
-    <div class="opt-grid single-col">${optsHtml}</div>
-    <div class="feedback ${already?'show':''} ${already ? (opts[step._picked] && opts[step._picked].isCorrect ? 'good':'bad') : ''}">
-      ${already ? (q.commasNeeded ? "This clause gives <b>extra</b> (non-essential) info, so it needs commas." : "This clause <b>identifies</b> which one, so no commas are needed.") : ""}
-    </div>
-  `;
-  if(!already){
-    card.querySelectorAll(".opt-btn").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        const i = parseInt(btn.getAttribute("data-i"));
-        step._picked = i;
-        answered[stepIndex]=true;
-        if(opts[i].isCorrect){ correctFlag[stepIndex]=true; score++; }
-        renderStep();
-      });
-    });
+function highlightWordAt(r, c) {
+  document.querySelectorAll('.cell').forEach(el => el.classList.remove('highlight'));
+  document.querySelectorAll('.clue-item').forEach(el => el.classList.remove('active'));
+
+  const matches = entriesAt(r, c);
+  if (matches.length === 0) return;
+
+  // prefer currentDir if available, else first match
+  let entry = matches.find(e => (e.dr === 0 ? 'across' : 'down') === currentDir) || matches[0];
+  currentDir = entry.dr === 0 ? 'across' : 'down';
+
+  for (let i = 0; i < entry.len; i++) {
+    const rr = entry.r + entry.dr * i;
+    const cc = entry.c + entry.dc * i;
+    const el = inputRefs[`${rr},${cc}`];
+    if (el) el.classList.add('highlight');
+  }
+
+  const clueEl = document.getElementById(`clue-${entry.number}-${currentDir}`);
+  if (clueEl) {
+    clueEl.classList.add('active');
+    clueEl.scrollIntoView({block: 'nearest', behavior: 'smooth'});
   }
 }
 
-function renderResults(){
-  answered[stepIndex]=true;
-  const pct = Math.round((score/TOTAL_SCORABLE)*100);
-  let tier;
-  if(pct>=90) tier="Master Detective! Outstanding work. 🕵️‍♀️";
-  else if(pct>=70) tier="Nice work — you're cracking the case.";
-  else if(pct>=50) tier="Good effort — review the Field Guide and try again.";
-  else tier="Keep practicing — revisit the Field Guide first.";
-  card.innerHTML = `
-    <div class="center-card">
-      <div class="badge-icon">🏅</div>
-      <h2>Case Closed!</h2>
-      <div class="score-big">${score}/${TOTAL_SCORABLE}</div>
-      <div class="tier-msg">${tier}</div>
-      <button class="primary-btn" id="restartBtn">Play Again</button>
-    </div>
-  `;
-  document.getElementById("restartBtn").addEventListener("click", restart);
-  nextBtn.style.visibility="hidden";
+function moveToNext(r, c) {
+  const dr = currentDir === 'down' ? 1 : 0;
+  const dc = currentDir === 'across' ? 1 : 0;
+  const next = inputRefs[`${r+dr},${c+dc}`];
+  if (next) next.focus();
 }
 
-function restart(){
-  stepIndex=0; score=0;
-  answered = new Array(steps.length).fill(false);
-  correctFlag = new Array(steps.length).fill(false);
-  steps.forEach(s=>{ delete s._picked; delete s._typed; });
-  nextBtn.style.visibility="visible";
-  renderStep();
+function moveToPrev(r, c) {
+  const dr = currentDir === 'down' ? -1 : 0;
+  const dc = currentDir === 'across' ? -1 : 0;
+  const prev = inputRefs[`${r+dr},${c+dc}`];
+  if (prev) prev.focus();
 }
 
-backBtn.addEventListener("click", ()=>{
-  if(stepIndex>0){ stepIndex--; renderStep(); }
-});
-nextBtn.addEventListener("click", ()=>{
-  if(stepIndex<steps.length-1){ stepIndex++; renderStep(); }
+function handleKeydown(e, r, c) {
+  if (e.key === 'ArrowRight') { e.preventDefault(); currentDir='across'; const el = inputRefs[`${r},${c+1}`]; if (el) el.focus(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); currentDir='across'; const el = inputRefs[`${r},${c-1}`]; if (el) el.focus(); }
+  else if (e.key === 'ArrowDown') { e.preventDefault(); currentDir='down'; const el = inputRefs[`${r+1},${c}`]; if (el) el.focus(); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); currentDir='down'; const el = inputRefs[`${r-1},${c}`]; if (el) el.focus(); }
+  else if (e.key === 'Backspace') {
+    const el = inputRefs[`${r},${c}`];
+    if (!el.value) {
+      e.preventDefault();
+      moveToPrev(r, c);
+      const prevEl = document.activeElement;
+      if (prevEl && prevEl.classList.contains('cell')) prevEl.value = '';
+    }
+  }
+}
+
+// Build clue lists
+const acrossContainer = document.getElementById('across-clues');
+const downContainer = document.getElementById('down-clues');
+
+const sortedEntries = [...ENTRIES].sort((a,b) => a.number - b.number);
+
+sortedEntries.forEach(entry => {
+  const dir = entry.dr === 0 ? 'across' : 'down';
+  const div = document.createElement('div');
+  div.className = 'clue-item';
+  div.id = `clue-${entry.number}-${dir}`;
+  div.innerHTML = `<span class="clue-num">${entry.number}.</span>${entry.clue}`;
+  div.addEventListener('click', () => {
+    currentDir = dir;
+    const el = inputRefs[`${entry.r},${entry.c}`];
+    if (el) el.focus();
+  });
+  if (dir === 'across') acrossContainer.appendChild(div);
+  else downContainer.appendChild(div);
 });
 
-renderStep();
+function checkAnswers() {
+  let total = 0, correct = 0;
+  Object.keys(solutionCells).forEach(key => {
+    const el = inputRefs[key];
+    if (!el) return;
+    total++;
+    const val = el.value.toUpperCase();
+    const answer = solutionCells[key];
+    el.classList.remove('correct','incorrect');
+    if (val === '') return;
+    if (val === answer) { el.classList.add('correct'); correct++; }
+    else el.classList.add('incorrect');
+  });
+  const status = document.getElementById('status');
+  if (correct === total) {
+    status.textContent = `🎉 All correct! ${correct}/${total} letters.`;
+    status.style.color = '#1d7a30';
+  } else {
+    status.textContent = `${correct}/${total} letters correct so far. Keep going!`;
+    status.style.color = '#1d3557';
+  }
+}
+
+function revealAll() {
+  Object.keys(solutionCells).forEach(key => {
+    const el = inputRefs[key];
+    if (el) {
+      el.value = solutionCells[key];
+      el.classList.remove('incorrect');
+      el.classList.add('correct');
+    }
+  });
+  document.getElementById('status').textContent = 'Answers revealed.';
+  document.getElementById('status').style.color = '#1d3557';
+}
+
+function clearAll() {
+  Object.values(inputRefs).forEach(el => {
+    el.value = '';
+    el.classList.remove('correct','incorrect','highlight');
+  });
+  document.getElementById('status').textContent = '';
+}
 </script>
+
 </body>
 </html>
