@@ -38,11 +38,21 @@
     margin:0;
     font-size:0.95rem;
   }
-  .logo{
-    width:56px;
-    height:56px;
-    margin:0 auto 12px;
-    display:block;
+  .logo3d{
+    font-size:2.2rem;
+    font-weight:800;
+    font-family:Georgia,'Times New Roman',serif;
+    font-style:italic;
+    display:inline-block;
+    color:var(--accent);
+    text-shadow:
+      1px 1px 0 #3f74d1,
+      2px 2px 0 #2f5aa8,
+      3px 3px 0 #234280,
+      4px 4px 0 #182f5c,
+      5px 5px 8px rgba(0,0,0,0.5);
+    margin-bottom:8px;
+    letter-spacing:0.5px;
   }
   .grid{
     display:flex;
@@ -117,13 +127,8 @@
 <body>
 
 <header>
-  <svg class="logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-    <rect x="4" y="4" width="56" height="56" rx="14" fill="#1b1f27" stroke="#4f8dfd" stroke-width="2"/>
-    <circle cx="24" cy="26" r="6" fill="#4f8dfd"/>
-    <circle cx="40" cy="26" r="6" fill="#33d69f"/>
-    <path d="M18 42c4-6 24-6 28 0" stroke="#f5f7fa" stroke-width="3" fill="none" stroke-linecap="round"/>
-  </svg>
-  <h1>Mr. Rich's IGCSE ESL Games</h1>
+  <div class="logo3d">Mr. Rich's</div>
+  <h1>IGCSE ESL Games</h1>
   <p>Pick a unit or activity to play</p>
 </header>
 
