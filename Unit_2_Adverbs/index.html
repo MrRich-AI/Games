@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Adverbs Challenge</title>
+<style>
+  :root{
+    --bg:#1b2233; --card:#ffffff; --text:#14181f; --accent:#1d4ed8; --accent2:#0f766e;
+    --good:#15803d; --bad:#b91c1c; --muted:#4b5563; --track:#e5e7eb;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    background:var(--bg); color:var(--text);
+    display:flex; justify-content:center; min-height:100vh;
+  }
+  #app{width:100%; max-width:480px; min-height:100vh; background:var(--bg); display:flex; flex-direction:column;}
+  .screen{flex:1; display:flex; flex-direction:column; padding:20px; overflow-y:auto;}
+  .card{background:var(--card); border-radius:16px; padding:22px 20px; box-shadow:0 6px 18px rgba(0,0,0,.25); flex:1; display:flex; flex-direction:column;}
+  h1{font-size:1.5rem; margin:0 0 8px; color:#fff; text-align:center;}
+  h2{font-size:1.15rem; margin:0 0 14px; color:var(--text);}
+  p{line-height:1.5;}
+  .subtitle{color:#cbd5e1; text-align:center; margin:0 0 20px; font-size:.95rem;}
+  .progress-wrap{width:100%; background:var(--track); border-radius:8px; height:10px; margin-bottom:14px; overflow:hidden;}
+  .progress-bar{height:100%; background:var(--accent); transition:width .3s;}
+  .roundlabel{font-size:.85rem; font-weight:700; color:var(--accent2); text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px;}
+  .prompt{font-size:1.15rem; font-weight:600; margin:6px 0 18px; line-height:1.5;}
+  .prompt .blank{border-bottom:2px solid var(--accent); padding:0 4px; color:var(--accent);}
+  .choice{
+    display:block; width:100%; text-align:left; padding:14px 16px; margin-bottom:10px;
+    border:2px solid #d1d5db; border-radius:10px; background:#fff; color:var(--text);
+    font-size:1rem; cursor:pointer;
+  }
+  .choice:active{transform:scale(.99);}
+  .choice.correct{border-color:var(--good); background:#dcfce7; color:#14532d; font-weight:700;}
+  .choice.incorrect{border-color:var(--bad); background:#fee2e2; color:#7f1d1d; font-weight:700;}
+  .choice.disabled{pointer-events:none;}
+  .feedback{margin-top:8px; padding:12px 14px; border-radius:10px; font-size:.95rem; line-height:1.4;}
+  .feedback.good{background:#dcfce7; color:#14532d;}
+  .feedback.bad{background:#fee2e2; color:#7f1d1d;}
+  .btnrow{display:flex; gap:10px; margin-top:auto; padding-top:16px;}
+  button.nav{
+    flex:1; padding:14px; border:none; border-radius:10px; font-size:1rem; font-weight:700; cursor:pointer;
+  }
+  .btn-primary{background:var(--accent); color:#fff;}
+  .btn-primary:disabled{background:#93a3c4; cursor:not-allowed;}
+  .btn-secondary{background:#e5e7eb; color:var(--text);}
+  .startbtn{background:var(--accent); color:#fff; border:none; padding:16px; border-radius:12px; font-size:1.1rem; font-weight:700; cursor:pointer; margin-top:20px;}
+  .score{font-size:2.4rem; font-weight:800; color:var(--accent2); text-align:center; margin:10px 0;}
+  ul.rules{padding-left:20px; color:var(--muted); line-height:1.6;}
+  .menubtn{background:none; border:none; color:#cbd5e1; font-size:.9rem; cursor:pointer; padding:0 0 12px; text-align:left;}
+  .actcard{border:2px solid #e5e7eb; border-radius:12px; padding:16px; margin-bottom:14px; text-align:left;}
+  .actname{font-weight:700; font-size:1.05rem; margin-bottom:4px;}
+  .actdesc{color:var(--muted); font-size:.9rem; margin-bottom:10px;}
+  .badge{display:inline-block; font-size:.8rem; font-weight:700; padding:3px 9px; border-radius:999px; margin-bottom:10px;}
+  .badge.done{background:#dcfce7; color:#14532d;}
+  .badge.todo{background:#e5e7eb; color:var(--muted);}
+  .playbtn{width:100%; background:var(--accent); color:#fff; border:none; padding:12px; border-radius:8px; font-weight:700; font-size:.95rem; cursor:pointer;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const R1 = [
+["absolutely","absolutely ___",["exhausted","tired","quick","small"],0],
+["badly","badly ___",["injured","delighted","tiny","cheap"],0],
+["certainly","certainly ___",["possible","exhausted","tiny","fast"],0],
+["completely","completely ___",["different","tired","quick","tiny"],0],
+["definitely","definitely ___",["recommend it","exhausted","tiny","badly done"],0],
+["incredibly","incredibly ___",["talented","injured","cheap","slow"],0],
+["really","really ___",["nice","exhausted","ridiculous","tiny"],0],
+["recently","recently ___",["moved house","exhausted","tiny","furious"],0],
+["remotely","not remotely ___",["interested","tired","cheap","fast"],0],
+["supposedly","supposedly ___",["haunted","exhausted","tiny","quick"],0],
+["totally","totally ___",["agree","injured","tiny","slow"],0],
+["unexpectedly","unexpectedly ___",["arrived early","exhausted","tiny","cheap"],0],
+["usually","usually ___",["arrives on time","exhausted","tiny","furious"],0],
+["very","very ___",["happy","exhausted","tiny","quick"],0],
+["completely","completely ___",["exhausted","happy","quick","cheap"],0]
+];
+
+const R2 = [
+["I'm ___ certain she already left.","absolutely",["absolutely","usually","recently","remotely"],"'Absolutely certain' pairs an extreme intensifier with an ungradable adjective."],
+["He was ___ injured in the accident.","badly",["badly","totally","supposedly","really"],"'Badly injured' is a fixed manner collocation, not 'totally injured'."],
+["She will ___ pass the exam — she's studied so hard.","certainly",["certainly","remotely","badly","recently"],"'Certainly' expresses the speaker's high confidence."],
+["The two versions are ___ different from each other.","completely",["completely","usually","badly","recently"],"'Completely different' — an ungradable adjective needs 'completely', not 'very'."],
+["I would ___ recommend this restaurant to anyone.","definitely",["definitely","remotely","badly","usually"],"'Definitely recommend' shows strong personal certainty."],
+["The young violinist is ___ talented for her age.","incredibly",["incredibly","remotely","usually","badly"],"'Incredibly talented' intensifies a gradable adjective."],
+["It was a ___ nice evening; we should do it again.","really",["really","remotely","supposedly","badly"],"'Really nice' is a common gradable-adjective intensifier."],
+["They ___ moved into their new house last week.","recently",["recently","remotely","absolutely","totally"],"'Recently' marks that something happened not long ago."],
+["I'm not ___ interested in football, to be honest.","remotely",["remotely","recently","usually","certainly"],"'Not remotely interested' is a fixed negative collocation meaning 'not at all'."],
+["The old house is ___ haunted, according to locals.","supposedly",["supposedly","certainly","badly","really"],"'Supposedly' signals the claim is reported, not confirmed."],
+["I ___ agree with your plan — let's do it.","totally",["totally","remotely","badly","usually"],"'Totally agree' is an informal intensifier for strong agreement."],
+["The bus ___ arrived ten minutes early today.","unexpectedly",["unexpectedly","usually","remotely","badly"],"'Unexpectedly' shows something happened against expectations."],
+["The train ___ arrives at platform 4 around 9am.","usually",["usually","recently","supposedly","totally"],"'Usually' expresses a general habit or routine."],
+["I was ___ happy to hear the good news.","very",["very","absolutely","remotely","badly"],"'Very happy' fits a gradable adjective; 'absolutely' would be too extreme here."],
+["After the marathon, the runners were ___ exhausted.","completely",["completely","very","remotely","usually"],"'Exhausted' is ungradable, so it takes 'completely', not 'very'."]
+];
+
+const R3 = [
+["The soup was very delicious.","absolutely",["absolutely","badly","remotely","usually"],0,"'Delicious' is an extreme adjective — it needs 'absolutely', not 'very'."],
+["He was remotely injured in the fall and needs stitches.","badly",["badly","really","supposedly","very"],0,"'Remotely' doesn't mean 'severely' — 'badly injured' is the correct collocation."],
+["I'm totally certain she forgot the meeting.","absolutely",["absolutely","badly","usually","recently"],0,"'Absolutely certain' is the natural pairing; 'totally certain' sounds unnatural here."],
+["The two designs are very different in style.","completely",["completely","badly","remotely","usually"],0,"'Different' is often treated as ungradable — 'completely different' is more natural."],
+["I would badly recommend that restaurant to anyone.","definitely",["definitely","really","remotely","supposedly"],0,"'Badly recommend' isn't a real collocation; use 'definitely recommend'."],
+["She's a remotely talented young pianist.","incredibly",["incredibly","badly","usually","recently"],0,"'Remotely talented' doesn't fit here — 'incredibly talented' expresses admiration."],
+["It was a remotely nice evening at the beach.","really",["really","badly","supposedly","totally"],0,"'Remotely' is used in negatives ('not remotely'); 'really nice' fits a positive statement."],
+["They badly moved into their new flat last month.","recently",["recently","badly","totally","unexpectedly"],0,"The sentence needs a time adverb — 'recently moved', not 'badly moved'."],
+["I'm not usually interested in horror films at all.","remotely",["remotely","usually","recently","certainly"],0,"'Not remotely interested' is the fixed phrase meaning 'not at all'; 'usually' changes the meaning."],
+["The old mansion is badly haunted, or so people say.","supposedly",["supposedly","badly","certainly","really"],0,"The sentence reports an unverified claim, so 'supposedly' fits, not 'badly'."],
+["I remotely agree with your plan — let's go ahead.","totally",["totally","remotely","badly","usually"],0,"'Remotely agree' isn't a real collocation; 'totally agree' is."],
+["The guests usually arrived two hours early, which surprised everyone.","unexpectedly",["unexpectedly","usually","remotely","badly"],0,"Because it 'surprised everyone', 'unexpectedly' fits better than the habitual 'usually'."],
+["The 9am train recently arrives at platform 4.","usually",["usually","recently","supposedly","totally"],0,"A routine timetable fact needs 'usually', not 'recently'."],
+["I was absolutely happy to hear the good news.","very",["very","absolutely","remotely","badly"],0,"'Happy' is gradable, so it pairs naturally with 'very', not the extreme 'absolutely'."],
+["After the marathon, the runners were very exhausted.","completely",["completely","very","remotely","usually"],0,"'Exhausted' is an extreme/ungradable adjective, so it needs 'completely'."]
+];
+
+function shuffle(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function shuffledIndices(n){return shuffle([...Array(n).keys()]);}
+
+let progress=[
+  {done:false,score:0,total:R1.length},
+  {done:false,score:0,total:R2.length},
+  {done:false,score:0,total:R3.length}
+];
+let state={screen:'home',round:0,q:0,score:0,answered:false,order:[[],[],[]]};
+const rounds=[
+  {name:"Round 1: Collocation Match-Up", data:R1, kind:'r1'},
+  {name:"Round 2: Fill in the Gap", data:R2, kind:'r2'},
+  {name:"Round 3: Spot the Wrong Adverb", data:R3, kind:'r3'}
+];
+const totalQ = R1.length+R2.length+R3.length;
+
+function overallIndex(){let n=0;for(let i=0;i<state.round;i++)n+=rounds[i].data.length;return n+state.q;}
+
+function render(){
+  const app=document.getElementById('app');
+  if(state.screen==='home'){
+    const descs=["Pick the word each adverb naturally collocates with.","Fill the gap with the correct adverb.","Spot the misused adverb and choose the fix."];
+    app.innerHTML=`<div class="screen"><div class="card">
+      <h1>🎯 Adverbs Challenge</h1>
+      <p class="subtitle">Choose an activity to practice</p>
+      ${rounds.map((r,i)=>{
+        const p=progress[i];
+        const badge = p.done ? `<span class="badge done">✓ Completed — ${p.score}/${p.total}</span>` : `<span class="badge todo">Not started</span>`;
+        return `<div class="actcard">
+          <div class="actname">${r.name}</div>
+          <div class="actdesc">${descs[i]}</div>
+          ${badge}
+          <button class="playbtn" onclick="selectRound(${i})">${p.done?'Play Again':'Play'}</button>
+        </div>`;
+      }).join('')}
+    </div></div>`;
+    return;
+  }
+  if(state.screen==='roundintro'){
+    const r=rounds[state.round];
+    app.innerHTML=`<div class="screen"><div class="card">
+      <button class="menubtn" onclick="goHome()">&larr; Menu</button>
+      <h1>${r.name}</h1>
+      <p class="subtitle">${r.data.length} questions</p>
+      <button class="startbtn" onclick="beginRound()">Begin</button>
+    </div></div>`;
+    return;
+  }
+  if(state.screen==='question'){
+    const r=rounds[state.round];
+    const item=r.data[state.order[state.round][state.q]];
+    const pct=Math.round((state.q)/r.data.length*100);
+    let promptHTML, choices, correctIdx, feedbackTextFn;
+    if(r.kind==='r1'){
+      const [adv,tmpl,opts,ci]=item;
+      promptHTML = `<span class="blank">${adv}</span> — choose the word that fits: <br><br>"${tmpl.replace('___','_____')}"`;
+      choices=opts; correctIdx=ci;
+      feedbackTextFn=(ok)=>ok?`Correct — "${adv} ${opts[ci]}" is natural.`:`Not quite — the natural collocation is "${adv} ${opts[ci]}".`;
+    } else if(r.kind==='r2'){
+      const [sent,adv,opts,exp]=item;
+      promptHTML = sent.replace('___','<span class="blank">_____</span>');
+      choices=opts; correctIdx=opts.indexOf(adv);
+      feedbackTextFn=(ok)=>exp;
+    } else {
+      const [sent,fix,opts,ci,exp]=item;
+      promptHTML = `Find the fix for the underlined problem:<br><br>"${sent}"`;
+      choices=opts; correctIdx=ci;
+      feedbackTextFn=(ok)=>exp;
+    }
+    const pairs=shuffle(choices.map((c,i)=>({text:c, correct:i===correctIdx})));
+    const shuffledCorrectIdx=pairs.findIndex(p=>p.correct);
+    app.innerHTML=`<div class="screen"><div class="card">
+      <button class="menubtn" onclick="goHome()">&larr; Menu</button>
+      <div class="progress-wrap"><div class="progress-bar" style="width:${pct}%"></div></div>
+      <div class="roundlabel">${r.name} &middot; Q${state.q+1}/${r.data.length}</div>
+      <div class="prompt">${promptHTML}</div>
+      <div id="choices">${pairs.map((p,i)=>`<button class="choice" onclick="answer(${i},${shuffledCorrectIdx})">${p.text}</button>`).join('')}</div>
+      <div id="feedback"></div>
+      <div class="btnrow">
+        <button class="nav btn-secondary" onclick="prevQ()" ${state.q===0?'disabled':''}>Back</button>
+        <button class="nav btn-primary" id="nextBtn" onclick="nextQ()" disabled>Next</button>
+      </div>
+    </div></div>`;
+    window._feedbackTextFn=feedbackTextFn;
+    return;
+  }
+  if(state.screen==='result'){
+    const r=rounds[state.round];
+    app.innerHTML=`<div class="screen"><div class="card">
+      <h1>🏁 ${r.name}</h1>
+      <div class="score">${state.score} / ${r.data.length}</div>
+      <p style="text-align:center;">Nice work! Your progress has been saved.</p>
+      <div class="btnrow">
+        <button class="nav btn-secondary" onclick="goHome()">Back to Menu</button>
+        <button class="nav btn-primary" onclick="selectRound(${state.round})">Play Again</button>
+      </div>
+    </div></div>`;
+    return;
+  }
+}
+
+function selectRound(i){
+  const ord=state.order.slice(); ord[i]=shuffledIndices(rounds[i].data.length);
+  state={screen:'roundintro',round:i,q:0,score:0,answered:false,order:ord};
+  render();
+}
+function goHome(){state.screen='home';render();}
+function beginRound(){state.screen='question';state.q=0;state.answered=false;render();}
+
+function answer(i,correctIdx){
+  if(state.answered)return;
+  state.answered=true;
+  const ok = i===correctIdx;
+  if(ok)state.score++;
+  document.querySelectorAll('.choice').forEach((btn,idx)=>{
+    btn.classList.add('disabled');
+    if(idx===correctIdx)btn.classList.add('correct');
+    else if(idx===i)btn.classList.add('incorrect');
+  });
+  const fb=document.getElementById('feedback');
+  fb.className='feedback '+(ok?'good':'bad');
+  fb.textContent=window._feedbackTextFn(ok);
+  document.getElementById('nextBtn').disabled=false;
+}
+
+function nextQ(){
+  const r=rounds[state.round];
+  if(state.q < r.data.length-1){
+    state.q++; state.answered=false; render();
+  } else {
+    progress[state.round]={done:true,score:state.score,total:r.data.length};
+    state.screen='result'; render();
+  }
+}
+function prevQ(){
+  if(state.q>0){state.q--; state.answered=false; render();}
+}
+
+render();
+</script>
+</body>
+</html>
