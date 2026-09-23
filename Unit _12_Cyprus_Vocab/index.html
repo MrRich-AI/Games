@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Grow Your Vocab — Cyprus Reading Vocab</title>
+<style>
+  :root{
+    --bg:#122015; --card:#1c3323; --accent:#ffd23f; --accent2:#7ed957;
+    --text:#f4f6ff; --muted:#a9c2ab; --good:#3ddc84; --bad:#ff5c72; --chip:#284530;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'Segoe UI',Arial,sans-serif;
+       display:flex;justify-content:center;min-height:100vh;}
+  #app{width:100%;max-width:480px;min-height:100vh;display:flex;flex-direction:column;
+       padding:16px;overflow-x:hidden;}
+  h1{font-size:1.2rem;margin:6px 0 2px;text-align:center;}
+  .sub{color:var(--muted);text-align:center;font-size:.85rem;margin-bottom:12px;}
+  .card{background:var(--card);border-radius:16px;padding:18px;margin-bottom:14px;
+        box-shadow:0 4px 14px rgba(0,0,0,.35);}
+  .btn{background:var(--accent);color:#2b1d00;border:none;border-radius:12px;
+       padding:14px 18px;font-size:1rem;font-weight:700;width:100%;cursor:pointer;}
+  .btn.secondary{background:var(--chip);color:var(--text);}
+  .btn:disabled{opacity:.4;}
+  .row{display:flex;gap:10px;margin-top:14px;}
+  .row .btn{flex:1;}
+  .opt{display:block;width:100%;text-align:left;background:var(--chip);color:var(--text);
+       border:2px solid transparent;border-radius:12px;padding:14px;margin-bottom:10px;
+       font-size:.98rem;cursor:pointer;}
+  .opt.correct{border-color:var(--good);background:#0f2a1c;color:var(--good);}
+  .opt.wrong{border-color:var(--bad);background:#2a0f14;color:var(--bad);animation:shake .35s;}
+  @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+  .home-card{display:flex;align-items:center;gap:14px;background:var(--card);
+             border-radius:16px;padding:16px;cursor:pointer;}
+  .home-icon{width:46px;height:46px;flex:none;}
+  .home-info{flex:1;}
+  .home-info b{font-size:1rem;}
+  .home-info .prog{font-size:.8rem;color:var(--muted);margin-top:3px;}
+  .flower-wrap{display:flex;justify-content:center;margin:6px 0 14px;}
+  .score-screen{text-align:center;}
+  .score-num{font-size:2.2rem;font-weight:800;color:var(--accent);}
+  .confetti{position:fixed;top:-20px;width:8px;height:14px;opacity:.9;
+            animation:fall linear forwards;}
+  @keyframes fall{to{transform:translateY(110vh) rotate(360deg);opacity:1;}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ---------- Data ---------- */
+const words = [
+  {w:"compass", def:"A tool that shows which direction — north, south, east or west — you are travelling in.",
+   opts:["compass","fire extinguisher","welfare","philosopher"]},
+  {w:"survival excursion", def:"A trip organised so participants can practise the skills needed to survive outdoors.",
+   opts:["survival excursion","archaeological sites","campaign for","consumerism"]},
+  {w:"invaluable", def:"Extremely useful — so valuable that its worth can barely be measured.",
+   opts:["invaluable","accumulated","take measures","welfare"]},
+  {w:"campaign for", def:"To carry out an organised effort in support of a particular cause or goal.",
+   opts:["campaign for","consumerism","philosopher","compass"]},
+  {w:"consumerism", def:"Society's strong focus on buying and owning material goods.",
+   opts:["consumerism","welfare","invaluable","survival excursion"]},
+  {w:"fire extinguisher", def:"A portable device used to put out small fires.",
+   opts:["fire extinguisher","compass","archaeological sites","accumulated"]},
+  {w:"take measures", def:"To take specific steps or actions in order to deal with a problem.",
+   opts:["take measures","campaign for","philosopher","consumerism"]},
+  {w:"welfare", def:"The general health, happiness and safety of a person or group.",
+   opts:["welfare","invaluable","fire extinguisher","compass"]},
+  {w:"archaeological sites", def:"Places where remains of past human life and activity are studied.",
+   opts:["archaeological sites","survival excursion","take measures","philosopher"]},
+  {w:"accumulated", def:"Gathered gradually over time until reaching a large amount.",
+   opts:["accumulated","consumerism","welfare","compass"]},
+  {w:"philosopher", def:"A person who studies deep questions about existence, knowledge and values.",
+   opts:["philosopher","fire extinguisher","invaluable","campaign for"]}
+];
+
+let state = { screen:'home', order:[], idx:0, correctCount:0, answered:false };
+
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+function loadBest(){ try{return JSON.parse(localStorage.getItem('sunflowerBest')||'0');}catch(e){return 0;} }
+function saveBest(s){ try{localStorage.setItem('sunflowerBest', JSON.stringify(Math.max(loadBest(), s)));}catch(e){} }
+
+function startActivity(){
+  state.order = shuffle(words.map((_,i)=>i));
+  state.idx = 0; state.correctCount = 0; state.answered = false;
+  state.screen = 'play';
+  render();
+}
+
+function pickOption(chosen, correct){
+  if(state.answered) return;
+  state.answered = true;
+  state.lastChosen = chosen; state.lastCorrect = correct;
+  if(chosen === correct) state.correctCount++;
+  render();
+}
+
+function nextQuestion(){
+  if(state.idx < words.length-1){ state.idx++; state.answered=false; render(); }
+  else { saveBest(state.correctCount); state.screen = 'score'; render(); }
+}
+
+/* ---------- Sunflower SVG (grows with progress) ---------- */
+function sunflowerSVG(progress, bloom){
+  const stemH = 40 + progress*90;
+  const petals = bloom ? 12 : Math.round(progress*12);
+  let petalHtml = '';
+  for(let i=0;i<petals;i++){
+    const angle = (360/12)*i;
+    petalHtml += `<ellipse cx="100" cy="${140-stemH-28}" rx="10" ry="22"
+      fill="var(--accent)" transform="rotate(${angle} 100 ${140-stemH})"></ellipse>`;
+  }
+  const center = progress>0.15 || bloom ? `<circle cx="100" cy="${140-stemH}" r="16" fill="#7a4a1f"/>` : '';
+  return `<svg viewBox="0 0 200 160" width="180" height="145">
+    <line x1="100" y1="140" x2="100" y2="${140-stemH}" stroke="var(--accent2)" stroke-width="6" stroke-linecap="round"/>
+    <path d="M100 ${140-stemH*0.5} q-20 -6 -26 10" stroke="var(--accent2)" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M100 ${140-stemH*0.3} q20 -4 26 12" stroke="var(--accent2)" stroke-width="5" fill="none" stroke-linecap="round"/>
+    ${petalHtml}
+    ${center}
+  </svg>`;
+}
+
+function confettiBurst(){
+  const colors = ['#ffd23f','#7ed957','#ff5c72','#5ee6c8','#ffcd4b'];
+  let html = '';
+  for(let i=0;i<28;i++){
+    const left = Math.random()*100;
+    const delay = Math.random()*0.6;
+    const dur = 2 + Math.random()*1.5;
+    const color = colors[i % colors.length];
+    html += `<div class="confetti" style="left:${left}vw;background:${color};
+      animation-duration:${dur}s;animation-delay:${delay}s;"></div>`;
+  }
+  return html;
+}
+
+function render(){
+  const app = document.getElementById('app');
+
+  if(state.screen === 'home'){
+    const best = loadBest();
+    app.innerHTML = `
+      <h1>Grow Your Vocab</h1>
+      <div class="home-card" onclick="startActivity()">
+        <svg class="home-icon" viewBox="0 0 46 46"><rect width="46" height="46" rx="10" fill="var(--accent)"/>
+          <circle cx="23" cy="23" r="8" fill="#7a4a1f"/>
+          <ellipse cx="23" cy="9" rx="4" ry="8" fill="#fff5cf"/></svg>
+        <div class="home-info">
+          <b>Cyprus Reading Vocab</b>
+          <div class="prog">Best score: ${best} / ${words.length}</div>
+        </div>
+      </div>`;
+    return;
+  }
+
+  if(state.screen === 'play'){
+    const qi = state.order[state.idx];
+    const q = words[qi];
+    const opts = state.shuffledOpts && state.shuffledOptsIdx===state.idx
+      ? state.shuffledOpts
+      : (state.shuffledOpts = shuffle(q.opts), state.shuffledOptsIdx = state.idx, state.shuffledOpts);
+    const progress = state.correctCount / words.length;
+
+    const optsHtml = opts.map(o=>{
+      let cls = 'opt';
+      if(state.answered){
+        if(o === q.w) cls += ' correct';
+        else if(o === state.lastChosen) cls += ' wrong';
+      }
+      return `<button class="${cls}" ${state.answered?'disabled':''} onclick="pickOption('${o.replace(/'/g,"\\'")}','${q.w.replace(/'/g,"\\'")}')">${o}</button>`;
+    }).join('');
+
+    app.innerHTML = `
+      <h1>Grow Your Vocab</h1>
+      <div class="sub">Cyprus Reading Vocab · Word ${state.idx+1} of ${words.length}</div>
+      <div class="flower-wrap">${sunflowerSVG(progress, false)}</div>
+      <div class="card">
+        <div style="font-size:1.02rem;line-height:1.5;">${q.def}</div>
+      </div>
+      ${optsHtml}
+      <div class="row">
+        <button class="btn" onclick="nextQuestion()" ${state.answered?'':'disabled'}>
+          ${state.idx===words.length-1?'Finish':'Next'}
+        </button>
+      </div>`;
+    return;
+  }
+
+  if(state.screen === 'score'){
+    const all = state.correctCount === words.length;
+    app.innerHTML = `
+      ${all ? confettiBurst() : ''}
+      <h1>${all ? 'Full Bloom!' : 'Nice work!'}</h1>
+      <div class="flower-wrap">${sunflowerSVG(1, all)}</div>
+      <div class="card score-screen">
+        <div class="score-num">${state.correctCount}/${words.length}</div>
+        <div class="sub">${all ? 'Every word identified correctly!' : 'words identified correctly'}</div>
+      </div>
+      <div class="row">
+        <button class="btn secondary" onclick="state.screen='home';render()">Home</button>
+        <button class="btn" onclick="startActivity()">Play again</button>
+      </div>`;
+    return;
+  }
+}
+
+render();
+</script>
+</body>
+</html>
