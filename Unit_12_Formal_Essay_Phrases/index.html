@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Formal Essay Phrases</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Patrick+Hand&display=swap');
+
+  :root{
+    --paper:#fbf9f1;
+    --line:#bcd4ea;
+    --margin:#e79c9c;
+    --ink:#1e2b3c;
+    --ink-soft:#33425a;
+    --accent:#2f6f4f;
+    --accent2:#b5541c;
+    --correct:#2f7d32;
+    --correct-bg:#dff3e0;
+    --wrong:#b3261e;
+    --wrong-bg:#fbe1df;
+    --card:#ffffff;
+    --shadow:rgba(30,43,60,0.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;height:100%;
+    font-family:'Comic Neue','Comic Sans MS','Chalkboard SE',cursive;
+    color:var(--ink);
+    background:var(--paper);
+  }
+  body{
+    background-image:
+      repeating-linear-gradient(var(--paper) 0px, var(--paper) 33px, var(--line) 34px),
+      linear-gradient(90deg, transparent 0 54px, var(--margin) 54px, var(--margin) 56px, transparent 56px);
+    background-attachment:local;
+    min-height:100%;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  .app{
+    max-width:520px;
+    margin:0 auto;
+    min-height:100vh;
+    padding:22px 18px 34px 30px;
+  }
+  .screen{display:none;animation:fadeIn .35s ease;}
+  .screen.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  h1{
+    font-family:'Patrick Hand',cursive;
+    font-size:2rem;
+    color:var(--accent2);
+    text-align:center;
+    margin:6px 0 4px;
+  }
+  h2{
+    font-family:'Patrick Hand',cursive;
+    font-size:1.5rem;
+    color:var(--accent2);
+    margin:0 0 10px;
+    text-align:center;
+  }
+  p.sub{text-align:center;color:var(--ink-soft);margin-top:0;font-size:1.05rem;}
+
+  .card{
+    background:var(--card);
+    border-radius:14px;
+    padding:18px;
+    box-shadow:0 4px 10px var(--shadow);
+    margin-bottom:16px;
+    border:2px solid #eee1c6;
+  }
+
+  input[type=text]{
+    width:100%;
+    font-family:inherit;
+    font-size:1.2rem;
+    padding:12px 14px;
+    border-radius:10px;
+    border:2px solid var(--line);
+    background:#fff;
+    color:var(--ink);
+    margin:10px 0 18px;
+  }
+  input[type=text]:focus{outline:2px solid var(--accent);}
+
+  button{
+    font-family:inherit;
+    cursor:pointer;
+  }
+  .btn{
+    display:block;
+    width:100%;
+    font-size:1.15rem;
+    padding:14px 10px;
+    border-radius:12px;
+    border:none;
+    background:var(--accent);
+    color:#fff;
+    font-weight:700;
+    box-shadow:0 3px 0 #1f4d36;
+    transition:transform .08s ease;
+  }
+  .btn:active{transform:translateY(2px);box-shadow:0 1px 0 #1f4d36;}
+  .btn.secondary{background:var(--accent2);box-shadow:0 3px 0 #7a3810;}
+  .btn.ghost{background:#fff;color:var(--accent);border:2px solid var(--accent);box-shadow:none;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;box-shadow:none;}
+
+  .activity-card{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    background:var(--card);
+    border:2px solid #eee1c6;
+    border-radius:14px;
+    padding:16px;
+    margin-bottom:14px;
+    box-shadow:0 3px 8px var(--shadow);
+    text-align:left;
+    width:100%;
+  }
+  .activity-card:active{transform:translateY(1px);}
+  .ac-left{display:flex;align-items:center;gap:12px;}
+  .ac-icon{width:42px;height:42px;flex:0 0 auto;}
+  .ac-text .ac-title{font-family:'Patrick Hand',cursive;font-size:1.25rem;color:var(--ink);display:block;}
+  .ac-text .ac-progress{font-size:.95rem;color:var(--ink-soft);}
+  .ac-chevron{font-size:1.4rem;color:var(--accent);}
+
+  .progressbar{
+    height:10px;background:#e7e0cb;border-radius:6px;overflow:hidden;margin:6px 0 16px;
+  }
+  .progressbar > div{
+    height:100%;background:var(--accent);width:0%;
+    transition:width .35s ease;
+  }
+
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;
+  }
+  .topbar .name-badge{font-size:.95rem;color:var(--ink-soft);}
+  .backlink{
+    background:none;border:none;color:var(--accent2);font-family:inherit;font-size:1.05rem;
+    padding:4px 0;
+  }
+
+  .feedback{
+    text-align:center;font-size:1.1rem;font-weight:700;min-height:1.6em;margin:6px 0;
+  }
+  .feedback.correct{color:var(--correct);}
+  .feedback.wrong{color:var(--wrong);}
+
+  .sentence-box{
+    font-size:1.15rem;line-height:1.6;background:#fff8e8;border:2px solid #eee1c6;border-radius:12px;
+    padding:16px;margin-bottom:16px;
+  }
+  mark{background:#ffe3a8;padding:1px 4px;border-radius:4px;}
+
+  .options-list .opt-btn{
+    display:block;width:100%;text-align:left;font-size:1.1rem;padding:12px 14px;
+    border-radius:10px;border:2px solid var(--line);background:#fff;color:var(--ink);
+    margin-bottom:10px;
+  }
+  .opt-btn.correct{background:var(--correct-bg);border-color:var(--correct);color:var(--correct);}
+  .opt-btn.wrong{background:var(--wrong-bg);border-color:var(--wrong);color:var(--wrong);}
+  .opt-btn:disabled{cursor:default;}
+
+  .essay-text{
+    font-size:1.12rem;line-height:2.1;white-space:pre-wrap;
+  }
+  select.blank{
+    font-family:inherit;
+    font-size:1.02rem;
+    padding:5px 8px;
+    border-radius:8px;
+    border:2px solid var(--accent2);
+    background:#fff8e8;
+    color:var(--ink);
+    margin:0 2px;
+  }
+  select.blank.correct{border-color:var(--correct);background:var(--correct-bg);color:var(--correct);}
+  select.blank.wrong{border-color:var(--wrong);background:var(--wrong-bg);color:var(--wrong);}
+
+  .nav-row{display:flex;gap:10px;margin-top:18px;}
+  .nav-row .btn{flex:1;}
+
+  .mascot{
+    width:70px;height:70px;margin:0 auto 8px;display:block;
+  }
+  .score-big{
+    font-family:'Patrick Hand',cursive;font-size:2.4rem;text-align:center;color:var(--accent);margin:6px 0;
+  }
+  .result-name{text-align:center;font-size:1.2rem;color:var(--ink-soft);margin-bottom:4px;}
+
+  /* ACTIVITY 1 BOARD VIEW */
+  .board-cats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+  .cat-box{border:2px solid var(--accent);border-radius:12px;padding:8px;min-height:64px;background:#fff;transition:background .2s,border-color .2s;}
+  .cat-box-title{font-family:'Patrick Hand',cursive;font-size:.92rem;color:var(--accent);text-align:center;margin-bottom:6px;font-weight:700;line-height:1.15;}
+  .cat-box.flash-correct{background:var(--correct-bg);border-color:var(--correct);}
+  .cat-box.flash-wrong{background:var(--wrong-bg);border-color:var(--wrong);}
+  .chip{display:inline-block;background:var(--correct-bg);border:2px solid var(--correct);color:var(--correct);border-radius:14px;padding:3px 8px;margin:2px;font-size:.78rem;}
+  .bank-title{font-family:'Patrick Hand',cursive;color:var(--accent2);text-align:center;margin:8px 0 6px;font-size:1.2rem;}
+  .bank{background:#fff8e8;border:2px dashed var(--accent2);border-radius:12px;padding:10px;min-height:60px;text-align:center;}
+  .chip-btn{display:inline-block;background:#fff;border:2px solid var(--accent2);border-radius:16px;padding:8px 12px;margin:4px;font-size:.95rem;font-family:inherit;color:var(--ink);}
+  .chip-btn.selected{background:var(--accent2);color:#fff;}
+  .wordbank-cat{margin-bottom:14px;}
+  .wordbank-cat h3{font-family:'Patrick Hand',cursive;color:var(--accent);font-size:1.15rem;margin:0 0 4px;}
+  .wordbank-list{margin:0;padding-left:20px;}
+  .wordbank-list li{margin-bottom:2px;}
+
+  ::-webkit-scrollbar{width:8px;}
+  ::-webkit-scrollbar-thumb{background:#cdbf98;border-radius:4px;}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- START SCREEN -->
+  <section class="screen active" id="screen-start">
+    <h1>Formal Essay Phrases</h1>
+    <p class="sub">Learn to use formal linking phrases the right way</p>
+    <div class="card">
+      <svg class="mascot" viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="#fff8e8" stroke="#b5541c" stroke-width="4"/><circle cx="35" cy="45" r="6" fill="#1e2b3c"/><circle cx="65" cy="45" r="6" fill="#1e2b3c"/><path d="M32 65 Q50 80 68 65" stroke="#1e2b3c" stroke-width="4" fill="none" stroke-linecap="round"/></svg>
+      <p class="sub" style="margin-top:0;">What's your name?</p>
+      <input type="text" id="nameInput" placeholder="Type your name here" autocomplete="off">
+      <button class="btn" id="startBtn">Let's start!</button>
+    </div>
+  </section>
+
+  <!-- HOME SCREEN -->
+  <section class="screen" id="screen-home">
+    <div class="topbar">
+      <h2 style="margin:0;">Choose an activity</h2>
+    </div>
+    <p class="sub" id="homeGreeting" style="margin-top:-4px;"></p>
+
+    <button class="activity-card" onclick="startActivity(1)">
+      <span class="ac-left">
+        <svg class="ac-icon" viewBox="0 0 48 48"><rect x="4" y="6" width="18" height="14" rx="3" fill="#dff3e0" stroke="#2f7d32" stroke-width="2"/><rect x="26" y="6" width="18" height="14" rx="3" fill="#fde3d0" stroke="#b5541c" stroke-width="2"/><rect x="4" y="28" width="18" height="14" rx="3" fill="#e3e9fb" stroke="#3a4fa0" stroke-width="2"/><rect x="26" y="28" width="18" height="14" rx="3" fill="#fbe1df" stroke="#b3261e" stroke-width="2"/></svg>
+        <span class="ac-text"><span class="ac-title">1. Sort the Phrases</span><br><span class="ac-progress" id="prog1">0 / 36</span></span>
+      </span>
+      <span class="ac-chevron">&#8250;</span>
+    </button>
+
+    <button class="activity-card" onclick="startActivity(2)">
+      <span class="ac-left">
+        <svg class="ac-icon" viewBox="0 0 48 48"><circle cx="24" cy="24" r="20" fill="#fbe1df" stroke="#b3261e" stroke-width="2"/><path d="M24 14v14" stroke="#b3261e" stroke-width="4" stroke-linecap="round"/><circle cx="24" cy="33" r="2.4" fill="#b3261e"/></svg>
+        <span class="ac-text"><span class="ac-title">2. Error Correction</span><br><span class="ac-progress" id="prog2">0 / 10</span></span>
+      </span>
+      <span class="ac-chevron">&#8250;</span>
+    </button>
+
+    <button class="activity-card" onclick="startActivity(3)">
+      <span class="ac-left">
+        <svg class="ac-icon" viewBox="0 0 48 48"><rect x="8" y="5" width="32" height="38" rx="3" fill="#fff8e8" stroke="#b5541c" stroke-width="2"/><line x1="14" y1="15" x2="34" y2="15" stroke="#b5541c" stroke-width="2"/><line x1="14" y1="22" x2="34" y2="22" stroke="#b5541c" stroke-width="2"/><line x1="14" y1="29" x2="28" y2="29" stroke="#b5541c" stroke-width="2"/></svg>
+        <span class="ac-text"><span class="ac-title">3. Essay Gap-Fill (B1)</span><br><span class="ac-progress" id="prog3">0 / 7</span></span>
+      </span>
+      <span class="ac-chevron">&#8250;</span>
+    </button>
+
+    <button class="activity-card" onclick="startActivity(4)">
+      <span class="ac-left">
+        <svg class="ac-icon" viewBox="0 0 48 48"><rect x="8" y="5" width="32" height="38" rx="3" fill="#e3e9fb" stroke="#3a4fa0" stroke-width="2"/><line x1="14" y1="15" x2="34" y2="15" stroke="#3a4fa0" stroke-width="2"/><line x1="14" y1="22" x2="34" y2="22" stroke="#3a4fa0" stroke-width="2"/><line x1="14" y1="29" x2="28" y2="29" stroke="#3a4fa0" stroke-width="2"/></svg>
+        <span class="ac-text"><span class="ac-title">4. Essay Gap-Fill (B2)</span><br><span class="ac-progress" id="prog4">0 / 8</span></span>
+      </span>
+      <span class="ac-chevron">&#8250;</span>
+    </button>
+
+    <button class="activity-card" id="wordBankCard" style="display:none;" onclick="showWordBank()">
+      <span class="ac-left">
+        <svg class="ac-icon" viewBox="0 0 48 48"><rect x="6" y="8" width="36" height="32" rx="3" fill="#fff8e8" stroke="#b5541c" stroke-width="2"/><line x1="12" y1="18" x2="36" y2="18" stroke="#b5541c" stroke-width="2"/><line x1="12" y1="25" x2="36" y2="25" stroke="#b5541c" stroke-width="2"/><line x1="12" y1="32" x2="28" y2="32" stroke="#b5541c" stroke-width="2"/></svg>
+        <span class="ac-text"><span class="ac-title">Word Bank (Sorted)</span><br><span class="ac-progress">Review your completed sort</span></span>
+      </span>
+      <span class="ac-chevron">&#8250;</span>
+    </button>
+  </section>
+
+  <!-- ACTIVITY 1: SORT THE PHRASES (BOARD VIEW) -->
+  <section class="screen" id="screen-a1">
+    <div class="topbar"><button class="backlink" onclick="goHome()">&#8592; Home</button><span class="name-badge" id="badge1"></span></div>
+    <h2>Sort the Phrases</h2>
+    <div class="progressbar"><div id="bar1"></div></div>
+    <p class="sub" style="margin-top:0;">Tap a phrase below, then tap the category it belongs to.</p>
+    <div class="board-cats" id="a1grid"></div>
+    <div class="bank-title">Phrase Bank</div>
+    <div class="bank" id="a1bank"></div>
+    <div class="feedback" id="a1feedback"></div>
+  </section>
+
+  <!-- ACTIVITY 1 RESULT / WORD BANK -->
+  <section class="screen" id="screen-a1-result">
+    <div class="topbar"><button class="backlink" onclick="goHome()">&#8592; Home</button><span class="name-badge" id="badgeWB"></span></div>
+    <h2>Your Sorted Word Bank</h2>
+    <p class="sub" id="a1resultScore"></p>
+    <div id="a1wordbank"></div>
+    <button class="btn" onclick="goHome()">Back to Home</button>
+  </section>
+
+  <!-- ACTIVITY 2: ERROR CORRECTION -->
+  <section class="screen" id="screen-a2">
+    <div class="topbar"><button class="backlink" onclick="goHome()">&#8592; Home</button><span class="name-badge" id="badge2"></span></div>
+    <h2>Fix the Highlighted Phrase</h2>
+    <div class="progressbar"><div id="bar2"></div></div>
+    <div class="sentence-box" id="a2sentence"></div>
+    <div class="options-list" id="a2options"></div>
+    <div class="feedback" id="a2feedback"></div>
+  </section>
+
+  <!-- ACTIVITY 3: ESSAY B1 -->
+  <section class="screen" id="screen-a3">
+    <div class="topbar"><button class="backlink" onclick="goHome()">&#8592; Home</button><span class="name-badge" id="badge3"></span></div>
+    <h2>Charity Organizations (B1)</h2>
+    <div class="progressbar"><div id="bar3"></div></div>
+    <div class="card essay-text" id="a3essay"></div>
+    <button class="btn" id="a3finish" onclick="finishEssay(3)" disabled>Finish</button>
+  </section>
+
+  <!-- ACTIVITY 4: ESSAY B2 -->
+  <section class="screen" id="screen-a4">
+    <div class="topbar"><button class="backlink" onclick="goHome()">&#8592; Home</button><span class="name-badge" id="badge4"></span></div>
+    <h2>Volunteering Abroad (B2)</h2>
+    <div class="progressbar"><div id="bar4"></div></div>
+    <div class="card essay-text" id="a4essay"></div>
+    <button class="btn" id="a4finish" onclick="finishEssay(4)" disabled>Finish</button>
+  </section>
+
+  <!-- RESULT SCREEN (activities 2, 3, 4) -->
+  <section class="screen" id="screen-result">
+    <svg class="mascot" viewBox="0 0 100 100" id="resultMascot"></svg>
+    <div class="result-name" id="resultName"></div>
+    <div class="score-big" id="resultScore"></div>
+    <p class="sub" id="resultMsg"></p>
+    <button class="btn" onclick="goHome()">Back to Home</button>
+  </section>
+
+</div>
+
+<script>
+/* ---------- DATA ---------- */
+const catPhrases = {
+  "Giving an Opinion": ["I am against the idea","I believe","I contend that","In my opinion","It could be argued that","Personally, I believe"],
+  "Adding Information": ["Additionally","Furthermore","In addition","Moreover","What is more"],
+  "Showing Contrast": ["Although","Despite this","However","Nevertheless","On the one hand","On the other hand","Whereas","While"],
+  "Cause and Effect": ["As a result","Consequently","Due to this","For this reason","Therefore"],
+  "Framing / General Statements": ["It is often said that","Nowadays","People often maintain","Two points of view","What matters most"],
+  "Conclusion": ["All things considered","In conclusion","On balance","Overall","Taking everything into account","To conclude","To sum up"]
+};
+const catNames = Object.keys(catPhrases);
+
+let a1items = [];
+Object.entries(catPhrases).forEach(([cat, list]) => list.forEach(p => a1items.push({phrase:p, cat})));
+
+const a2data = [
+  {text:'Some charities spend a large percentage of their donations on staff salaries and marketing. <mark>Moreover</mark>, I do not believe this is fair to the people who donate. Charities should be honest about how money is spent.', correct:'In my opinion', options:['In my opinion','As a result','Nevertheless','Nowadays']},
+  {text:'Schools raise funds for charity every year through bake sales, sponsored walks, and collections. <mark>As a result</mark>, many people believe this teaches students responsibility. Teachers often use these events to talk about generosity in class.', correct:'It is often said that', options:['It is often said that','Despite this','Moreover','All things considered']},
+  {text:'Volunteering abroad usually costs a lot of money for flights, accommodation, and program fees. <mark>In addition</mark>, some students still choose to do it every summer. They believe the experience is worth the cost.', correct:'Despite this', options:['Despite this','Therefore','In my opinion','Nowadays']},
+  {text:'Charity organizations raise millions of pounds every year for people in need around the world. <mark>In conclusion</mark>, this essay will look at both sides of the argument. Many people disagree about how charities should operate.', correct:'Two points of view', options:['Two points of view','Additionally','Consequently','I believe']},
+  {text:'Volunteers often work long hours without any pay at all. <mark>Nowadays</mark>, they clearly demonstrate great dedication to their cause. Many charities could not survive without them.', correct:'Therefore', options:['Therefore','Whereas','It could be argued that','What is more']},
+  {text:'Most charities are run by dedicated volunteers who genuinely want to help others. <mark>On the other hand</mark>, this kind of work builds valuable skills for young people. Volunteering can shape a person&#39;s character in lasting ways.', correct:'Furthermore', options:['Furthermore','Consequently','Overall','I contend that']},
+  {text:'Volunteering trips abroad can be exciting and rewarding for many students. <mark>Overall</mark>, students should think carefully before committing to a trip. Costs and safety are both important factors to consider.', correct:'It could be argued that', options:['It could be argued that','Whereas','Moreover','Due to this']},
+  {text:'Charities need money to run their programs and pay for basic operating costs. <mark>While</mark> volunteers are also extremely valuable to daily operations. Without both, most charities could not continue their work.', correct:'Moreover', options:['Moreover','Consequently','To conclude','Personally, I believe']},
+  {text:'Donating money is one of the easiest ways for people to help a charity. <mark>For this reason</mark>, raising awareness can be just as important as giving money. Talking about a cause can inspire others to get involved too.', correct:'Nevertheless', options:['Nevertheless','Nowadays','All things considered','In my opinion']},
+  {text:'Many students genuinely want to help people who are less fortunate than themselves. <mark>Taking everything into account</mark>, some students choose to volunteer abroad during the summer holidays. This can be a life-changing experience for them.', correct:'As a result', options:['As a result','Despite this','In my opinion','What is more']}
+];
+
+const essay3template = [
+"Charity Organizations","",
+"{0} charity organizations are very important in our society. They help poor families, sick people, and children who need support. Many people do not realize how much charities do until they need help themselves.","",
+"{1} many people donate money or old clothes to charities every year. This is a simple way to help others. Some schools also organize fundraising events for local charities.","",
+"{2} some people think charities do not always use money correctly. {3} most charities are honest and use donations well. It is important for a charity to explain clearly how it spends its money.","",
+"{4} volunteers give their free time to help at charity events. This is another important way to support good causes. {5} more people are helped every year and communities become stronger.","",
+"{6} charity organizations do a lot of good work, and everyone should try to support them in some way. Even a small donation can make a real difference."
+].join("\n");
+
+const essay3blanks = [
+  {correct:"In my opinion", options:["In my opinion","Furthermore","As a result","Nowadays"]},
+  {correct:"Nowadays", options:["Nowadays","I believe","However","Therefore"]},
+  {correct:"On the one hand", options:["On the one hand","Moreover","Consequently","It is often said that"]},
+  {correct:"On the other hand", options:["On the other hand","In my opinion","In conclusion","For this reason"]},
+  {correct:"Furthermore", options:["Furthermore","Nevertheless","Overall","Personally, I believe"]},
+  {correct:"As a result", options:["As a result","Although","What matters most","To conclude"]},
+  {correct:"In conclusion", options:["In conclusion","Despite this","Additionally","People often maintain"]}
+];
+
+const essay4template = [
+"Volunteering Abroad","",
+"{0} increasing numbers of young people choose to spend their summer holidays volunteering abroad, whether building schools, teaching English, or supporting environmental projects. These programmes have become increasingly popular over the last decade.","",
+"{1} this is one of the most valuable experiences a student can have, as it builds independence and a genuine understanding of other cultures. {2} many students report that volunteering abroad improves their confidence and communication skills significantly. These benefits often last long after the trip has ended.","",
+"{3} critics argue that such programmes are often expensive and can do more harm than good if they are poorly organised. {4} well-run programmes, guided by experienced local staff, tend to leave a lasting positive impact on the communities they serve. The quality of an organisation, therefore, matters as much as the intention behind it.","",
+"{5} students should research an organisation carefully before committing to a volunteering trip abroad. {6} that volunteering abroad changes participants more than it changes the communities they visit. This is not necessarily a bad thing, but it is worth keeping in mind.","",
+"{7} volunteering abroad can be a rewarding experience, provided that students choose a responsible, well-managed programme. With the right preparation, it can benefit everyone involved."
+].join("\n");
+
+const essay4blanks = [
+  {correct:"It is often said that", options:["It is often said that","Furthermore","As a result","In my opinion"]},
+  {correct:"It could be argued that", options:["It could be argued that","Nowadays","However","Consequently"]},
+  {correct:"Moreover", options:["Moreover","Despite this","Overall","I believe"]},
+  {correct:"However", options:["However","Due to this","What matters most","To conclude"]},
+  {correct:"Nevertheless", options:["Nevertheless","In addition","Personally, I believe","Therefore"]},
+  {correct:"Therefore", options:["Therefore","Although","Two points of view","All things considered"]},
+  {correct:"People often maintain", options:["People often maintain","On the other hand","Additionally","To sum up"]},
+  {correct:"Overall", options:["Overall","Whereas","For this reason","Personally, I believe"]}
+];
+
+/* ---------- STATE ---------- */
+let studentName = "";
+let progress = {1:{done:0,total:36,correct:0}, 2:{done:0,total:10,correct:0}, 3:{done:0,total:7,correct:0}, 4:{done:0,total:8,correct:0}};
+
+let a2order = [], a2index = 0, a2correctCount = 0;
+let a3answered = 0, a3correctCount = 0;
+let a4answered = 0, a4correctCount = 0;
+
+// Activity 1 state
+let a1bankItems = [];
+let a1selected = null;
+let a1firstTryCorrect = 0;
+let a1sorted = {};
+let a1completed = false;
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+function catIndexOf(cat){ return catNames.indexOf(cat); }
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function updateBadges(){
+  ['badge1','badge2','badge3','badge4','badgeWB'].forEach(id=>{
+    const b = document.getElementById(id);
+    if(b) b.textContent = studentName;
+  });
+}
+
+function updateHomeProgress(){
+  document.getElementById('prog1').textContent = progress[1].done + ' / ' + progress[1].total;
+  document.getElementById('prog2').textContent = progress[2].done + ' / ' + progress[2].total;
+  document.getElementById('prog3').textContent = progress[3].done + ' / ' + progress[3].total;
+  document.getElementById('prog4').textContent = progress[4].done + ' / ' + progress[4].total;
+}
+
+document.getElementById('startBtn').addEventListener('click', ()=>{
+  const val = document.getElementById('nameInput').value.trim();
+  studentName = val || "Student";
+  updateBadges();
+  document.getElementById('homeGreeting').textContent = "Nice to meet you, " + studentName + "!";
+  updateHomeProgress();
+  showScreen('screen-home');
+});
+
+function goHome(){
+  updateHomeProgress();
+  showScreen('screen-home');
+}
+
+function startActivity(n){
+  if(n===1) startA1();
+  if(n===2) startA2();
+  if(n===3) startA3();
+  if(n===4) startA4();
+}
+
+/* ---------- ACTIVITY 1: SORT THE PHRASES (BOARD VIEW) ---------- */
+function startA1(){
+  a1bankItems = shuffle(a1items).map(x=>({phrase:x.phrase, cat:x.cat, wrongAttempt:false}));
+  a1selected = null;
+  a1firstTryCorrect = 0;
+  a1sorted = {};
+  catNames.forEach(c=>a1sorted[c]=[]);
+  progress[1].done = 0; progress[1].correct = 0;
+  document.getElementById('a1feedback').textContent = '';
+  renderA1Board();
+  showScreen('screen-a1');
+}
+
+function renderA1Board(){
+  const grid = document.getElementById('a1grid');
+  grid.innerHTML = '';
+  catNames.forEach(cat=>{
+    const box = document.createElement('div');
+    box.className = 'cat-box';
+    box.onclick = ()=> attemptPlace(cat, box);
+    const title = document.createElement('div');
+    title.className = 'cat-box-title';
+    title.textContent = cat;
+    box.appendChild(title);
+    const chipsWrap = document.createElement('div');
+    a1sorted[cat].forEach(p=>{
+      const chip = document.createElement('span');
+      chip.className = 'chip';
+      chip.textContent = p;
+      chipsWrap.appendChild(chip);
+    });
+    box.appendChild(chipsWrap);
+    grid.appendChild(box);
+  });
+  renderA1Bank();
+  updateA1ProgressBar();
+}
+
+function renderA1Bank(){
+  const bank = document.getElementById('a1bank');
+  bank.innerHTML = '';
+  if(a1bankItems.length === 0){
+    finishA1();
+    return;
+  }
+  a1bankItems.forEach(item=>{
+    const btn = document.createElement('button');
+    btn.className = 'chip-btn' + (a1selected===item ? ' selected' : '');
+    btn.textContent = item.phrase;
+    btn.onclick = (e)=>{ e.stopPropagation(); selectPhrase(item); };
+    bank.appendChild(btn);
+  });
+}
+
+function selectPhrase(item){
+  a1selected = (a1selected===item) ? null : item;
+  renderA1Bank();
+  const fb = document.getElementById('a1feedback');
+  fb.textContent = a1selected ? 'Now tap the category it belongs to.' : '';
+  fb.className = 'feedback';
+}
+
+function attemptPlace(cat, boxEl){
+  const fb = document.getElementById('a1feedback');
+  if(!a1selected){
+    fb.textContent = 'Select a phrase from the bank first.';
+    fb.className = 'feedback wrong';
+    return;
+  }
+  const item = a1selected;
+  if(item.cat === cat){
+    if(!item.wrongAttempt) a1firstTryCorrect++;
+    a1sorted[cat].push(item.phrase);
+    a1bankItems = a1bankItems.filter(x=>x!==item);
+    a1selected = null;
+    boxEl.classList.add('flash-correct');
+    setTimeout(()=>boxEl.classList.remove('flash-correct'), 500);
+    fb.textContent = 'Correct!';
+    fb.className = 'feedback correct';
+    progress[1].done = 36 - a1bankItems.length;
+    progress[1].correct = a1firstTryCorrect;
+    renderA1Board();
+  } else {
+    item.wrongAttempt = true;
+    boxEl.classList.add('flash-wrong');
+    setTimeout(()=>boxEl.classList.remove('flash-wrong'), 500);
+    fb.textContent = 'Try again!';
+    fb.className = 'feedback wrong';
+  }
+}
+
+function updateA1ProgressBar(){
+  const done = 36 - a1bankItems.length;
+  document.getElementById('bar1').style.width = (done/36*100) + '%';
+}
+
+function finishA1(){
+  a1completed = true;
+  progress[1].done = 36;
+  progress[1].correct = a1firstTryCorrect;
+  document.getElementById('wordBankCard').style.display = 'flex';
+  renderWordBankScreen();
+  showScreen('screen-a1-result');
+}
+
+function renderWordBankScreen(){
+  document.getElementById('badgeWB').textContent = studentName;
+  document.getElementById('a1resultScore').textContent = studentName + "'s first-try score: " + a1firstTryCorrect + ' / 36';
+  const container = document.getElementById('a1wordbank');
+  container.innerHTML = '';
+  catNames.forEach(cat=>{
+    const div = document.createElement('div');
+    div.className = 'wordbank-cat card';
+    const h3 = document.createElement('h3');
+    h3.textContent = cat;
+    div.appendChild(h3);
+    const ul = document.createElement('ul');
+    ul.className = 'wordbank-list';
+    a1sorted[cat].slice().sort((a,b)=>a.localeCompare(b)).forEach(p=>{
+      const li = document.createElement('li');
+      li.textContent = p;
+      ul.appendChild(li);
+    });
+    div.appendChild(ul);
+    container.appendChild(div);
+  });
+}
+
+function showWordBank(){
+  renderWordBankScreen();
+  showScreen('screen-a1-result');
+}
+
+/* ---------- ACTIVITY 2: ERROR CORRECTION ---------- */
+function startA2(){
+  a2order = shuffle(a2data);
+  a2index = 0; a2correctCount = 0;
+  progress[2].done = 0; progress[2].correct = 0;
+  renderA2();
+  showScreen('screen-a2');
+}
+function renderA2(){
+  document.getElementById('bar2').style.width = (a2index/a2order.length*100)+'%';
+  if(a2index >= a2order.length){
+    endActivity(2, a2correctCount, a2order.length);
+    return;
+  }
+  const item = a2order[a2index];
+  document.getElementById('a2sentence').innerHTML = item.text;
+  document.getElementById('a2feedback').textContent = '';
+  document.getElementById('a2feedback').className = 'feedback';
+  const optDiv = document.getElementById('a2options');
+  optDiv.innerHTML = '';
+  shuffle(item.options).forEach(opt=>{
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.textContent = opt;
+    btn.onclick = ()=> answerA2(opt, item.correct, btn, optDiv);
+    optDiv.appendChild(btn);
+  });
+}
+function answerA2(chosen, correct, btn, optDiv){
+  optDiv.querySelectorAll('button').forEach(b=>b.disabled=true);
+  const fb = document.getElementById('a2feedback');
+  if(chosen === correct){
+    btn.classList.add('correct');
+    fb.textContent = "Correct!";
+    fb.className = 'feedback correct';
+    a2correctCount++;
+  } else {
+    btn.classList.add('wrong');
+    optDiv.querySelectorAll('button').forEach(b=>{ if(b.textContent===correct) b.classList.add('correct'); });
+    fb.textContent = "The best phrase is: " + correct;
+    fb.className = 'feedback wrong';
+  }
+  progress[2].done = a2index+1; progress[2].correct = a2correctCount;
+  setTimeout(()=>{ a2index++; renderA2(); }, 1200);
+}
+
+/* ---------- ACTIVITIES 3 & 4: ESSAY GAP-FILL ---------- */
+function buildEssay(template, blanksArr, containerID, finishBtnID, actNum){
+  let html = template.split('\n').map(line=>{
+    return line.replace(/\{(\d+)\}/g, (m, idx)=>{
+      return '<span data-blank="'+idx+'"></span>';
+    });
+  }).join('<br>');
+  const container = document.getElementById(containerID);
+  container.innerHTML = html;
+
+  let answered = 0, correctCount = 0;
+  blanksArr.forEach((b, i)=>{
+    const opts = shuffle(b.options);
+    const sel = document.createElement('select');
+    sel.className = 'blank';
+    const placeholder = document.createElement('option');
+    placeholder.textContent = 'choose...';
+    placeholder.value = '';
+    placeholder.disabled = true; placeholder.selected = true;
+    sel.appendChild(placeholder);
+    opts.forEach(o=>{
+      const op = document.createElement('option');
+      op.value = o; op.textContent = o;
+      sel.appendChild(op);
+    });
+    sel.addEventListener('change', function(){
+      if(sel.dataset.locked) return;
+      sel.dataset.locked = '1';
+      if(sel.value === b.correct){
+        sel.classList.add('correct');
+        correctCount++;
+      } else {
+        sel.classList.add('wrong');
+      }
+      answered++;
+      if(actNum===3){ a3answered=answered; a3correctCount=correctCount; progress[3].done=answered; progress[3].correct=correctCount; }
+      if(actNum===4){ a4answered=answered; a4correctCount=correctCount; progress[4].done=answered; progress[4].correct=correctCount; }
+      document.getElementById('bar'+actNum).style.width = (answered/blanksArr.length*100)+'%';
+      if(answered === blanksArr.length){
+        document.getElementById(finishBtnID).disabled = false;
+      }
+    });
+    const target = container.querySelector('[data-blank="'+i+'"]');
+    target.appendChild(sel);
+  });
+}
+
+function startA3(){
+  a3answered = 0; a3correctCount = 0;
+  progress[3].done = 0; progress[3].correct = 0;
+  document.getElementById('bar3').style.width = '0%';
+  document.getElementById('a3finish').disabled = true;
+  buildEssay(essay3template, essay3blanks, 'a3essay', 'a3finish', 3);
+  showScreen('screen-a3');
+}
+function startA4(){
+  a4answered = 0; a4correctCount = 0;
+  progress[4].done = 0; progress[4].correct = 0;
+  document.getElementById('bar4').style.width = '0%';
+  document.getElementById('a4finish').disabled = true;
+  buildEssay(essay4template, essay4blanks, 'a4essay', 'a4finish', 4);
+  showScreen('screen-a4');
+}
+function finishEssay(n){
+  const correct = n===3 ? a3correctCount : a4correctCount;
+  const total = n===3 ? essay3blanks.length : essay4blanks.length;
+  endActivity(n, correct, total);
+}
+
+/* ---------- RESULT (activities 2, 3, 4) ---------- */
+function endActivity(n, correct, total){
+  progress[n].done = total;
+  progress[n].correct = correct;
+  document.getElementById('resultName').textContent = studentName;
+  document.getElementById('resultScore').textContent = correct + ' / ' + total;
+  const pct = total ? correct/total : 0;
+  let msg = "Nice try — keep practicing!";
+  let mouth = 'M32 68 Q50 60 68 68';
+  if(pct >= 0.9){ msg = "Outstanding work!"; mouth = 'M32 62 Q50 82 68 62'; }
+  else if(pct >= 0.7){ msg = "Great job!"; mouth = 'M32 65 Q50 78 68 65'; }
+  else if(pct >= 0.5){ msg = "Good effort — review and try again!"; mouth = 'M32 68 Q50 74 68 68'; }
+  document.getElementById('resultMsg').textContent = msg;
+  document.getElementById('resultMascot').innerHTML =
+    '<circle cx="50" cy="50" r="46" fill="#fff8e8" stroke="#b5541c" stroke-width="4"/>' +
+    '<circle cx="35" cy="45" r="6" fill="#1e2b3c"/><circle cx="65" cy="45" r="6" fill="#1e2b3c"/>' +
+    '<path d="'+mouth+'" stroke="#1e2b3c" stroke-width="4" fill="none" stroke-linecap="round"/>';
+  showScreen('screen-result');
+}
+</script>
+</body>
+</html>
