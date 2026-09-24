@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adverb Hangman</title>
+<style>
+  :root{
+    --bg:#1b2430; --panel:#25313f; --panel2:#2f3e4f; --accent:#3fb0ff;
+    --accent2:#ffb84f; --good:#4bd07a; --bad:#ff6161; --text:#f4f7fa; --dim:#b7c3d0;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);
+    display:flex;justify-content:center;}
+  #app{width:100%;max-width:480px;min-height:100vh;display:flex;flex-direction:column;padding:16px;}
+  .screen{display:none;flex-direction:column;flex:1;animation:fade .25s ease;}
+  .screen.active{display:flex;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  h1{font-size:1.4em;margin:4px 0 8px;color:var(--accent);text-align:center;}
+  h2{font-size:1.1em;margin:0 0 10px;color:var(--accent2);text-align:center;}
+  p{line-height:1.5;color:var(--text);}
+  .card{background:var(--panel);border-radius:14px;padding:16px;margin-bottom:14px;}
+  input[type=text]{width:100%;padding:12px;font-size:1em;border-radius:10px;border:2px solid var(--panel2);
+    background:var(--panel2);color:var(--text);margin-bottom:14px;}
+  button{cursor:pointer;border:none;border-radius:10px;font-weight:600;font-size:1em;padding:14px;
+    background:var(--accent);color:#06202e;}
+  button:active{transform:scale(.97);}
+  .btn-secondary{background:var(--panel2);color:var(--text);}
+  .center{text-align:center;}
+  svg{display:block;margin:0 auto;}
+  #wordBlank{font-size:1.6em;letter-spacing:6px;text-align:center;margin:14px 0;font-weight:700;
+    word-break:break-all;}
+  #clue{font-style:italic;color:var(--dim);text-align:center;margin-bottom:10px;}
+  #lives{text-align:center;color:var(--dim);margin-bottom:8px;font-size:.9em;}
+  #keyboard{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:auto;}
+  #keyboard button{padding:10px 0;font-size:.95em;background:var(--panel2);color:var(--text);}
+  #keyboard button:disabled{opacity:.35;}
+  #keyboard button.correct{background:var(--good);color:#06210f;}
+  #keyboard button.wrong{background:var(--bad);color:#2a0a0a;}
+  .wordtag{display:inline-block;background:var(--accent);color:#06202e;padding:2px 10px;border-radius:8px;
+    font-weight:700;margin:0 3px;}
+  .result-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--panel2);}
+  .result-row:last-child{border-bottom:none;}
+  .tag-solved{color:var(--good);font-weight:700;}
+  .tag-missed{color:var(--bad);font-weight:700;}
+  #progressBar{height:8px;background:var(--panel2);border-radius:5px;overflow:hidden;margin-bottom:14px;}
+  #progressFill{height:100%;background:var(--accent);width:0%;transition:width .3s;}
+  .spacer{flex:1;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- START SCREEN -->
+  <div class="screen active" id="screen-start">
+    <h1>🎯 Adverb Hangman</h1>
+    <div class="card">
+      <p>Guess six tricky adverbs one letter at a time: <b>certainly, completely, definitely, recently, remotely,
+      supposedly</b>. After each word, you'll see exactly how it's used — and how NOT to confuse it with a
+      similar-looking or similar-meaning word.</p>
+    </div>
+    <div class="card">
+      <label for="nameInput"><b>What's your name?</b></label>
+      <input type="text" id="nameInput" placeholder="Type your name">
+      <button onclick="startGame()">Start Game</button>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div class="screen" id="screen-game">
+    <h2 id="gameProgressLabel">Word 1 of 6</h2>
+    <div id="progressBar"><div id="progressFill"></div></div>
+    <svg id="hangSvg" viewBox="0 0 200 180" width="160" height="140">
+      <line x1="20" y1="170" x2="120" y2="170" stroke="#b7c3d0" stroke-width="4"/>
+      <line x1="45" y1="170" x2="45" y2="15" stroke="#b7c3d0" stroke-width="4"/>
+      <line x1="45" y1="15" x2="130" y2="15" stroke="#b7c3d0" stroke-width="4"/>
+      <line x1="130" y1="15" x2="130" y2="35" stroke="#b7c3d0" stroke-width="4"/>
+      <circle id="p-head" cx="130" cy="50" r="15" stroke="#ffb84f" stroke-width="4" fill="none" style="display:none"/>
+      <line id="p-body" x1="130" y1="65" x2="130" y2="110" stroke="#ffb84f" stroke-width="4" style="display:none"/>
+      <line id="p-armL" x1="130" y1="75" x2="110" y2="95" stroke="#ffb84f" stroke-width="4" style="display:none"/>
+      <line id="p-armR" x1="130" y1="75" x2="150" y2="95" stroke="#ffb84f" stroke-width="4" style="display:none"/>
+      <line id="p-legL" x1="130" y1="110" x2="112" y2="140" stroke="#ffb84f" stroke-width="4" style="display:none"/>
+      <line id="p-legR" x1="130" y1="110" x2="148" y2="140" stroke="#ffb84f" stroke-width="4" style="display:none"/>
+    </svg>
+    <div id="lives">Wrong guesses: 0 / 6</div>
+    <div id="clue"></div>
+    <div id="wordBlank"></div>
+    <div id="keyboard"></div>
+  </div>
+
+  <!-- EXPLANATION SCREEN -->
+  <div class="screen" id="screen-explain">
+    <h2 id="explainHeadline"></h2>
+    <div class="card">
+      <p id="explainDef"></p>
+      <p id="explainExample"></p>
+    </div>
+    <div class="card">
+      <p><b>⚠️ Don't confuse it:</b></p>
+      <p id="explainConfuse"></p>
+    </div>
+    <div class="spacer"></div>
+    <button onclick="nextWord()">Continue</button>
+  </div>
+
+  <!-- FINAL SCREEN -->
+  <div class="screen" id="screen-final">
+    <h1 id="finalTitle">🏆 Great work!</h1>
+    <div class="card">
+      <p id="finalSummary" class="center"></p>
+    </div>
+    <div class="card" id="resultsList"></div>
+    <button onclick="location.reload()">Play Again</button>
+  </div>
+
+</div>
+
+<script>
+const WORDS = [
+  { word:"certainly",
+    clue:"Used to confirm or agree strongly with something.",
+    def:"<b>Certainly</b> means 'without doubt' — often used to give a firm, confident agreement or to emphasize a fact.",
+    example:"Example: “Can you help me?” — “Certainly!”",
+    confuse:"Compare with <span class='wordtag'>definitely</span>: both show confidence, but <b>certainly</b> is more common as a polite spoken response, while <b>definitely</b> often stresses a personal intention or strong belief about the future." },
+  { word:"completely",
+    clue:"Means totally, with nothing missing.",
+    def:"<b>Completely</b> means 'fully' or 'entirely' — 100%, with no part left out.",
+    example:"Example: The tank was completely empty after the trip.",
+    confuse:"Don't confuse with <span class='wordtag'>certainly</span> — <b>completely</b> describes the DEGREE of something (how much), not how sure you are about it." },
+  { word:"definitely",
+    clue:"Expresses a strong, sure statement about a fact or plan.",
+    def:"<b>Definitely</b> means 'without any doubt' — used to show you are 100% sure about a fact, plan, or opinion.",
+    example:"Example: I will definitely finish the homework tonight.",
+    confuse:"Compare with <span class='wordtag'>supposedly</span>: they are almost opposites! <b>Definitely</b> = certain and confirmed; <b>supposedly</b> = unconfirmed and possibly untrue." },
+  { word:"recently",
+    clue:"Refers to something that happened not long ago.",
+    def:"<b>Recently</b> means 'not long ago' or 'in the near past' — it always relates to TIME.",
+    example:"Example: I recently started a new English class.",
+    confuse:"Careful with spelling and meaning vs <span class='wordtag'>remotely</span> — the words look similar, but <b>recently</b> is about TIME (when), while <b>remotely</b> is about DISTANCE or degree (how far/how much)." },
+  { word:"remotely",
+    clue:"Refers to distance, or (with 'not') to a small degree.",
+    def:"<b>Remotely</b> has two common meanings: (1) from a distant place, e.g. working remotely, and (2) 'not remotely' = not even slightly.",
+    example:"Example: She works remotely from another city. / That excuse isn't remotely believable.",
+    confuse:"Don't confuse with <span class='wordtag'>recently</span> (about time). Also note <b>remotely</b> is usually negative/limiting when paired with 'not', unlike most adverbs on this list." },
+  { word:"supposedly",
+    clue:"Used when something is said to be true, but you're not sure it really is.",
+    def:"<b>Supposedly</b> means 'according to what people say or believe' — it signals doubt about whether something is actually true.",
+    example:"Example: He is supposedly the best player on the team, but I haven't seen him play.",
+    confuse:"Contrast with <span class='wordtag'>certainly</span> and <span class='wordtag'>definitely</span>: those show confidence, while <b>supposedly</b> shows the speaker is skeptical or unsure." }
+];
+
+let order = [], idx = 0, name = "", results = [];
+let guessed = [], wrong = 0, currentWord = "";
+
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startGame(){
+  name = document.getElementById('nameInput').value.trim() || "Student";
+  order = shuffle([...Array(WORDS.length).keys()]);
+  idx = 0; results = [];
+  loadWord();
+  show('screen-game');
+}
+
+function loadWord(){
+  const w = WORDS[order[idx]];
+  currentWord = w.word;
+  guessed = []; wrong = 0;
+  document.getElementById('gameProgressLabel').textContent = `Word ${idx+1} of ${WORDS.length}`;
+  document.getElementById('progressFill').style.width = `${(idx/WORDS.length)*100}%`;
+  document.getElementById('clue').textContent = w.clue;
+  ['p-head','p-body','p-armL','p-armR','p-legL','p-legR'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('lives').textContent = `Wrong guesses: 0 / 6`;
+  renderBlank();
+  renderKeyboard();
+}
+
+function renderBlank(){
+  document.getElementById('wordBlank').textContent =
+    currentWord.split('').map(ch => guessed.includes(ch) ? ch : '_').join(' ');
+}
+
+function renderKeyboard(){
+  const kb = document.getElementById('keyboard');
+  kb.innerHTML = '';
+  'abcdefghijklmnopqrstuvwxyz'.split('').forEach(letter=>{
+    const b = document.createElement('button');
+    b.textContent = letter;
+    b.onclick = ()=>guess(letter, b);
+    kb.appendChild(b);
+  });
+}
+
+const PARTS = ['p-head','p-body','p-armL','p-armR','p-legL','p-legR'];
+
+function guess(letter, btn){
+  btn.disabled = true;
+  if(currentWord.includes(letter)){
+    guessed.push(letter);
+    btn.classList.add('correct');
+    renderBlank();
+    if(!currentWord.split('').some(ch=>!guessed.includes(ch))){
+      finishWord(true);
+    }
+  } else {
+    btn.classList.add('wrong');
+    document.getElementById(PARTS[wrong]).style.display = 'inline';
+    wrong++;
+    document.getElementById('lives').textContent = `Wrong guesses: ${wrong} / 6`;
+    if(wrong >= 6){
+      finishWord(false);
+    }
+  }
+}
+
+function finishWord(success){
+  results.push({word:currentWord, success, wrongCount:wrong});
+  document.querySelectorAll('#keyboard button').forEach(b=>b.disabled=true);
+  const w = WORDS.find(x=>x.word===currentWord);
+  document.getElementById('explainHeadline').textContent =
+    (success ? "✅ " : "⏱️ The word was: ") + w.word;
+  document.getElementById('explainDef').innerHTML = w.def;
+  document.getElementById('explainExample').textContent = w.example;
+  document.getElementById('explainConfuse').innerHTML = w.confuse;
+  setTimeout(()=>show('screen-explain'), 400);
+}
+
+function nextWord(){
+  idx++;
+  if(idx >= WORDS.length){
+    showFinal();
+  } else {
+    loadWord();
+    show('screen-game');
+  }
+}
+
+function showFinal(){
+  document.getElementById('progressFill').style.width = '100%';
+  const solved = results.filter(r=>r.success).length;
+  document.getElementById('finalTitle').textContent = `🏆 Nice work, ${name}!`;
+  document.getElementById('finalSummary').textContent =
+    `You correctly guessed ${solved} out of ${WORDS.length} words.`;
+  const list = document.getElementById('resultsList');
+  list.innerHTML = '';
+  results.forEach(r=>{
+    const row = document.createElement('div');
+    row.className = 'result-row';
+    row.innerHTML = `<span>${r.word}</span><span class="${r.success ? 'tag-solved':'tag-missed'}">
+      ${r.success ? '✔ solved ('+r.wrongCount+' misses)' : '✘ not solved'}</span>`;
+    list.appendChild(row);
+  });
+  show('screen-final');
+}
+</script>
+</body>
+</html>
