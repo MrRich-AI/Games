@@ -345,7 +345,7 @@ const catPhrases = {
   "Showing Contrast": ["Although","Despite this","However","Nevertheless","On the one hand","On the other hand","Whereas","While"],
   "Cause and Effect": ["As a result","Consequently","Due to this","For this reason","Therefore"],
   "Framing / General Statements": ["It is often said that","Nowadays","People often maintain","Two points of view","What matters most"],
-  "Conclusion": ["All things considered","In conclusion","On balance","Overall","Taking everything into account","To conclude","To sum up"]
+  "Conclusion": ["All things considered","In conclusion","In summary","Overall","Taking everything into account","To conclude","To sum up"]
 };
 const catNames = Object.keys(catPhrases);
 
@@ -443,10 +443,10 @@ function updateBadges(){
 }
 
 function updateHomeProgress(){
-  document.getElementById('prog1').textContent = progress[1].done + ' / ' + progress[1].total;
-  document.getElementById('prog2').textContent = progress[2].done + ' / ' + progress[2].total;
-  document.getElementById('prog3').textContent = progress[3].done + ' / ' + progress[3].total;
-  document.getElementById('prog4').textContent = progress[4].done + ' / ' + progress[4].total;
+  document.getElementById('prog1').textContent = progress[1].correct + ' / ' + progress[1].total + ' correct';
+  document.getElementById('prog2').textContent = progress[2].correct + ' / ' + progress[2].total + ' correct';
+  document.getElementById('prog3').textContent = progress[3].correct + ' / ' + progress[3].total + ' correct';
+  document.getElementById('prog4').textContent = progress[4].correct + ' / ' + progress[4].total + ' correct';
 }
 
 document.getElementById('startBtn').addEventListener('click', ()=>{
