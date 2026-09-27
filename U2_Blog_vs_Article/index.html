@@ -501,36 +501,33 @@
   }
 
   function handleChoice(id, chosen) {
-    if (answered[id]) return; // ADDED: "answered" now means answered CORRECTLY — see below
+    if (answered[id]) return; // ADDED: locks after ANY answer, right or wrong — single attempt per question
     var item = texts.filter(function (t) { return t.id === id; })[0];
-
-    attemptsPerQuestion[id] = (attemptsPerQuestion[id] || 0) + 1; // ADDED: counts every try, right or wrong
+    answered[id] = true;
+    attemptsPerQuestion[id] = 1; // ADDED: one attempt per question (retries happen via full "Try Again" at the end, not here)
 
     var screen = screensEl.querySelector('[data-screen="text-' + id + '"]');
     var blogBtn = screen.querySelector('[data-choice="blog"]');
     var articleBtn = screen.querySelector('[data-choice="article"]');
     var feedbackEl = document.getElementById('feedback-' + id);
 
+    blogBtn.disabled = true;
+    articleBtn.disabled = true;
+
     var isCorrect = chosen === item.answer;
     var chosenBtn = chosen === 'blog' ? blogBtn : articleBtn;
+    var correctBtn = item.answer === 'blog' ? blogBtn : articleBtn;
 
     if (isCorrect) {
-      answered[id] = true; // ADDED: only locks the question once the student gets it right
-      blogBtn.disabled = true;
-      articleBtn.disabled = true;
       chosenBtn.classList.add('picked-correct');
       correctCount += 1;
-      feedbackEl.classList.remove('wrong');
-      feedbackEl.classList.add('show', 'correct');
-      feedbackEl.innerHTML = '<strong>Correct — it\'s a ' + item.answer + '.</strong>' + item.why;
     } else {
-      // ADDED: wrong attempt — disable just that option so the question stays open for another try
-      chosenBtn.disabled = true;
       chosenBtn.classList.add('picked-wrong');
-      feedbackEl.classList.remove('correct');
-      feedbackEl.classList.add('show', 'wrong');
-      feedbackEl.innerHTML = '<strong>Not quite — try again.</strong>Read the text once more and pick the other option.';
+      correctBtn.classList.add('reveal-correct');
     }
+
+    feedbackEl.classList.add('show', isCorrect ? 'correct' : 'wrong');
+    feedbackEl.innerHTML = '<strong>' + (isCorrect ? 'Correct — it\'s a ' : 'Not quite — it\'s a ') + item.answer + '.</strong>' + item.why;
 
     updateScoreDisplays();
     updateNav();
