@@ -72,6 +72,7 @@
     gap:6px;
     margin-bottom:8px;
   }
+  .dots.hidden{ display:none; }
   .dot{
     flex:1;
     height:5px;
@@ -291,6 +292,11 @@
     font-size:16px;
     cursor:pointer;
   }
+  .primary-btn[disabled]{
+    background:var(--paper-2);
+    color:var(--ink-soft);
+    cursor:default;
+  }
   .score-big{
     font-family:Georgia,serif;
     font-size:44px;
@@ -299,7 +305,102 @@
   }
   .tier-msg{ color:var(--ink-soft); margin-bottom:6px; }
 
-  /* ---------- FOOTER NAV ---------- */
+  /* ---------- ADDED: name-entry screen ---------- */
+  .name-entry{
+    background:#fff;
+    border:1.5px solid var(--paper-2);
+    border-radius:var(--radius);
+    padding:20px 22px;
+    margin-top:20px;
+  }
+  .name-entry label{
+    display:block;
+    font-weight:700;
+    font-size:14px;
+    margin-bottom:10px;
+    color:var(--navy);
+  }
+  .name-entry input{
+    width:100%;
+    padding:12px 14px;
+    font-size:16px;
+    font-family:inherit;
+    border:1.5px solid var(--paper-2);
+    border-radius:10px;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  .name-entry input:focus{ outline:none; border-color:var(--gold); }
+  .name-entry .hint{ font-size:12px; color:var(--ink-soft); margin-top:8px; }
+  /* END ADDED */
+
+  /* ---------- ADDED: homescreen module cards ---------- */
+  .module-card{
+    background:#fff;
+    border:1.5px solid var(--paper-2);
+    border-radius:var(--radius);
+    padding:16px 18px;
+    margin-bottom:12px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .module-card .info h3{ font-size:16px; margin:0 0 4px 0; }
+  .module-card .info .status{ font-size:13px; color:var(--ink-soft); }
+  .module-card .info .status.done{ color:var(--teal); font-weight:700; }
+  .module-card button{
+    flex:0 0 auto;
+    background:var(--navy);
+    color:var(--paper);
+    border:none;
+    padding:10px 16px;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:700;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .final-box{
+    background:var(--paper-2);
+    border-radius:var(--radius);
+    padding:16px 18px;
+    margin-top:8px;
+    text-align:center;
+  }
+  .final-box p{ font-size:13px; color:var(--ink-soft); margin:0 0 4px 0; }
+  .final-row{
+    display:flex;
+    justify-content:space-between;
+    font-size:15px;
+    padding:8px 0;
+    border-bottom:1px solid var(--paper-2);
+  }
+  .final-row:last-child{ border-bottom:none; }
+  /* END ADDED */
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-row">
+    <div class="topbar-title">🔎 Clause Detective</div>
+    <div class="topbar-score" id="scoreDisplay"></div>
+  </div>
+  <div class="dots" id="dots"></div>
+  <div class="section-label" id="sectionLabel"></div>
+</div>
+
+<div class="screen-wrap" id="screenWrap">
+  <div class="card" id="card"></div>
+</div>
+
+<div class="footbar" id="footbar">
+  <button class="nav-btn back" id="backBtn">Back</button>
+  <button class="nav-btn next" id="nextBtn" disabled>Next</button>
+</div>
+
+<style>
   .footbar{
     flex:0 0 auto;
     padding:12px 18px calc(12px + var(--safe-b)) 18px;
@@ -308,6 +409,7 @@
     display:flex;
     gap:10px;
   }
+  .footbar.hidden{ display:none; }
   .nav-btn{
     flex:1;
     padding:14px;
@@ -334,29 +436,26 @@
     cursor:default;
   }
 </style>
-</head>
-<body>
-
-<div class="topbar">
-  <div class="topbar-row">
-    <div class="topbar-title">🔎 Clause Detective</div>
-    <div class="topbar-score" id="scoreDisplay">Score: 0/31</div>
-  </div>
-  <div class="dots" id="dots"></div>
-  <div class="section-label" id="sectionLabel">Field Guide</div>
-</div>
-
-<div class="screen-wrap" id="screenWrap">
-  <div class="card" id="card"></div>
-</div>
-
-<div class="footbar">
-  <button class="nav-btn back" id="backBtn">Back</button>
-  <button class="nav-btn next" id="nextBtn" disabled>Next</button>
-</div>
 
 <script>
-/* ============ DATA ============ */
+  // ============================================================
+  // ADDED: Google Sheets data-submission setup
+  // ============================================================
+  var GAME_NAME = 'Clause Detective — Non-Defining Relative Clauses';
+  var GAME_DATA_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyxAAXBx_SRQcUrw6fYBJ2A78-kJqKTf72suSy3OkKFGVJe9QPtFFX2RkMqCTwUrwOHDA/exec';
+
+  function submitGameData(payload) {
+    fetch(GAME_DATA_ENDPOINT, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload)
+    }).catch(function (err) { console.error('Data submission failed:', err); });
+  }
+  // END ADDED
+  // ============================================================
+
+/* ============ DATA (unchanged) ============ */
 
 const guideRows = [
   ["who","people — subject","My teacher, <b>who</b> teaches Biology, is very strict."],
@@ -432,22 +531,35 @@ const ex4 = [
   wrong:"Paris which is the capital of France attracts millions of tourists.", commasNeeded:true}
 ];
 
-/* ============ BUILD FLAT STEP LIST ============ */
-const steps = [];
-steps.push({type:"guide"});
-ex2.forEach((q,i)=> steps.push({type:"mcq", data:q, idx:i, total:ex2.length, section:"Exercise 2 · Gap-Fill"}));
-ex1.forEach((q,i)=> steps.push({type:"combine", data:q, idx:i, total:ex1.length, section:"Exercise 1 · Sentence Combining"}));
-steps.push({type:"definingIntro"});
-ex4.forEach((q,i)=> steps.push({type:"punct", data:q, idx:i, total:ex4.length, section:"Exercise 4 · Defining vs. Non-Defining"}));
-steps.push({type:"results"});
+/* ============ ADDED: module framework (three independent mini-games) ============ */
 
-const SECTION_ORDER = ["Field Guide","Exercise 2 · Gap-Fill","Exercise 1 · Sentence Combining","Defining vs. Non-Defining","Exercise 4 · Defining vs. Non-Defining","Results"];
-const TOTAL_SCORABLE = ex2.length + ex1.length + ex4.length;
+const MODULES = {
+  ex2: { key:'ex2', label:'Exercise 2 — Gap-Fill', kind:'mcq', hasIntro:true, data:ex2, total:ex2.length },
+  ex1: { key:'ex1', label:'Exercise 1 — Sentence Combining', kind:'combine', hasIntro:false, data:ex1, total:ex1.length },
+  ex4: { key:'ex4', label:'Exercise 4 — Defining vs. Non-Defining', kind:'punct', hasIntro:true, data:ex4, total:ex4.length }
+};
+const MODULE_ORDER = ['ex2','ex1','ex4'];
 
-let stepIndex = 0;
-let score = 0;
-let answered = new Array(steps.length).fill(false);
-let correctFlag = new Array(steps.length).fill(false);
+function buildModuleSteps(key){
+  const def = MODULES[key];
+  const steps = [];
+  if(def.hasIntro) steps.push({type: key==='ex2' ? 'guide' : 'definingIntro'});
+  def.data.forEach((q,i)=> steps.push({type:def.kind, data:q, idx:i}));
+  steps.push({type:'finish'});
+  return steps;
+}
+function freshModuleState(key, attempts){
+  return { steps: buildModuleSteps(key), stepIndex:0, score:0, attempts: attempts||1, completed:false };
+}
+
+let moduleStates = {};
+MODULE_ORDER.forEach(function(k){ moduleStates[k] = freshModuleState(k,1); });
+
+let studentName = '';
+let gameStartTime = null;
+let hasSubmittedResults = false;
+let currentView = 'name'; // name | home | module | final
+let activeModuleKey = null;
 
 const card = document.getElementById("card");
 const backBtn = document.getElementById("backBtn");
@@ -455,67 +567,148 @@ const nextBtn = document.getElementById("nextBtn");
 const dotsWrap = document.getElementById("dots");
 const sectionLabel = document.getElementById("sectionLabel");
 const scoreDisplay = document.getElementById("scoreDisplay");
+const footbar = document.getElementById("footbar");
 
-/* build 4 dots for the 4 main sections (guide/ex2/ex1/ex4) */
-function currentMainSectionIdx(){
-  const step = steps[stepIndex];
-  if(step.type==="guide") return 0;
-  if(step.type==="mcq") return 1;
-  if(step.type==="combine") return 2;
-  if(step.type==="definingIntro" || step.type==="punct") return 3;
-  return 4;
+/* ---------- NAME ENTRY ---------- */
+function showNameEntry(){
+  currentView = 'name';
+  footbar.classList.add('hidden');
+  dotsWrap.classList.add('hidden');
+  sectionLabel.textContent = '';
+  scoreDisplay.textContent = '';
+  card.innerHTML = `
+    <span class="eyebrow">Before you start</span>
+    <h2>Clause Detective</h2>
+    <p class="lede">Three short case files on non-defining relative clauses. Enter your name to begin.</p>
+    <div class="name-entry">
+      <label for="student-name-input">What's your name?</label>
+      <input type="text" id="student-name-input" placeholder="Type your name here" autocomplete="off">
+      <p class="hint">Your name will appear on your results.</p>
+    </div>
+    <button class="primary-btn" id="nameContinueBtn" disabled>Continue</button>
+  `;
+  const nameInput = document.getElementById('student-name-input');
+  const continueBtn = document.getElementById('nameContinueBtn');
+  nameInput.addEventListener('input', function(){
+    studentName = nameInput.value.trim();
+    continueBtn.disabled = studentName.length === 0;
+  });
+  continueBtn.addEventListener('click', function(){
+    if (gameStartTime === null) gameStartTime = Date.now(); // ADDED: session timer starts here
+    showHome();
+  });
 }
-function renderDots(){
-  dotsWrap.innerHTML = "";
-  const mainIdx = currentMainSectionIdx();
-  for(let i=0;i<4;i++){
-    const d = document.createElement("div");
-    d.className="dot";
-    const fill = document.createElement("div");
-    fill.className="dot-fill";
-    if(i<mainIdx) fill.style.width="100%";
-    else if(i===mainIdx){
-      const step = steps[stepIndex];
-      if(step.type==="guide") fill.style.width="100%";
-      else if(step.type==="definingIntro") fill.style.width="0%";
-      else fill.style.width = Math.round(((step.idx+1)/step.total)*100)+"%";
-    } else fill.style.width="0%";
-    d.appendChild(fill);
-    dotsWrap.appendChild(d);
+
+/* ---------- HOMESCREEN ---------- */
+function moduleStatusHtml(key){
+  const ms = moduleStates[key];
+  const def = MODULES[key];
+  if (ms.completed) return '<div class="status done">Score: ' + ms.score + '/' + def.total + ' • Attempt ' + ms.attempts + '</div>';
+  if (ms.stepIndex > 0) return '<div class="status">In progress</div>';
+  return '<div class="status">Not started</div>';
+}
+function moduleButtonLabel(key){
+  const ms = moduleStates[key];
+  if (ms.completed) return 'Try Again';
+  if (ms.stepIndex > 0) return 'Continue';
+  return 'Start';
+}
+function allModulesCompleted(){
+  return MODULE_ORDER.every(function(k){ return moduleStates[k].completed; });
+}
+function showHome(){
+  currentView = 'home';
+  footbar.classList.add('hidden');
+  dotsWrap.classList.add('hidden');
+  sectionLabel.textContent = 'Choose an exercise';
+  scoreDisplay.textContent = studentName;
+
+  let cardsHtml = MODULE_ORDER.map(function(key){
+    const def = MODULES[key];
+    return '<div class="module-card">' +
+      '<div class="info"><h3>' + def.label + '</h3>' + moduleStatusHtml(key) + '</div>' +
+      '<button data-key="' + key + '">' + moduleButtonLabel(key) + '</button>' +
+      '</div>';
+  }).join('');
+
+  const finished = allModulesCompleted();
+  const finalHtml = '<div class="final-box">' +
+    '<p>' + (finished ? 'All three exercises complete.' : 'Complete all three exercises to see your final results.') + '</p>' +
+    '<button class="primary-btn" id="finalBtn" ' + (finished ? '' : 'disabled') + '>View Final Results</button>' +
+    '</div>';
+
+  card.innerHTML = '<span class="eyebrow">Case files</span><h2>Choose an exercise</h2>' + cardsHtml + finalHtml;
+
+  card.querySelectorAll('.module-card button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      const key = btn.getAttribute('data-key');
+      const ms = moduleStates[key];
+      if (ms.completed) ms.stepIndex = ms.steps.length - 1; // jump straight to that module's finish screen
+      enterModule(key);
+    });
+  });
+  const finalBtn = document.getElementById('finalBtn');
+  if (finalBtn && !finalBtn.disabled) finalBtn.addEventListener('click', showFinal);
+}
+
+/* ---------- MODULE (mini-game) FLOW ---------- */
+function enterModule(key){
+  activeModuleKey = key;
+  currentView = 'module';
+  footbar.classList.remove('hidden');
+  dotsWrap.classList.remove('hidden');
+  renderModuleStep();
+}
+function renderModuleStep(){
+  const ms = moduleStates[activeModuleKey];
+  const def = MODULES[activeModuleKey];
+  const step = ms.steps[ms.stepIndex];
+
+  sectionLabel.textContent = step.type === 'finish' ? def.label + ' — Result' :
+    (step.type === 'guide' || step.type === 'definingIntro') ? def.label + ' — Field Guide' :
+    def.label + ' — Q' + (step.idx+1) + ' of ' + def.total;
+  scoreDisplay.textContent = 'Score: ' + ms.score + '/' + def.total;
+
+  dotsWrap.innerHTML = '';
+  const scorable = ms.steps.filter(function(s){ return s.type!=='guide' && s.type!=='definingIntro' && s.type!=='finish'; });
+  scorable.forEach(function(s, i){
+    const d = document.createElement('div'); d.className = 'dot';
+    const fill = document.createElement('div'); fill.className = 'dot-fill';
+    const qPos = ms.steps.indexOf(s);
+    if (qPos < ms.stepIndex) fill.style.width = '100%';
+    else if (qPos === ms.stepIndex) fill.style.width = (s._answered ? '100%' : '0%');
+    d.appendChild(fill); dotsWrap.appendChild(d);
+  });
+
+  document.getElementById('screenWrap').scrollTop = 0;
+
+  if (step.type === 'finish') {
+    footbar.classList.add('hidden');
+  } else {
+    footbar.classList.remove('hidden');
+    backBtn.disabled = false; // back always available inside a module (returns to home from step 0)
+    const answeredNow = step.type === 'guide' || step.type === 'definingIntro' ? true : !!step._answered;
+    nextBtn.disabled = !answeredNow;
+    nextBtn.textContent = (ms.stepIndex === ms.steps.length - 2) ? 'See Score' : 'Next';
   }
+
+  if (step.type === 'guide') renderGuide(step);
+  else if (step.type === 'definingIntro') renderDefiningIntro(step);
+  else if (step.type === 'mcq') renderMcq(step, def);
+  else if (step.type === 'combine') renderCombine(step, def);
+  else if (step.type === 'punct') renderPunct(step, def);
+  else if (step.type === 'finish') renderModuleFinish(def);
 }
 
-function renderStep(){
-  const step = steps[stepIndex];
-  sectionLabel.textContent = step.type==="results" ? "Case Closed" :
-    step.type==="guide" ? "Field Guide" :
-    step.type==="definingIntro" ? "Defining vs. Non-Defining" :
-    step.section + " — Q" + (step.idx+1) + " of " + step.total;
-  scoreDisplay.textContent = "Score: " + score + "/" + TOTAL_SCORABLE;
-  renderDots();
-  document.getElementById("screenWrap").scrollTop = 0;
-
-  backBtn.disabled = stepIndex===0;
-  nextBtn.disabled = !answered[stepIndex] && step.type!=="guide";
-  nextBtn.textContent = stepIndex===steps.length-2 ? "See Results" : "Next";
-
-  if(step.type==="guide") renderGuide();
-  else if(step.type==="mcq") renderMcq(step);
-  else if(step.type==="combine") renderCombine(step);
-  else if(step.type==="definingIntro") renderDefiningIntro();
-  else if(step.type==="punct") renderPunct(step);
-  else if(step.type==="results") renderResults();
-}
-
-function renderGuide(){
-  answered[stepIndex]=true;
+function renderGuide(step){
+  step._answered = true;
   let rows = guideRows.map(r=>
     `<tr><td><span class="pronoun-pill">${r[0]}</span></td><td>${r[1]}</td><td>${r[2]}</td></tr>`
   ).join("");
   card.innerHTML = `
-    <span class="eyebrow">Before you start</span>
+    <span class="eyebrow">Field Guide</span>
     <h2>Which relative pronoun?</h2>
-    <p class="lede">A quick reference before the case files begin. Non-defining relative clauses always sit between commas — they add <i>extra</i>, non-essential information.</p>
+    <p class="lede">A quick reference before this case file begins. Non-defining relative clauses always sit between commas — they add <i>extra</i>, non-essential information.</p>
     <table class="guide-table">
       <tr><th>Pronoun</th><th>Used for</th><th>Example</th></tr>
       ${rows}
@@ -526,16 +719,14 @@ function renderGuide(){
       <i>Note: "whom" is formal and rare in everyday speech, but it still appears in exams.</i>
     </div>
   `;
-  nextBtn.disabled = false;
 }
 
-function renderDefiningIntro(){
-  answered[stepIndex]=true;
+function renderDefiningIntro(step){
+  step._answered = true;
   card.innerHTML = `
-    <span class="eyebrow">Before Exercise 4</span>
+    <span class="eyebrow">Field Guide</span>
     <h2>Defining vs. Non-Defining</h2>
     <p class="lede">Every relative clause does one of two jobs. Telling them apart decides whether you need commas.</p>
-
     <table class="guide-table">
       <tr><th>Defining</th><th>Non-defining</th></tr>
       <tr>
@@ -551,19 +742,17 @@ function renderDefiningIntro(){
         <td>Paris, <b>which is the capital of France</b>, attracts millions of tourists.<br><i>(There's only one Paris — the fact is extra, not identifying.)</i></td>
       </tr>
     </table>
-
     <div class="trick-box">
       <b>Quick test:</b> can you delete the clause without losing essential meaning?<br>
       Yes → it's <b>extra info</b> → non-defining → use commas.<br>
       No → it's <b>identifying</b> → defining → no commas.
     </div>
   `;
-  nextBtn.disabled = false;
 }
 
-function renderMcq(step){
+function renderMcq(step, def){
   const q = step.data;
-  const already = answered[stepIndex];
+  const already = step._answered;
   let optsHtml = ex2Options.map(opt=>{
     let cls="opt-btn";
     if(already){
@@ -574,33 +763,35 @@ function renderMcq(step){
   }).join("");
 
   card.innerHTML = `
-    <span class="eyebrow">Exercise 2 · Gap-Fill</span>
-    <div class="q-meta">Question ${step.idx+1} of ${step.total}</div>
+    <span class="eyebrow">${def.label}</span>
+    <div class="q-meta">Question ${step.idx+1} of ${def.total}</div>
     <div class="q-sentence">${q.s.replace("___", '<span class="blank">'+(already?q.a:"___")+'</span>')}</div>
     <div class="opt-grid">${optsHtml}</div>
-    <div class="feedback ${already?'show':''} ${already ? (step._picked===q.a?'good':'bad') : ''}" id="fb">
+    <div class="feedback ${already?'show':''} ${already ? (step._picked===q.a?'good':'bad') : ''}">
       ${already ? (step._picked===q.a ? "✓ Correct!" : "The correct answer is <b>"+q.a+"</b>.") : ""}
     </div>
   `;
   if(!already){
     card.querySelectorAll(".opt-btn").forEach(btn=>{
       btn.addEventListener("click", ()=>{
+        // single attempt per question — locks immediately on any pick, right or wrong
         const picked = btn.getAttribute("data-opt");
         step._picked = picked;
-        answered[stepIndex]=true;
-        if(picked===q.a){ correctFlag[stepIndex]=true; score++; }
-        renderStep();
+        step._answered = true;
+        const ms = moduleStates[activeModuleKey];
+        if(picked===q.a){ ms.score++; }
+        renderModuleStep();
       });
     });
   }
 }
 
-function renderCombine(step){
+function renderCombine(step, def){
   const q = step.data;
-  const already = answered[stepIndex];
+  const already = step._answered;
   card.innerHTML = `
-    <span class="eyebrow">Exercise 1 · Sentence Combining</span>
-    <div class="q-meta">Question ${step.idx+1} of ${step.total}</div>
+    <span class="eyebrow">${def.label}</span>
+    <div class="q-meta">Question ${step.idx+1} of ${def.total}</div>
     <div class="q-sentence">
       1. ${q.a}<br>2. ${q.b}
     </div>
@@ -610,7 +801,6 @@ function renderCombine(step){
     </div>
     <div class="btn-row" id="btnRow">
       ${already ? "" : `<button class="btn secondary" id="showAnswerBtn">Show model answer</button>`}
-      ${already ? `<button class="btn self-right" id="rightBtn" disabled>I got it right ✓</button>` : ""}
     </div>
   `;
   if(!already){
@@ -623,23 +813,22 @@ function renderCombine(step){
         <button class="btn self-right" id="rightBtn">I got it right ✓</button>
       `;
       document.getElementById("rightBtn").addEventListener("click", ()=>{
-        answered[stepIndex]=true; correctFlag[stepIndex]=true; score++; renderStep();
+        step._answered = true; moduleStates[activeModuleKey].score++; renderModuleStep();
       });
       document.getElementById("wrongBtn").addEventListener("click", ()=>{
-        answered[stepIndex]=true; correctFlag[stepIndex]=false; renderStep();
+        step._answered = true; renderModuleStep();
       });
     });
   }
 }
 
-function renderPunct(step){
+function renderPunct(step, def){
   const q = step.data;
-  const already = answered[stepIndex];
+  const already = step._answered;
   const opts = [
     {text:q.commasNeeded ? q.wrong : q.correct, isCorrect: !q.commasNeeded},
     {text:q.commasNeeded ? q.correct : q.wrong, isCorrect: q.commasNeeded}
   ];
-  // shuffle deterministically by index parity so it's not always in the same order
   if(step.idx % 2 === 1) opts.reverse();
 
   let optsHtml = opts.map((o,i)=>{
@@ -652,8 +841,8 @@ function renderPunct(step){
   }).join("");
 
   card.innerHTML = `
-    <span class="eyebrow">Exercise 4 · Defining vs. Non-Defining</span>
-    <div class="q-meta">Question ${step.idx+1} of ${step.total} — tap the correctly punctuated version</div>
+    <span class="eyebrow">${def.label}</span>
+    <div class="q-meta">Question ${step.idx+1} of ${def.total} — tap the correctly punctuated version</div>
     <div class="q-sentence" style="font-size:15px;color:var(--ink-soft);">"${q.plain}"</div>
     <div class="opt-grid single-col">${optsHtml}</div>
     <div class="feedback ${already?'show':''} ${already ? (opts[step._picked] && opts[step._picked].isCorrect ? 'good':'bad') : ''}">
@@ -665,52 +854,111 @@ function renderPunct(step){
       btn.addEventListener("click", ()=>{
         const i = parseInt(btn.getAttribute("data-i"));
         step._picked = i;
-        answered[stepIndex]=true;
-        if(opts[i].isCorrect){ correctFlag[stepIndex]=true; score++; }
-        renderStep();
+        step._answered = true;
+        if(opts[i].isCorrect){ moduleStates[activeModuleKey].score++; }
+        renderModuleStep();
       });
     });
   }
 }
 
-function renderResults(){
-  answered[stepIndex]=true;
-  const pct = Math.round((score/TOTAL_SCORABLE)*100);
+function renderModuleFinish(def){
+  const ms = moduleStates[activeModuleKey];
+  ms.completed = true;
+  footbar.classList.add('hidden');
+  const pct = Math.round((ms.score/def.total)*100);
   let tier;
   if(pct>=90) tier="Master Detective! Outstanding work. 🕵️‍♀️";
   else if(pct>=70) tier="Nice work — you're cracking the case.";
-  else if(pct>=50) tier="Good effort — review the Field Guide and try again.";
-  else tier="Keep practicing — revisit the Field Guide first.";
+  else if(pct>=50) tier="Good effort — review the field guide and try again.";
+  else tier="Keep practicing — revisit the field guide first.";
   card.innerHTML = `
     <div class="center-card">
       <div class="badge-icon">🏅</div>
-      <h2>Case Closed!</h2>
-      <div class="score-big">${score}/${TOTAL_SCORABLE}</div>
+      <h2>${def.label}</h2>
+      <div class="score-big">${ms.score}/${def.total}</div>
       <div class="tier-msg">${tier}</div>
-      <button class="primary-btn" id="restartBtn">Play Again</button>
+      <button class="primary-btn" id="tryAgainBtn">Try Again</button>
+      <button class="primary-btn" id="backHomeBtn" style="background:var(--paper-2);color:var(--navy);">Back to Home</button>
     </div>
   `;
-  document.getElementById("restartBtn").addEventListener("click", restart);
-  nextBtn.style.visibility="hidden";
+  document.getElementById('tryAgainBtn').addEventListener('click', function(){
+    moduleStates[activeModuleKey] = freshModuleState(activeModuleKey, ms.attempts + 1); // ADDED: increments THIS module's attempt count only
+    hasSubmittedResults = false; // ADDED: a new attempt means final results should be able to resubmit
+    enterModule(activeModuleKey);
+  });
+  document.getElementById('backHomeBtn').addEventListener('click', showHome);
 }
 
-function restart(){
-  stepIndex=0; score=0;
-  answered = new Array(steps.length).fill(false);
-  correctFlag = new Array(steps.length).fill(false);
-  steps.forEach(s=>{ delete s._picked; delete s._typed; });
-  nextBtn.style.visibility="visible";
-  renderStep();
+/* ---------- FINAL RESULTS (submits once, after all three are complete) ---------- */
+function showFinal(){
+  currentView = 'final';
+  footbar.classList.add('hidden');
+  dotsWrap.classList.add('hidden');
+  sectionLabel.textContent = 'Final Results';
+  scoreDisplay.textContent = studentName;
+
+  const rowsHtml = MODULE_ORDER.map(function(key){
+    const ms = moduleStates[key]; const def = MODULES[key];
+    return '<div class="final-row"><span>' + def.label + '</span><span>' + ms.score + '/' + def.total + '</span></div>';
+  }).join('');
+
+  card.innerHTML = `
+    <div class="center-card">
+      <div class="badge-icon">🎉</div>
+      <h2>Case Closed!</h2>
+      ${rowsHtml}
+      <button class="primary-btn" id="playAgainAllBtn">Start New Attempt</button>
+      <button class="primary-btn" id="backHomeBtn2" style="background:var(--paper-2);color:var(--navy);">Back to Home</button>
+    </div>
+  `;
+
+  // ============================================================
+  // ADDED: submit combined results once per completed session
+  // ============================================================
+  if (!hasSubmittedResults) {
+    hasSubmittedResults = true;
+    var minutesPlayed = gameStartTime ? Math.round(((Date.now()-gameStartTime)/60000)*10)/10 : 0;
+    var scoreString = MODULE_ORDER.map(function(k){
+      var ms = moduleStates[k]; var def = MODULES[k];
+      return ms.score + '/' + def.total;
+    }).join(', ');
+    var attemptsString = MODULE_ORDER.map(function(k){ return moduleStates[k].attempts; }).join(',');
+    submitGameData({
+      gameName: GAME_NAME,
+      studentName: studentName,
+      score: scoreString,
+      minutesPlayed: minutesPlayed,
+      attempts: attemptsString
+    });
+  }
+  // END ADDED
+  // ============================================================
+
+  document.getElementById('playAgainAllBtn').addEventListener('click', function(){
+    MODULE_ORDER.forEach(function(k){
+      var prevAttempts = moduleStates[k].attempts;
+      moduleStates[k] = freshModuleState(k, prevAttempts + 1); // ADDED: full replay increments every module's attempt count
+    });
+    hasSubmittedResults = false;
+    showHome();
+  });
+  document.getElementById('backHomeBtn2').addEventListener('click', showHome);
 }
 
 backBtn.addEventListener("click", ()=>{
-  if(stepIndex>0){ stepIndex--; renderStep(); }
+  if (currentView !== 'module') return;
+  const ms = moduleStates[activeModuleKey];
+  if (ms.stepIndex > 0) { ms.stepIndex--; renderModuleStep(); }
+  else { showHome(); }
 });
 nextBtn.addEventListener("click", ()=>{
-  if(stepIndex<steps.length-1){ stepIndex++; renderStep(); }
+  if (currentView !== 'module') return;
+  const ms = moduleStates[activeModuleKey];
+  if (ms.stepIndex < ms.steps.length - 1) { ms.stepIndex++; renderModuleStep(); }
 });
 
-renderStep();
+showNameEntry();
 </script>
 </body>
 </html>
