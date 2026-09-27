@@ -292,6 +292,9 @@
     color: var(--article-accent-dark);
     margin: 0 0 4px;
   }
+  .finish #try-again-btn {
+    margin-top: 4px;
+  }
   /* END ADDED */
 
   .nav-row {
@@ -369,9 +372,11 @@
   var stepCountEl = document.getElementById('step-count');
 
   var answered = {};
+  var attemptsPerQuestion = {}; // ADDED: tracks every try (right or wrong) per question, to support multiple attempts
   var correctCount = 0;
   var studentName = ''; // ADDED: holds the name typed on the intro screen
   var gameStartTime = null; // ADDED: timestamp set once the student starts playing
+  var hasSubmittedResults = false; // ADDED: guards against duplicate Google Sheet submissions from back/forward navigation
 
   var screenDefs = ['intro', 'definition', 'cheatsheet'].concat(
     texts.map(function (t) { return 'text-' + t.id; })
@@ -444,6 +449,7 @@
         '<p class="finish-name" id="finish-name"></p>' + // ADDED: displays the student's name on the results screen
         '<h3 id="finish-title"></h3>' +
         '<p id="finish-sub"></p>' +
+        '<button class="nav-btn primary" type="button" id="try-again-btn">Try Again</button>' + // ADDED: resets the game for a new playthrough (counts as a new attempt)
       '</div>' +
       '</div>';
 
@@ -470,6 +476,15 @@
       updateNav();
     });
     // END ADDED
+
+    // ADDED: Try Again button resets the game for a new playthrough
+    var tryAgainBtn = document.getElementById('try-again-btn');
+    if (tryAgainBtn) {
+      tryAgainBtn.addEventListener('click', function () {
+        resetGame();
+      });
+    }
+    // END ADDED
   }
 
   function isTextScreenAnswered(name) {
@@ -486,32 +501,36 @@
   }
 
   function handleChoice(id, chosen) {
-    if (answered[id]) return;
+    if (answered[id]) return; // ADDED: "answered" now means answered CORRECTLY — see below
     var item = texts.filter(function (t) { return t.id === id; })[0];
-    answered[id] = true;
+
+    attemptsPerQuestion[id] = (attemptsPerQuestion[id] || 0) + 1; // ADDED: counts every try, right or wrong
 
     var screen = screensEl.querySelector('[data-screen="text-' + id + '"]');
     var blogBtn = screen.querySelector('[data-choice="blog"]');
     var articleBtn = screen.querySelector('[data-choice="article"]');
     var feedbackEl = document.getElementById('feedback-' + id);
 
-    blogBtn.disabled = true;
-    articleBtn.disabled = true;
-
     var isCorrect = chosen === item.answer;
     var chosenBtn = chosen === 'blog' ? blogBtn : articleBtn;
-    var correctBtn = item.answer === 'blog' ? blogBtn : articleBtn;
 
     if (isCorrect) {
+      answered[id] = true; // ADDED: only locks the question once the student gets it right
+      blogBtn.disabled = true;
+      articleBtn.disabled = true;
       chosenBtn.classList.add('picked-correct');
       correctCount += 1;
+      feedbackEl.classList.remove('wrong');
+      feedbackEl.classList.add('show', 'correct');
+      feedbackEl.innerHTML = '<strong>Correct — it\'s a ' + item.answer + '.</strong>' + item.why;
     } else {
+      // ADDED: wrong attempt — disable just that option so the question stays open for another try
+      chosenBtn.disabled = true;
       chosenBtn.classList.add('picked-wrong');
-      correctBtn.classList.add('reveal-correct');
+      feedbackEl.classList.remove('correct');
+      feedbackEl.classList.add('show', 'wrong');
+      feedbackEl.innerHTML = '<strong>Not quite — try again.</strong>Read the text once more and pick the other option.';
     }
-
-    feedbackEl.classList.add('show', isCorrect ? 'correct' : 'wrong');
-    feedbackEl.innerHTML = '<strong>' + (isCorrect ? 'Correct — it\'s a ' : 'Not quite — it\'s a ') + item.answer + '.</strong>' + item.why;
 
     updateScoreDisplays();
     updateNav();
@@ -524,28 +543,55 @@
 
     nameEl.textContent = studentName; // ADDED: shows the student's name at the top of the results screen
 
-    title.textContent = correctCount === texts.length ? 'Nice work — all correct!' : correctCount + ' out of ' + texts.length + ' correct';
+    // ADDED: score always shown as a fraction of the total, e.g. "7/7"
+    title.textContent = correctCount === texts.length
+      ? 'Nice work — ' + correctCount + '/' + texts.length + ' correct!'
+      : correctCount + '/' + texts.length + ' correct';
     sub.textContent = correctCount === texts.length
       ? 'You can spot the tell-tale signs of a blog post, even when it references data.'
       : 'Go back through the texts to review the feedback.';
 
     // ============================================================
-    // ADDED: send this student's results to your Google Sheet
+    // ADDED: send this student's results to your Google Sheet (once per completed playthrough)
     // ============================================================
-    var minutesPlayed = gameStartTime
-      ? Math.round(((Date.now() - gameStartTime) / 60000) * 10) / 10 // rounded to 1 decimal place
-      : 0;
+    if (!hasSubmittedResults) {
+      hasSubmittedResults = true; // ADDED: prevents re-submitting if the student navigates back and forward to this screen again
 
-    submitGameData({
-      gameName: GAME_NAME,
-      studentName: studentName,
-      score: correctCount,
-      minutesPlayed: minutesPlayed,
-      attempts: texts.length // each text is answered once, so attempts = total questions
-    });
+      var minutesPlayed = gameStartTime
+        ? Math.round(((Date.now() - gameStartTime) / 60000) * 10) / 10 // rounded to 1 decimal place
+        : 0;
+
+      var totalAttempts = 0; // ADDED: sums every try (right or wrong) across all questions, reflecting retries
+      texts.forEach(function (t) {
+        totalAttempts += attemptsPerQuestion[t.id] || 0;
+      });
+
+      submitGameData({
+        gameName: GAME_NAME,
+        studentName: studentName,
+        score: correctCount + '/' + texts.length, // ADDED: score sent as a fraction, e.g. "6/7"
+        minutesPlayed: minutesPlayed,
+        attempts: totalAttempts
+      });
+    }
     // ============================================================
     // END ADDED
     // ============================================================
+  }
+
+  function resetGame() { // ADDED: resets game state for a new playthrough via "Try Again" — counts as a new attempt
+    answered = {};
+    attemptsPerQuestion = {};
+    correctCount = 0;
+    gameStartTime = null;
+    hasSubmittedResults = false;
+
+    buildScreens();
+
+    var nameInput = document.getElementById('student-name-input'); // ADDED: keep the name pre-filled so the student doesn't retype it
+    if (nameInput) nameInput.value = studentName;
+
+    showScreen(0);
   }
 
   function showScreen(idx) {
