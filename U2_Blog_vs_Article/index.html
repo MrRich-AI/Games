@@ -113,6 +113,42 @@
   }
   .masthead p { color: var(--ink-soft); margin: 0; font-size: 15px; }
 
+  /* ADDED: styling for the name-entry field on the intro screen */
+  .name-entry {
+    background: var(--paper-card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 20px 22px;
+    margin-top: auto;
+    margin-bottom: auto;
+  }
+  .name-entry label {
+    display: block;
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+  .name-entry input {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 16px;
+    font-family: inherit;
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .name-entry input:focus {
+    outline: none;
+    border-color: var(--article-accent);
+  }
+  .name-entry .hint {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 8px;
+  }
+  /* END ADDED */
+
   .definition {
     background: var(--paper-card);
     border: 1px solid var(--line);
@@ -249,6 +285,14 @@
   }
   .finish h3 { font-family: 'Source Serif 4', serif; font-size: 22px; margin: 0 0 6px; }
   .finish p { color: var(--ink-soft); margin: 0 0 16px; font-size: 14px; }
+  /* ADDED: style for the student name shown on the finish screen */
+  .finish .finish-name {
+    font-family: 'Kalam', cursive;
+    font-size: 16px;
+    color: var(--article-accent-dark);
+    margin: 0 0 4px;
+  }
+  /* END ADDED */
 
   .nav-row {
     display: flex;
@@ -290,6 +334,24 @@
 </div>
 
 <script>
+  // ============================================================
+  // ADDED: Google Sheets data-submission setup
+  // ============================================================
+  var GAME_NAME = 'Blog or Article — Digital Life'; // ADDED: identifies this game in your Sheet rows
+  var GAME_DATA_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyxAAXBx_SRQcUrw6fYBJ2A78-kJqKTf72suSy3OkKFGVJe9QPtFFX2RkMqCTwUrwOHDA/exec'; // ADDED: your Apps Script Web App URL
+
+  function submitGameData(payload) { // ADDED: sends one row of data to your Google Sheet
+    fetch(GAME_DATA_ENDPOINT, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload)
+    }).catch(function (err) { console.error('Data submission failed:', err); });
+  }
+  // ============================================================
+  // END ADDED
+  // ============================================================
+
   var texts = [
     { id: "A", quote: "I'll admit it — I checked my phone four times while writing this sentence. Is that normal? Probably not. But honestly, who isn't a little addicted to their screen these days?", answer: "blog", why: "First person (\"I\"), casual questions, and a personal confession — the writer is speaking directly to you." },
     { id: "B", quote: "Recent studies indicate that the average teenager checks their smartphone over 90 times per day, raising concerns among researchers about the long-term effects of frequent screen engagement.", answer: "article", why: "No personal pronouns, a cited study, and a formal, distant tone." },
@@ -308,6 +370,8 @@
 
   var answered = {};
   var correctCount = 0;
+  var studentName = ''; // ADDED: holds the name typed on the intro screen
+  var gameStartTime = null; // ADDED: timestamp set once the student starts playing
 
   var screenDefs = ['intro', 'definition', 'cheatsheet'].concat(
     texts.map(function (t) { return 'text-' + t.id; })
@@ -322,6 +386,13 @@
       '<header class="masthead">' +
         '<h1>Blog or Article?</h1>' +
       '</header>' +
+      // ADDED: name-entry field on the start screen
+      '<div class="name-entry">' +
+        '<label for="student-name-input">What\'s your name?</label>' +
+        '<input type="text" id="student-name-input" placeholder="Type your name here" autocomplete="off">' +
+        '<p class="hint">Your name will appear on your results screen.</p>' +
+      '</div>' +
+      // END ADDED
       '</div>';
 
     html += '<div class="screen" data-screen="definition">' +
@@ -370,6 +441,7 @@
 
     html += '<div class="screen" data-screen="finish">' +
       '<div class="finish">' +
+        '<p class="finish-name" id="finish-name"></p>' + // ADDED: displays the student's name on the results screen
         '<h3 id="finish-title"></h3>' +
         '<p id="finish-sub"></p>' +
       '</div>' +
@@ -390,9 +462,18 @@
         handleChoice(id, choice);
       });
     });
+
+    // ADDED: keep the Next button disabled on the intro screen until a name is typed
+    var nameInput = document.getElementById('student-name-input');
+    nameInput.addEventListener('input', function () {
+      studentName = nameInput.value.trim();
+      updateNav();
+    });
+    // END ADDED
   }
 
   function isTextScreenAnswered(name) {
+    if (name === 'intro') return studentName.length > 0; // ADDED: intro screen requires a name before continuing
     if (name.indexOf('text-') !== 0) return true;
     var id = name.slice(5);
     return !!answered[id];
@@ -437,17 +518,45 @@
   }
 
   function renderFinish() {
+    var nameEl = document.getElementById('finish-name'); // ADDED
     var title = document.getElementById('finish-title');
     var sub = document.getElementById('finish-sub');
+
+    nameEl.textContent = studentName; // ADDED: shows the student's name at the top of the results screen
+
     title.textContent = correctCount === texts.length ? 'Nice work — all correct!' : correctCount + ' out of ' + texts.length + ' correct';
     sub.textContent = correctCount === texts.length
       ? 'You can spot the tell-tale signs of a blog post, even when it references data.'
       : 'Go back through the texts to review the feedback.';
+
+    // ============================================================
+    // ADDED: send this student's results to your Google Sheet
+    // ============================================================
+    var minutesPlayed = gameStartTime
+      ? Math.round(((Date.now() - gameStartTime) / 60000) * 10) / 10 // rounded to 1 decimal place
+      : 0;
+
+    submitGameData({
+      gameName: GAME_NAME,
+      studentName: studentName,
+      score: correctCount,
+      minutesPlayed: minutesPlayed,
+      attempts: texts.length // each text is answered once, so attempts = total questions
+    });
+    // ============================================================
+    // END ADDED
+    // ============================================================
   }
 
   function showScreen(idx) {
     current = idx;
     var name = screenDefs[current];
+
+    // ADDED: start the timer the moment the student leaves the intro screen
+    if (name !== 'intro' && gameStartTime === null) {
+      gameStartTime = Date.now();
+    }
+    // END ADDED
 
     screensEl.querySelectorAll('.screen').forEach(function (s) {
       s.classList.toggle('active', s.getAttribute('data-screen') === name);
