@@ -372,12 +372,11 @@
   var stepCountEl = document.getElementById('step-count');
 
   var answered = {};
-  var attemptsPerQuestion = {}; // ADDED: tracks every try (right or wrong) per question, to support multiple attempts
   var correctCount = 0;
   var studentName = ''; // ADDED: holds the name typed on the intro screen
   var gameStartTime = null; // ADDED: timestamp set once the student starts playing
   var hasSubmittedResults = false; // ADDED: guards against duplicate Google Sheet submissions from back/forward navigation
-
+  var playthroughAttempt = 1; // ADDED: which playthrough this is — increments only when "Try Again" is used, not per question
   var screenDefs = ['intro', 'definition', 'cheatsheet'].concat(
     texts.map(function (t) { return 'text-' + t.id; })
   ).concat(['finish']);
@@ -504,7 +503,6 @@
     if (answered[id]) return; // ADDED: locks after ANY answer, right or wrong — single attempt per question
     var item = texts.filter(function (t) { return t.id === id; })[0];
     answered[id] = true;
-    attemptsPerQuestion[id] = 1; // ADDED: one attempt per question (retries happen via full "Try Again" at the end, not here)
 
     var screen = screensEl.querySelector('[data-screen="text-' + id + '"]');
     var blogBtn = screen.querySelector('[data-choice="blog"]');
@@ -558,17 +556,12 @@
         ? Math.round(((Date.now() - gameStartTime) / 60000) * 10) / 10 // rounded to 1 decimal place
         : 0;
 
-      var totalAttempts = 0; // ADDED: sums every try (right or wrong) across all questions, reflecting retries
-      texts.forEach(function (t) {
-        totalAttempts += attemptsPerQuestion[t.id] || 0;
-      });
-
       submitGameData({
         gameName: GAME_NAME,
         studentName: studentName,
         score: correctCount + '/' + texts.length, // ADDED: score sent as a fraction, e.g. "6/7"
         minutesPlayed: minutesPlayed,
-        attempts: totalAttempts
+        attempts: playthroughAttempt // ADDED: which playthrough this is (1st, 2nd, 3rd...), tied to "Try Again" — not the question count
       });
     }
     // ============================================================
@@ -578,10 +571,10 @@
 
   function resetGame() { // ADDED: resets game state for a new playthrough via "Try Again" — counts as a new attempt
     answered = {};
-    attemptsPerQuestion = {};
     correctCount = 0;
     gameStartTime = null;
     hasSubmittedResults = false;
+    playthroughAttempt += 1; // ADDED: this is what "counts as a new attempt" — tied to Try Again, not question count
 
     buildScreens();
 
