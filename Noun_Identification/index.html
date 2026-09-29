@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Noun Identification</title>
+<style>
+  :root{
+    --paper:#FAF6EE;
+    --paper-2:#F1EADA;
+    --ink:#25302B;
+    --ink-soft:#4A5550;
+    --navy:#26433F;
+    --gold:#C9982E;
+    --gold-light:#EAD9AC;
+    --gold-dark:#7A5A0E;
+    --teal:#3A7268;
+    --teal-light:#DCEAE6;
+    --green:#1F6B49;
+    --rust:#B24A34;
+    --rust-light:#F3DCD5;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;min-height:100%;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:17px;
+    line-height:1.5;
+  }
+  h1,h2,h3{
+    font-family:Georgia,"Times New Roman",serif;
+    color:var(--navy);
+    margin:0 0 8px 0;
+    line-height:1.2;
+  }
+  .hidden{display:none !important;}
+
+  /* ---------- TOP BAR ---------- */
+  .topbar{
+    background:var(--navy);
+    color:var(--paper);
+    padding:14px 32px 12px 32px;
+  }
+  .topbar-row{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:16px;
+    max-width:1200px;
+    margin:0 auto;
+  }
+  .topbar-title{
+    font-family:Georgia,serif;
+    font-size:20px;
+    font-weight:700;
+    letter-spacing:0.02em;
+  }
+  .topbar-who{
+    font-size:14px;
+    color:var(--gold-light);
+    font-weight:600;
+  }
+  .progress{
+    display:flex;
+    gap:6px;
+    max-width:1200px;
+    margin:10px auto 0 auto;
+  }
+  .progress .seg{
+    flex:1;
+    height:7px;
+    border-radius:4px;
+    background:rgba(250,246,238,0.25);
+    transition:background .3s ease;
+  }
+  .progress .seg.done{background:var(--gold);}
+  .progress .seg.now{background:var(--paper);}
+
+  /* ---------- LAYOUT ---------- */
+  main{
+    max-width:1200px;
+    margin:0 auto;
+    padding:28px 32px 48px 32px;
+  }
+  .grid-2{
+    display:grid;
+    grid-template-columns:1.15fr 1fr;
+    gap:28px;
+    align-items:start;
+  }
+  .card{
+    background:#fff;
+    border:2px solid var(--paper-2);
+    border-radius:var(--radius);
+    padding:24px 26px;
+    box-shadow:0 2px 0 var(--paper-2);
+  }
+  .card h2{font-size:24px;}
+  .card h3{font-size:18px;margin-top:18px;}
+  .card p{margin:6px 0;}
+
+  /* ---------- START SCREEN ---------- */
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 4px 0;}
+  .chip{
+    background:var(--teal-light);
+    color:var(--navy);
+    border-radius:999px;
+    padding:4px 14px;
+    font-weight:600;
+    font-size:16px;
+  }
+  .chip small{font-weight:500;color:var(--ink-soft);margin-left:4px;}
+  .note{
+    background:var(--gold-light);
+    border-left:5px solid var(--gold);
+    border-radius:8px;
+    padding:10px 14px;
+    margin:12px 0 0 0;
+    font-size:16px;
+  }
+  ol.how{margin:8px 0 0 0;padding-left:22px;}
+  ol.how li{margin-bottom:6px;}
+  .field{margin-top:14px;}
+  .field label{display:block;font-weight:700;margin-bottom:4px;color:var(--navy);}
+  .field input{
+    width:100%;
+    font-size:18px;
+    padding:11px 14px;
+    border:2px solid var(--navy);
+    border-radius:10px;
+    background:#fff;
+    color:var(--ink);
+  }
+  .field input:focus{outline:3px solid var(--gold);outline-offset:1px;}
+  .error{color:var(--rust);font-weight:700;margin-top:8px;min-height:22px;font-size:16px;}
+
+  /* ---------- BUTTONS ---------- */
+  .btn{
+    font-family:inherit;
+    font-size:18px;
+    font-weight:700;
+    border:2px solid var(--navy);
+    background:#fff;
+    color:var(--navy);
+    padding:11px 26px;
+    border-radius:12px;
+    cursor:pointer;
+    transition:transform .08s ease, background .15s ease;
+  }
+  .btn:hover:not(:disabled){transform:translateY(-1px);background:var(--teal-light);}
+  .btn.primary{background:var(--navy);color:#fff;}
+  .btn.primary:hover:not(:disabled){background:var(--teal);}
+  .btn.gold{background:var(--gold);border-color:var(--gold-dark);color:#1d1a10;}
+  .btn.gold:hover:not(:disabled){background:#d8a93a;}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
+
+  /* ---------- PLAY SCREEN ---------- */
+  .meta-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+  }
+  .pill{
+    background:var(--navy);
+    color:#fff;
+    border-radius:999px;
+    padding:3px 14px;
+    font-weight:700;
+    font-size:15px;
+  }
+  .meta-count{color:var(--ink-soft);font-weight:600;}
+  .label-small{
+    font-size:14px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--ink-soft);
+    font-weight:700;
+    margin:0 0 6px 0;
+  }
+  .sentence-text{
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:30px;
+    line-height:1.4;
+    color:var(--ink);
+    background:var(--paper);
+    border-radius:12px;
+    padding:16px 20px;
+    margin:0 0 22px 0;
+  }
+  .words{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    margin-bottom:24px;
+  }
+  .word{
+    font-family:inherit;
+    font-size:22px;
+    font-weight:600;
+    color:var(--ink);
+    background:#fff;
+    border:2px solid var(--navy);
+    border-radius:12px;
+    padding:9px 18px;
+    cursor:pointer;
+    transition:transform .08s ease, background .12s ease;
+  }
+  .word:hover:not(:disabled){transform:translateY(-2px);background:var(--teal-light);}
+  .word.selected{background:var(--navy);color:#fff;}
+  .word:disabled{cursor:default;opacity:1;}
+  .word.correct{background:var(--green);border-color:var(--green);color:#fff;}
+  .word.wrong{background:var(--rust);border-color:var(--rust);color:#fff;}
+  .word.missed{background:var(--gold-light);border:2px dashed var(--gold-dark);color:var(--ink);}
+  .word .mark{font-size:16px;margin-right:6px;font-weight:800;}
+  .actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+  .actions .spacer{flex:1;}
+
+  .side{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    gap:8px;
+  }
+  .mascot{width:150px;height:auto;}
+  .mascot.happy{animation:hop .6s ease 1;}
+  .mascot.sad{animation:wobble .6s ease 1;}
+  @keyframes hop{0%,100%{transform:translateY(0)}40%{transform:translateY(-14px)}70%{transform:translateY(0)}85%{transform:translateY(-5px)}}
+  @keyframes wobble{0%,100%{transform:rotate(0)}25%{transform:rotate(-5deg)}75%{transform:rotate(5deg)}}
+  .speech{
+    background:var(--paper);
+    border:2px solid var(--paper-2);
+    border-radius:12px;
+    padding:10px 16px;
+    font-weight:600;
+    width:100%;
+  }
+  .feedback{
+    width:100%;
+    text-align:left;
+    margin-top:6px;
+  }
+  .feedback .row{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    padding:8px 0;
+    border-bottom:1px solid var(--paper-2);
+    font-size:17px;
+  }
+  .feedback .row:last-child{border-bottom:none;}
+  .feedback .good{color:var(--green);font-weight:800;}
+  .feedback .bad{color:var(--rust);font-weight:800;}
+  .feedback .total{font-size:20px;font-weight:800;color:var(--navy);}
+  .nounlist{
+    margin-top:10px;
+    background:var(--teal-light);
+    border-radius:10px;
+    padding:10px 14px;
+    font-size:17px;
+  }
+  .legend{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:14px;margin-top:10px;color:var(--ink-soft);font-weight:600;}
+  .legend span::before{
+    content:"";
+    display:inline-block;
+    width:12px;height:12px;
+    border-radius:3px;
+    margin-right:6px;
+    vertical-align:-1px;
+  }
+  .legend .l-ok::before{background:var(--green);}
+  .legend .l-bad::before{background:var(--rust);}
+  .legend .l-miss::before{background:var(--gold-light);border:2px dashed var(--gold-dark);}
+
+  /* ---------- RESULTS ---------- */
+  .results-head{text-align:center;}
+  .big-score{
+    font-family:Georgia,serif;
+    font-size:72px;
+    font-weight:700;
+    color:var(--navy);
+    line-height:1.1;
+    margin:6px 0;
+  }
+  .who{font-size:20px;font-weight:700;color:var(--navy);}
+  .attempt-tag{color:var(--ink-soft);font-weight:600;margin-top:4px;}
+  table.breakdown{
+    width:100%;
+    border-collapse:collapse;
+    font-size:17px;
+  }
+  table.breakdown th, table.breakdown td{
+    text-align:left;
+    padding:8px 10px;
+    border-bottom:1px solid var(--paper-2);
+  }
+  table.breakdown th{color:var(--ink-soft);font-size:14px;text-transform:uppercase;letter-spacing:0.06em;}
+  table.breakdown td.pts{font-weight:800;color:var(--navy);white-space:nowrap;}
+
+  @media (max-width:900px){
+    .grid-2{grid-template-columns:1fr;}
+    main{padding:20px 16px 40px 16px;}
+    .topbar{padding:12px 16px;}
+    .sentence-text{font-size:24px;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .mascot.happy,.mascot.sad{animation:none;}
+    .btn,.word{transition:none;}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-row">
+    <div class="topbar-title">Noun Identification</div>
+    <div class="topbar-who" id="topWho"></div>
+  </div>
+  <div class="progress hidden" id="progress"></div>
+</header>
+
+<main>
+
+  <!-- ================= START SCREEN ================= -->
+  <section id="screenStart">
+    <div class="grid-2">
+      <div class="card">
+        <h2>What is a noun?</h2>
+        <p>A <b>noun</b> is a word that names a person, a place, a thing, an animal, an idea, or an activity.</p>
+        <div class="chips">
+          <span class="chip">teacher<small>person</small></span>
+          <span class="chip">Mai<small>name</small></span>
+          <span class="chip">park<small>place</small></span>
+          <span class="chip">Hanoi<small>place name</small></span>
+          <span class="chip">book<small>thing</small></span>
+          <span class="chip">cat<small>animal</small></span>
+          <span class="chip">honesty<small>idea</small></span>
+          <span class="chip">swimming<small>activity</small></span>
+        </div>
+        <div class="note">
+          <b>Look out for -ing words.</b> When an -ing word names an activity, it is a noun:
+          <i>Swimming is fun.</i> When it shows an action or describes something, it is not:
+          <i>Tom is swimming.</i>
+        </div>
+        <h3>These are not nouns</h3>
+        <p>Action words (<i>run, eat</i>), describing words (<i>red, cool</i>), and small words such as <i>the, on, and, because</i>.</p>
+      </div>
+
+      <div class="card">
+        <h2>How to play</h2>
+        <ol class="how">
+          <li>Read the sentence. There are <b>10 sentences</b>, from easy (A1) to hard (C1).</li>
+          <li>Click <b>every noun</b> in the row of word buttons. Click again to un-select a word.</li>
+          <li>Press <b>Check</b>. You get <b>+1 point</b> for each noun you found and <b>&minus;1 point</b> for each word you picked that is not a noun. A sentence can never score below 0.</li>
+          <li>After you check, your answer is locked and you can see what was right, wrong, or missed. Press <b>Next</b> to continue.</li>
+        </ol>
+        <div class="field">
+          <label for="inName">Your name</label>
+          <input id="inName" type="text" autocomplete="off" placeholder="Type your name">
+        </div>
+        <div class="field">
+          <label for="inClass">Your class</label>
+          <input id="inClass" type="text" autocomplete="off" placeholder="Example: 9A">
+        </div>
+        <div class="error" id="startError"></div>
+        <button class="btn primary" id="startBtn" type="button">Start</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PLAY SCREEN ================= -->
+  <section id="screenPlay" class="hidden">
+    <div class="grid-2">
+      <div class="card">
+        <div class="meta-row">
+          <span class="pill" id="levelPill">A1</span>
+          <span class="meta-count" id="countLabel">Sentence 1 of 10</span>
+        </div>
+        <p class="label-small">Read the sentence</p>
+        <div class="sentence-text" id="sentenceText"></div>
+        <p class="label-small">Click every noun</p>
+        <div class="words" id="words"></div>
+        <div class="actions">
+          <button class="btn" id="backBtn" type="button">Back</button>
+          <span class="spacer"></span>
+          <button class="btn gold" id="checkBtn" type="button">Check</button>
+          <button class="btn primary" id="nextBtn" type="button">Next</button>
+        </div>
+      </div>
+
+      <div class="card side">
+        <div id="mascotHolder"></div>
+        <div class="speech" id="speech">Pick every noun, then press Check.</div>
+        <div class="feedback hidden" id="feedback"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= RESULTS SCREEN ================= -->
+  <section id="screenResults" class="hidden">
+    <div class="grid-2">
+      <div class="card results-head">
+        <div id="resultsMascot"></div>
+        <h2>Well done!</h2>
+        <div class="who" id="resWho"></div>
+        <div class="big-score" id="resScore"></div>
+        <div class="attempt-tag" id="resAttempt"></div>
+        <p id="resMessage" style="margin-top:12px;"></p>
+        <div style="margin-top:18px;">
+          <button class="btn primary" id="tryAgainBtn" type="button">Try Again</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Your sentences</h2>
+        <table class="breakdown">
+          <thead><tr><th>#</th><th>Level</th><th>Score</th></tr></thead>
+          <tbody id="resTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // ============================================================
+  // Google Sheets data-submission setup
+  // ============================================================
+  var GAME_NAME = 'Noun Identification';
+  var GAME_DATA_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyxAAXBx_SRQcUrw6fYBJ2A78-kJqKTf72suSy3OkKFGVJe9QPtFFX2RkMqCTwUrwOHDA/exec';
+
+  function submitGameData(payload) {
+    fetch(GAME_DATA_ENDPOINT, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload)
+    }).catch(function (err) { console.error('Data submission failed:', err); });
+  }
+
+  // ============================================================
+  // DATA — fixed order, A1 to C1. Nouns are wrapped in { }.
+  // ============================================================
+  var RAW_SENTENCES = [
+    { level: 'A1', text: 'The {cat} sleeps on the {sofa}.' },
+    { level: 'A1', text: '{Tom} eats {rice} and {fish} for {lunch}.' },
+    { level: 'A2', text: 'On {Saturday}, the {boys} play {football} in the {park}.' },
+    { level: 'A2', text: '{Mai} visited {Hanoi} last {summer} because the {weather} was cool.' },
+    { level: 'B1', text: '{Swimming} is good {exercise} for {children}.' },
+    { level: 'B1', text: 'If {Linh} reads a {story} every {evening}, {vocabulary} improves quickly.' },
+    { level: 'B2', text: 'Although the {museum} was crowded, the {tourists} enjoyed the {exhibition} of ancient {pottery}.' },
+    { level: 'B2', text: 'The {report}, written by a {team} of {scientists}, warns of rising {temperatures}.' },
+    { level: 'C1', text: 'Having negotiated for {hours}, the {diplomats} finally reached an {agreement}, ending {decades} of {hostility}.' },
+    { level: 'C1', text: '{Accepting} {responsibility} for {mistakes}, rather than {blaming} {colleagues}, demonstrates {integrity} and marks genuine {leadership}.' }
+  ];
+
+  function parseSentence(item) {
+    var tokens = item.text.split(/\s+/).map(function (tok) {
+      var isNoun = tok.indexOf('{') !== -1;
+      var word = tok.replace(/[{}]/g, '').replace(/[.,;:!?]+$/, '');
+      return { word: word, noun: isNoun };
+    });
+    return {
+      level: item.level,
+      plain: item.text.replace(/[{}]/g, ''),
+      tokens: tokens,
+      nounCount: tokens.filter(function (t) { return t.noun; }).length
+    };
+  }
+
+  var SENTENCES = RAW_SENTENCES.map(parseSentence);
+  var TOTAL_SENTENCES = SENTENCES.length;
+  var TOTAL_NOUNS = SENTENCES.reduce(function (sum, s) { return sum + s.nounCount; }, 0);
+
+  // ============================================================
+  // STATE
+  // ============================================================
+  var studentName = '';
+  var studentClass = '';
+  var totalAttempts = 1;          // playthrough number; only goes up when "Try Again" is clicked
+  var hasSubmittedResults = false; // guards against submitting twice for one playthrough
+  var gameStartTime = null;
+  var current = 0;
+  var states = [];
+
+  function freshStates() {
+    return SENTENCES.map(function (s) {
+      return {
+        selected: s.tokens.map(function () { return false; }),
+        checked: false,
+        correct: 0,
+        wrong: 0,
+        missed: 0,
+        points: 0
+      };
+    });
+  }
+
+  // ============================================================
+  // HELPERS
+  // ============================================================
+  function $(id) { return document.getElementById(id); }
+
+  function showScreen(name) {
+    $('screenStart').classList.toggle('hidden', name !== 'start');
+    $('screenPlay').classList.toggle('hidden', name !== 'play');
+    $('screenResults').classList.toggle('hidden', name !== 'results');
+    $('progress').classList.toggle('hidden', name !== 'play');
+    $('topWho').textContent = (name === 'start' || !studentName) ? '' : studentName + ' · ' + studentClass;
+    window.scrollTo(0, 0);
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  // Simple owl mascot drawn with SVG. mood: neutral | think | happy | ok | sad
+  function mascotSvg(mood) {
+    var brows = {
+      neutral: ['M36 40 L52 38', 'M68 38 L84 40'],
+      think:   ['M36 41 L52 37', 'M68 35 L84 40'],
+      happy:   ['M36 38 Q44 32 52 38', 'M68 38 Q76 32 84 38'],
+      ok:      ['M36 39 L52 38', 'M68 38 L84 39'],
+      sad:     ['M36 37 L52 43', 'M68 43 L84 37']
+    }[mood] || [];
+    var eyes;
+    if (mood === 'happy') {
+      eyes = '<path d="M36 55 Q44 45 52 55" fill="none" stroke="#25302B" stroke-width="4" stroke-linecap="round"/>' +
+             '<path d="M68 55 Q76 45 84 55" fill="none" stroke="#25302B" stroke-width="4" stroke-linecap="round"/>' +
+             '<circle cx="32" cy="66" r="6" fill="#E9A99B" opacity="0.8"/><circle cx="88" cy="66" r="6" fill="#E9A99B" opacity="0.8"/>';
+    } else {
+      var py = mood === 'sad' ? 56 : 53;
+      eyes = '<circle cx="44" cy="53" r="12" fill="#fff"/><circle cx="76" cy="53" r="12" fill="#fff"/>' +
+             '<circle cx="44" cy="' + py + '" r="5.5" fill="#25302B"/><circle cx="76" cy="' + py + '" r="5.5" fill="#25302B"/>';
+      if (mood === 'sad') {
+        eyes += '<path d="M82 66 Q85 72 82 76 Q79 72 82 66Z" fill="#9CC8E8"/>';
+      }
+    }
+    var browPaths = brows.map(function (d) {
+      return '<path d="' + d + '" fill="none" stroke="#FAF6EE" stroke-width="3.5" stroke-linecap="round"/>';
+    }).join('');
+    return '<svg class="mascot ' + mood + '" viewBox="0 0 120 130" role="img" aria-label="Owl mascot">' +
+      '<ellipse cx="48" cy="123" rx="10" ry="5" fill="#C9982E"/><ellipse cx="72" cy="123" rx="10" ry="5" fill="#C9982E"/>' +
+      '<polygon points="28,34 36,10 50,28" fill="#26433F"/><polygon points="92,34 84,10 70,28" fill="#26433F"/>' +
+      '<ellipse cx="60" cy="76" rx="42" ry="46" fill="#3A7268"/>' +
+      '<ellipse cx="60" cy="92" rx="26" ry="28" fill="#F1EADA"/>' +
+      '<ellipse cx="20" cy="86" rx="9" ry="22" fill="#26433F" transform="rotate(12 20 86)"/>' +
+      '<ellipse cx="100" cy="86" rx="9" ry="22" fill="#26433F" transform="rotate(-12 100 86)"/>' +
+      eyes + browPaths +
+      '<polygon points="53,64 67,64 60,77" fill="#C9982E"/>' +
+      '</svg>';
+  }
+
+  function setMascot(mood) {
+    $('mascotHolder').innerHTML = mascotSvg(mood);
+  }
+
+  function renderProgress() {
+    var html = '';
+    for (var i = 0; i < TOTAL_SENTENCES; i++) {
+      var cls = 'seg';
+      if (states[i].checked) cls += ' done';
+      else if (i === current) cls += ' now';
+      html += '<div class="' + cls + '"></div>';
+    }
+    $('progress').innerHTML = html;
+  }
+
+  // ============================================================
+  // PLAY SCREEN
+  // ============================================================
+  function renderPlay() {
+    var s = SENTENCES[current];
+    var st = states[current];
+
+    $('levelPill').textContent = 'Level ' + s.level;
+    $('countLabel').textContent = 'Sentence ' + (current + 1) + ' of ' + TOTAL_SENTENCES;
+    $('sentenceText').textContent = s.plain;
+
+    var wordsEl = $('words');
+    wordsEl.innerHTML = '';
+    s.tokens.forEach(function (tok, idx) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'word';
+      var mark = '';
+      if (st.checked) {
+        var picked = st.selected[idx];
+        if (picked && tok.noun) { b.classList.add('correct'); mark = '✓'; }
+        else if (picked && !tok.noun) { b.classList.add('wrong'); mark = '✗'; }
+        else if (!picked && tok.noun) { b.classList.add('missed'); mark = '!'; }
+        b.disabled = true;
+      } else if (st.selected[idx]) {
+        b.classList.add('selected');
+      }
+      b.setAttribute('aria-pressed', st.selected[idx] ? 'true' : 'false');
+      b.innerHTML = (mark ? '<span class="mark" aria-hidden="true">' + mark + '</span>' : '') + escapeHtml(tok.word);
+      b.addEventListener('click', function () { toggleWord(idx); });
+      wordsEl.appendChild(b);
+    });
+
+    var anySelected = st.selected.some(function (v) { return v; });
+    $('checkBtn').disabled = st.checked || !anySelected;
+    $('nextBtn').disabled = !st.checked;
+    $('nextBtn').textContent = (current === TOTAL_SENTENCES - 1) ? 'See Results' : 'Next';
+    $('backBtn').disabled = current === 0;
+
+    renderFeedback();
+    renderProgress();
+  }
+
+  function renderFeedback() {
+    var s = SENTENCES[current];
+    var st = states[current];
+    var fb = $('feedback');
+
+    if (!st.checked) {
+      fb.classList.add('hidden');
+      fb.innerHTML = '';
+      $('speech').textContent = 'Pick every noun, then press Check.';
+      setMascot('think');
+      return;
+    }
+
+    var nouns = s.tokens.filter(function (t) { return t.noun; }).map(function (t) { return t.word; });
+    fb.classList.remove('hidden');
+    fb.innerHTML =
+      '<div class="row"><span>Nouns found</span><span class="good">+' + st.correct + '</span></div>' +
+      '<div class="row"><span>Wrong words picked</span><span class="bad">&minus;' + st.wrong + '</span></div>' +
+      '<div class="row"><span>Nouns missed</span><span>' + st.missed + ' (no penalty)</span></div>' +
+      '<div class="row"><span class="total">Sentence score</span><span class="total">' + st.points + '/' + s.nounCount + '</span></div>' +
+      '<div class="nounlist"><b>Nouns in this sentence:</b> ' + nouns.map(escapeHtml).join(', ') + '</div>' +
+      '<div class="legend"><span class="l-ok">Correct noun</span><span class="l-bad">Not a noun</span><span class="l-miss">Missed noun</span></div>';
+
+    var ratio = st.points / s.nounCount;
+    if (ratio >= 0.75) {
+      setMascot('happy');
+      $('speech').textContent = 'Great spotting!';
+    } else if (ratio >= 0.4) {
+      setMascot('ok');
+      $('speech').textContent = 'Nice try. Look at the ✓ and ✗ marks.';
+    } else {
+      setMascot('sad');
+      $('speech').textContent = 'Keep going. Check the nouns listed below.';
+    }
+  }
+
+  function toggleWord(idx) {
+    var st = states[current];
+    if (st.checked) return;
+    st.selected[idx] = !st.selected[idx];
+    // Update in place (no full re-render) so keyboard focus stays on the button
+    var btn = $('words').children[idx];
+    btn.classList.toggle('selected', st.selected[idx]);
+    btn.setAttribute('aria-pressed', st.selected[idx] ? 'true' : 'false');
+    $('checkBtn').disabled = !st.selected.some(function (v) { return v; });
+  }
+
+  function checkSentence() {
+    var s = SENTENCES[current];
+    var st = states[current];
+    if (st.checked) return;
+    var correct = 0, wrong = 0, missed = 0;
+    s.tokens.forEach(function (tok, idx) {
+      var picked = st.selected[idx];
+      if (picked && tok.noun) correct++;
+      else if (picked && !tok.noun) wrong++;
+      else if (!picked && tok.noun) missed++;
+    });
+    st.correct = correct;
+    st.wrong = wrong;
+    st.missed = missed;
+    st.points = Math.max(0, correct - wrong);
+    st.checked = true;
+    renderPlay();
+  }
+
+  function goNext() {
+    if (!states[current].checked) return;
+    if (current < TOTAL_SENTENCES - 1) {
+      current++;
+      renderPlay();
+      window.scrollTo(0, 0);
+    } else {
+      showResults();
+    }
+  }
+
+  function goBack() {
+    if (current > 0) {
+      current--;
+      renderPlay();
+      window.scrollTo(0, 0);
+    }
+  }
+
+  // ============================================================
+  // RESULTS SCREEN
+  // ============================================================
+  function showResults() {
+    var totalPoints = states.reduce(function (sum, st) { return sum + st.points; }, 0);
+    var scoreString = totalPoints + '/' + TOTAL_NOUNS;
+
+    showScreen('results');
+    $('resultsMascot').innerHTML = mascotSvg(totalPoints / TOTAL_NOUNS >= 0.6 ? 'happy' : 'ok');
+    $('resWho').textContent = studentName + ' · ' + studentClass;
+    $('resScore').textContent = scoreString;
+    $('resAttempt').textContent = 'Attempt ' + totalAttempts;
+
+    var ratio = totalPoints / TOTAL_NOUNS;
+    $('resMessage').textContent =
+      ratio >= 0.9 ? 'Excellent! You are a noun expert.' :
+      ratio >= 0.7 ? 'Very good work. You found most of the nouns.' :
+      ratio >= 0.5 ? 'Good effort. Press Try Again to improve your score.' :
+                     'Keep practising. Press Try Again to have another go.';
+
+    var rows = SENTENCES.map(function (s, i) {
+      return '<tr><td>' + (i + 1) + '</td><td>' + s.level + '</td><td class="pts">' + states[i].points + '/' + s.nounCount + '</td></tr>';
+    }).join('');
+    $('resTable').innerHTML = rows;
+
+    // Submit once per completed playthrough
+    if (!hasSubmittedResults) {
+      hasSubmittedResults = true;
+      var minutesPlayed = gameStartTime ? Math.round(((Date.now() - gameStartTime) / 60000) * 10) / 10 : 0;
+      submitGameData({
+        gameName: GAME_NAME,
+        studentName: studentName,
+        class: studentClass,
+        score: scoreString,
+        minutesPlayed: minutesPlayed,
+        attempts: totalAttempts
+      });
+    }
+  }
+
+  function tryAgain() {
+    totalAttempts++;
+    hasSubmittedResults = false;
+    states = freshStates();
+    current = 0;
+    gameStartTime = Date.now();
+    showScreen('play');
+    renderPlay();
+  }
+
+  // ============================================================
+  // START SCREEN
+  // ============================================================
+  function startGame() {
+    var name = $('inName').value.trim();
+    var cls = $('inClass').value.trim();
+    if (!name || !cls) {
+      $('startError').textContent = 'Please type your name and your class to start.';
+      (!name ? $('inName') : $('inClass')).focus();
+      return;
+    }
+    $('startError').textContent = '';
+    studentName = name;
+    studentClass = cls;
+    totalAttempts = 1;
+    hasSubmittedResults = false;
+    states = freshStates();
+    current = 0;
+    gameStartTime = Date.now();
+    showScreen('play');
+    renderPlay();
+  }
+
+  $('startBtn').addEventListener('click', startGame);
+  $('inName').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('inClass').focus(); });
+  $('inClass').addEventListener('keydown', function (e) { if (e.key === 'Enter') startGame(); });
+  $('checkBtn').addEventListener('click', checkSentence);
+  $('nextBtn').addEventListener('click', goNext);
+  $('backBtn').addEventListener('click', goBack);
+  $('tryAgainBtn').addEventListener('click', tryAgain);
+
+  showScreen('start');
+</script>
+</body>
+</html>
