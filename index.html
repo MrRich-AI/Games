@@ -6,9 +6,12 @@
 <title>Mr. Rich's IGCSE ESL Games</title>
 <style>
   :root{
-    --bg:#0e2a6e;
-    --card:#1b1f27;
-    --card-hover:#242a35;
+    --bg-top:#080a1e;
+    --bg-mid:#241454;
+    --bg-low:#7a2f6b;
+    --bg-glow:#ff8a4c;
+    --card:#1b1f27cc;
+    --card-hover:#242a35e6;
     --text:#f5f7fa;
     --sub:#a9b1c0;
     --accent:#4f8dfd;
@@ -16,53 +19,73 @@
     --border:#2c3240;
   }
   *{box-sizing:border-box;}
+  html,body{ height:100%; }
   body{
     margin:0;
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
     color:var(--text);
+    min-height:100%;
+    background:
+      radial-gradient(ellipse at 50% 100%, var(--bg-glow) 0%, transparent 55%),
+      linear-gradient(180deg,
+        var(--bg-top) 0%,
+        #1b1454 22%,
+        var(--bg-mid) 40%,
+        var(--bg-low) 60%,
+        #c1495a 78%,
+        var(--bg-glow) 100%);
+    background-attachment: fixed, fixed;
+    overflow-x:hidden;
+  }
+
+  /* fireworks canvas sits fixed behind all content */
+  #fireworks{
+    position:fixed;
+    inset:0;
+    width:100vw;
+    height:100vh;
+    z-index:0;
+    pointer-events:none;
+    display:block;
+  }
+
+  .page{
+    position:relative;
+    z-index:1;
     padding:24px 16px 48px;
     max-width:520px;
     margin:0 auto;
-    background-color:var(--bg);
-    background-image:
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cg%3E%3Cpolygon points='0,-6 1.41,-1.94 5.71,-1.85 2.28,0.74 3.53,4.85 0,2.4 -3.53,4.85 -2.28,0.74 -5.71,-1.85 -1.41,-1.94' fill='%23ffffff' fill-opacity='0.85' transform='translate(20,25) scale(1.1) rotate(10)'/%3E%3Cpolygon points='0,-6 1.41,-1.94 5.71,-1.85 2.28,0.74 3.53,4.85 0,2.4 -3.53,4.85 -2.28,0.74 -5.71,-1.85 -1.41,-1.94' fill='%23e63946' fill-opacity='0.9' transform='translate(70,15) scale(0.8) rotate(-15)'/%3E%3Cpolygon points='0,-6 1.41,-1.94 5.71,-1.85 2.28,0.74 3.53,4.85 0,2.4 -3.53,4.85 -2.28,0.74 -5.71,-1.85 -1.41,-1.94' fill='%23ffffff' fill-opacity='0.7' transform='translate(120,40) scale(0.6) rotate(30)'/%3E%3Cpolygon points='0,-6 1.41,-1.94 5.71,-1.85 2.28,0.74 3.53,4.85 0,2.4 -3.53,4.85 -2.28,0.74 -5.71,-1.85 -1.41,-1.94' fill='%23e63946' fill-opacity='0.75' transform='translate(30,90) scale(0.7) rotate(60)'/%3E%3Cpolygon points='0,-6 1.41,-1.94 5.71,-1.85 2.28,0.74 3.53,4.85 0,2.4 -3.53,4.85 -2.28,0.74 -5.71,-1.85 -1.41,-1.94' fill='%23ffffff' fill-opacity='0.85' transform='translate(90,80) scale(1) rotate(-25)'/%3E%3Cpolygon points='0,-6 1.41,-1.94 5.71,-1.85 2.28,0.74 3.53,4.85 0,2.4 -3.53,4.85 -2.28,0.74 -5.71,-1.85 -1.41,-1.94' fill='%23e63946' fill-opacity='0.85' transform='translate(140,110) scale(0.9) rotate(15)'/%3E%3Cpolygon points='0,-6 1.41,-1.94 5.71,-1.85 2.28,0.74 3.53,4.85 0,2.4 -3.53,4.85 -2.28,0.74 -5.71,-1.85 -1.41,-1.94' fill='%23ffffff' fill-opacity='0.6' transform='translate(10,135) scale(0.7) rotate(45)'/%3E%3Cpolygon points='0,-6 1.41,-1.94 5.71,-1.85 2.28,0.74 3.53,4.85 0,2.4 -3.53,4.85 -2.28,0.74 -5.71,-1.85 -1.41,-1.94' fill='%23e63946' fill-opacity='0.7' transform='translate(60,140) scale(0.6) rotate(-40)'/%3E%3Cpolygon points='0,-6 1.41,-1.94 5.71,-1.85 2.28,0.74 3.53,4.85 0,2.4 -3.53,4.85 -2.28,0.74 -5.71,-1.85 -1.41,-1.94' fill='%23ffffff' fill-opacity='0.75' transform='translate(140,150) scale(0.5) rotate(5)'/%3E%3C/g%3E%3C/svg%3E"),
-      repeating-linear-gradient(45deg,
-        rgba(230,57,70,0.22) 0px, rgba(230,57,70,0.22) 10px,
-        transparent 10px, transparent 46px,
-        rgba(255,255,255,0.16) 46px, rgba(255,255,255,0.16) 56px,
-        transparent 56px, transparent 92px);
-    background-repeat: repeat, repeat;
-    background-attachment: fixed, fixed;
   }
+
   header{
     text-align:center;
     margin-bottom:28px;
   }
   header h1{
-    font-size:1.6rem;
+    font-size:1.5rem;
     margin:0 0 6px;
+    text-shadow:0 2px 10px rgba(0,0,0,.55);
   }
   header p{
     color:var(--sub);
     margin:0;
     font-size:0.95rem;
+    text-shadow:0 1px 6px rgba(0,0,0,.5);
   }
-  .logo3d{
-    font-size:2.2rem;
-    font-weight:800;
-    font-family:Georgia,'Times New Roman',serif;
-    font-style:italic;
-    display:inline-block;
-    color:var(--accent);
-    text-shadow:
-      1px 1px 0 #3f74d1,
-      2px 2px 0 #2f5aa8,
-      3px 3px 0 #234280,
-      4px 4px 0 #182f5c,
-      5px 5px 8px rgba(0,0,0,0.5);
-    margin-bottom:8px;
-    letter-spacing:0.5px;
+
+  .logo-wrap{
+    display:flex;
+    justify-content:center;
+    margin-bottom:4px;
   }
+  #logoCanvas{
+    display:block;
+    width:100%;
+    max-width:220px;
+    height:auto;
+    filter:drop-shadow(0 6px 14px rgba(0,0,0,.45));
+  }
+
   .grid{
     display:flex;
     flex-direction:column;
@@ -78,6 +101,7 @@
     padding:14px 16px;
     text-decoration:none;
     color:var(--text);
+    backdrop-filter: blur(6px);
     transition:background 0.15s ease, transform 0.1s ease;
   }
   a.card:active{
@@ -130,30 +154,369 @@
     color:var(--sub);
     font-size:0.75rem;
     margin-top:32px;
+    text-shadow:0 1px 6px rgba(0,0,0,.5);
   }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo3d">Mr. Rich's</div>
-  <h1>IGCSE ESL Games</h1>
-  <p>Pick a unit or activity to play</p>
-</header>
+<canvas id="fireworks"></canvas>
 
-<div class="grid" id="gameGrid">
-  <p id="status" style="color:var(--sub);text-align:center;">Loading games…</p>
+<div class="page">
+  <header>
+    <div class="logo-wrap">
+      <canvas id="logoCanvas"></canvas>
+    </div>
+    <h1>IGCSE ESL Games</h1>
+    <p>Pick a unit or activity to play</p>
+  </header>
+
+  <div class="grid" id="gameGrid">
+    <p id="status" style="color:var(--sub);text-align:center;">Loading games…</p>
+  </div>
+
+  <footer>Tap a card to open the game</footer>
 </div>
 
-<footer>Tap a card to open the game</footer>
-
 <script>
-  // ---- CONFIG: your GitHub username/org and repo name ----
+/* =========================================================
+   Fireworks background — twilight sky, animated canvas
+   ========================================================= */
+(() => {
+  const canvas = document.getElementById('fireworks');
+  const ctx = canvas.getContext('2d');
+  let W, H;
+
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = canvas.width = Math.round(window.innerWidth * dpr);
+    H = canvas.height = Math.round(window.innerHeight * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  const COLORS = ['#ff6b6b', '#ffd166', '#06d6a0', '#4f8dfd', '#c77dff', '#ff9f1c', '#f72585', '#ffffff', '#7bdff2'];
+
+  class Particle {
+    constructor(x, y, color, speed, angle, life) {
+      this.x = x; this.y = y; this.px = x; this.py = y;
+      this.color = color;
+      this.vx = Math.cos(angle) * speed;
+      this.vy = Math.sin(angle) * speed;
+      this.life = life; this.age = 0;
+      this.gravity = 0.045;
+      this.drag = 0.985;
+    }
+    update() {
+      this.px = this.x; this.py = this.y;
+      this.vx *= this.drag; this.vy *= this.drag;
+      this.vy += this.gravity;
+      this.x += this.vx; this.y += this.vy;
+      this.age++;
+    }
+    get alpha() { return Math.max(0, 1 - this.age / this.life); }
+    get dead() { return this.age >= this.life; }
+    draw() {
+      const a = this.alpha;
+      if (a <= 0) return;
+      ctx.save();
+      ctx.globalAlpha = a;
+      ctx.strokeStyle = this.color;
+      ctx.lineWidth = 2.2;
+      ctx.lineCap = 'round';
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.moveTo(this.px, this.py);
+      ctx.lineTo(this.x, this.y);
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      ctx.globalAlpha = a * 0.9;
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, 1.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  class Rocket {
+    constructor(viewW, viewH) {
+      this.x = viewW * (0.12 + Math.random() * 0.76);
+      this.y = viewH;
+      this.targetY = viewH * (0.14 + Math.random() * 0.34);
+      this.speed = 5.5 + Math.random() * 2.5;
+      this.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+      this.trail = [];
+      this.dead = false;
+    }
+    update(viewW, viewH) {
+      this.y -= this.speed;
+      this.trail.push({ x: this.x, y: this.y });
+      if (this.trail.length > 7) this.trail.shift();
+      if (this.y <= this.targetY) this.explode();
+    }
+    explode() {
+      this.dead = true;
+      const count = 46 + Math.floor(Math.random() * 34);
+      const shape = Math.random();
+      for (let i = 0; i < count; i++) {
+        const angle = (i / count) * Math.PI * 2 + Math.random() * 0.3;
+        const speed = shape < 0.3
+          ? 1.5 + Math.random() * 1.5          // tight burst
+          : 1.5 + Math.random() * 4.2;         // wide burst
+        particles.push(new Particle(this.x, this.y, this.color, speed, angle, 55 + Math.random() * 35));
+      }
+    }
+    draw() {
+      ctx.save();
+      ctx.strokeStyle = this.color;
+      ctx.lineWidth = 2;
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur = 6;
+      ctx.beginPath();
+      this.trail.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  let rockets = [];
+  let particles = [];
+  let nextLaunch = 0;
+  let tick = 0;
+
+  function launchMaybe(viewW, viewH) {
+    if (tick >= nextLaunch) {
+      const burstCount = Math.random() < 0.22 ? 2 : 1;
+      for (let i = 0; i < burstCount; i++) rockets.push(new Rocket(viewW, viewH));
+      nextLaunch = tick + 55 + Math.random() * 70;
+    }
+    tick++;
+  }
+
+  function loop() {
+    const viewW = window.innerWidth, viewH = window.innerHeight;
+    ctx.clearRect(0, 0, viewW, viewH);
+
+    launchMaybe(viewW, viewH);
+
+    rockets.forEach(r => { r.update(viewW, viewH); r.draw(); });
+    rockets = rockets.filter(r => !r.dead);
+
+    particles.forEach(p => { p.update(); p.draw(); });
+    particles = particles.filter(p => !p.dead);
+
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+
+/* =========================================================
+   Small animated "Mr Rich" logo (transparent, looping)
+   Scaled-down version of the standalone logo build.
+   ========================================================= */
+(() => {
+  const canvas = document.getElementById('logoCanvas');
+  const ctx = canvas.getContext('2d');
+
+  const K = 2;                                   // sprite resolution multiplier
+  const LX0 = 70, LY0 = 0, LW = 800, LH = 460;    // logical frame (from source logo)
+  const TEXT1 = 'Mr', TEXT2 = 'R1ch';
+  const FONT = "'Rockwell Extra Bold','Rockwell','Roboto Slab','Bookman Old Style','Cambria','Georgia','DejaVu Serif',serif";
+  const TAU = Math.PI * 2;
+
+  const makeCanvas = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+  const rgb = c => `rgb(${c[0]},${c[1]},${c[2]})`;
+
+  function starPts(R, r, rot) {
+    const p = [];
+    for (let i = 0; i < 10; i++) {
+      const a = -Math.PI / 2 + rot + i * Math.PI / 5, rad = i % 2 ? r : R;
+      p.push([Math.cos(a) * rad, Math.sin(a) * rad]);
+    }
+    return p;
+  }
+  function starPath(g, pts) {
+    g.beginPath();
+    pts.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]));
+    g.closePath();
+  }
+  function tri(g, a, b, c) { g.beginPath(); g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]); g.lineTo(c[0], c[1]); g.closePath(); g.fill(); }
+
+  function newSprite(wL, hL, lx, ly) {
+    const c = makeCanvas(Math.ceil(wL * K), Math.ceil(hL * K)), g = c.getContext('2d');
+    g.scale(K, K);
+    return { c, g, wL, hL, lx, ly, t: makeCanvas(c.width, c.height), pivot: [lx + wL / 2, ly + hL / 2] };
+  }
+
+  function makeStar(cx, cy, R, rot, cA, cB) {
+    const pad = 36, size = 2 * (R + pad);
+    const s = newSprite(size, size, cx - size / 2, cy - size / 2);
+    const g = s.g; g.translate(size / 2, size / 2);
+    const pts = starPts(R, R * .46, rot);
+    g.lineJoin = 'round';
+
+    starPath(g, pts);
+    g.shadowColor = 'rgba(255,255,255,.95)'; g.shadowBlur = 9 * K;
+    g.strokeStyle = '#fff'; g.lineWidth = 12; g.stroke();
+    g.shadowBlur = 0; g.stroke();
+
+    const gr = g.createLinearGradient(-R * .6, -R, R * .6, R);
+    gr.addColorStop(0, rgb(cA)); gr.addColorStop(1, rgb(cB));
+    starPath(g, pts); g.fillStyle = gr; g.fill();
+
+    g.save(); starPath(g, pts); g.clip();
+    for (let i = 0; i < 10; i += 2) {
+      const tip = pts[i], l = pts[(i + 9) % 10], r = pts[(i + 1) % 10];
+      g.fillStyle = 'rgba(255,255,255,.17)'; tri(g, [0, 0], l, tip);
+      g.fillStyle = 'rgba(0,0,0,.06)'; tri(g, [0, 0], tip, r);
+    }
+    g.save(); g.translate(4, 4); starPath(g, pts); g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 14; g.stroke(); g.restore();
+    g.save(); g.translate(-4, -4); starPath(g, pts); g.strokeStyle = 'rgba(20,20,60,.22)'; g.lineWidth = 14; g.stroke(); g.restore();
+    const gl = g.createRadialGradient(-R * .35, -R * .45, 0, -R * .35, -R * .45, R * 1.1);
+    gl.addColorStop(0, 'rgba(255,255,255,.45)'); gl.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = gl; g.fillRect(-R * 1.5, -R * 1.5, R * 3, R * 3);
+    g.restore();
+
+    starPath(g, pts); g.strokeStyle = 'rgba(255,255,255,.9)'; g.lineWidth = 1.6; g.stroke();
+    return s;
+  }
+
+  function makeText(str, x, baseline, targetW) {
+    const m = document.createElement('canvas').getContext('2d');
+    let fs = 150; m.font = `900 ${fs}px ${FONT}`;
+    fs = Math.min(fs * targetW / m.measureText(str).width, 158);
+    m.font = `900 ${fs}px ${FONT}`;
+    const tw = m.measureText(str).width;
+    const asc = fs * .86, desc = fs * .24, pad = 36;
+    const wL = targetW + 2 * pad, hL = asc + desc + 2 * pad;
+    const s = newSprite(wL, hL, x - pad, baseline - asc - pad);
+    const g = s.g;
+    const off = Math.max(0, (targetW - tw) / 2);
+    g.font = `900 ${fs}px ${FONT}`; g.textBaseline = 'alphabetic'; g.lineJoin = 'round';
+    const tx = pad + off, ty = pad + asc;
+
+    g.strokeStyle = 'rgba(120,180,255,.95)'; g.lineWidth = 16;
+    g.shadowColor = 'rgba(100,170,255,1)'; g.shadowBlur = 12 * K;
+    g.strokeText(str, tx, ty);
+    g.shadowBlur = 0; g.lineWidth = 9; g.strokeStyle = 'rgba(196,224,255,.95)';
+    g.strokeText(str, tx, ty);
+
+    const bg = g.createLinearGradient(0, ty - asc * .8, 0, ty);
+    bg.addColorStop(0, '#4a86ea'); bg.addColorStop(.5, '#2458c6'); bg.addColorStop(1, '#1a45a5');
+    g.fillStyle = bg; g.fillText(str, tx, ty);
+    const gg = g.createLinearGradient(0, ty - asc * .8, 0, ty - asc * .2);
+    gg.addColorStop(0, 'rgba(255,255,255,.38)'); gg.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = gg; g.fillText(str, tx, ty);
+    g.lineWidth = 1.2; g.strokeStyle = 'rgba(10,30,110,.45)'; g.strokeText(str, tx, ty);
+    return s;
+  }
+
+  const S = {};
+  S.grey = makeStar(280, 178, 160, -.04, [238, 238, 240], [208, 208, 214]);
+  S.blue = makeStar(627, 187, 160, 0.0, [162, 172, 232], [204, 212, 248]);
+  S.red  = makeStar(452, 291, 146, .03, [255, 182, 182], [232, 116, 122]);
+  S.t1   = makeText(TEXT1, 110, 222, 240);
+  S.t2   = makeText(TEXT2, 272, 340, 446);
+
+  const els = [
+    { s: S.grey, osc: t => ({ r: .05 * Math.sin(t * 1.05), dx: 3 * Math.sin(t * .8 + 1), dy: 5 * Math.sin(t * 1.25 + .4), sc: 1 + .012 * Math.sin(t * 1.6) }) },
+    { s: S.blue, osc: t => ({ r: -.045 * Math.sin(t * .95 + 2), dx: -3 * Math.sin(t * .7), dy: 5 * Math.sin(t * 1.15 + 2), sc: 1 + .012 * Math.sin(t * 1.4 + 1) }) },
+    { s: S.red,  osc: t => ({ r: .04 * Math.sin(t * 1.2 + 4), dx: 2 * Math.sin(t * .9 + 2), dy: 6 * Math.sin(t * 1.35 + 3), sc: 1 + .014 * Math.sin(t * 1.5 + 2) }) },
+    { s: S.t1,   osc: t => ({ r: .012 * Math.sin(t * .9 + 3), dx: 2 * Math.sin(t * 1.1 + 1), dy: 3 * Math.sin(t * 1.5 + 1), sc: 1 }) },
+    { s: S.t2,   osc: t => ({ r: .010 * Math.sin(t * .9 + 3.4), dx: 2 * Math.sin(t * 1.0 + 2), dy: 3 * Math.sin(t * 1.5 + 1.6), sc: 1 }) }
+  ];
+
+  function band(tg, qc, bw, al) {
+    const a = qc - bw / 2, d = bw / 1.16;
+    const gr = tg.createLinearGradient(a, 0, a + d, .4 * d);
+    gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(.5, `rgba(255,255,255,${al})`); gr.addColorStop(1, 'rgba(255,255,255,0)');
+    tg.fillStyle = gr; tg.fillRect(0, 0, tg.canvas.width, tg.canvas.height);
+  }
+  function sheened(s, qc) {
+    const q0 = s.lx + .4 * s.ly, q1 = s.lx + s.wL + .4 * (s.ly + s.hL), bw = 170;
+    if (qc + bw < q0 || qc - bw > q1) return s.c;
+    const tg = s.tg || (s.tg = s.t.getContext('2d'));
+    tg.setTransform(1, 0, 0, 1, 0, 0);
+    tg.globalCompositeOperation = 'source-over';
+    tg.clearRect(0, 0, s.t.width, s.t.height);
+    tg.drawImage(s.c, 0, 0);
+    tg.globalCompositeOperation = 'source-atop';
+    const qpx = (qc - s.lx - .4 * s.ly) * K;
+    band(tg, qpx, bw * K, .55);
+    band(tg, qpx, 42 * K, .85);
+    tg.globalCompositeOperation = 'source-over';
+    return s.t;
+  }
+
+  const SPOTS = [[278, 18], [627, 24], [452, 146], [783, 138], [186, 307], [364, 432], [540, 428], [140, 110], [700, 236], [330, 214], [520, 340], [246, 88]];
+  function glint(g, x, y, sz, a, spin) {
+    if (a < .03) return;
+    g.save(); g.translate(x, y); g.globalCompositeOperation = 'lighter'; g.globalAlpha = Math.min(1, a);
+    const rg = g.createRadialGradient(0, 0, 0, 0, 0, sz * .55);
+    rg.addColorStop(0, 'rgba(255,255,255,.95)'); rg.addColorStop(.35, 'rgba(210,235,255,.35)'); rg.addColorStop(1, 'rgba(180,220,255,0)');
+    g.fillStyle = rg; g.beginPath(); g.arc(0, 0, sz * .55, 0, TAU); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.95)';
+    [[0, 1], [Math.PI / 2, 1], [Math.PI / 4, .5], [-Math.PI / 4, .5]].forEach(([r, k]) => {
+      g.save(); g.rotate(r + spin); g.beginPath();
+      g.moveTo(0, -sz * k); g.lineTo(sz * .09, 0); g.lineTo(0, sz * k); g.lineTo(-sz * .09, 0); g.closePath(); g.fill(); g.restore();
+    });
+    g.restore();
+  }
+
+  function renderLogo(g, t, k, ox, oy) {
+    g.save();
+    g.setTransform(k, 0, 0, k, ox - LX0 * k, oy - LY0 * k);
+
+    const qc = -260 + ((t * 220) % 2100);
+    const gcx = 470, gcy = 220;
+    g.translate(gcx, gcy + 5 * Math.sin(t * 1.3));
+    g.rotate(.03 * Math.sin(t * .9));
+    g.translate(-gcx, -gcy);
+
+    els.forEach(e => {
+      const o = e.osc(t), s = e.s, tex = sheened(s, qc);
+      g.save();
+      g.shadowColor = 'rgba(30,40,90,.38)'; g.shadowBlur = 16 * k; g.shadowOffsetX = 5 * k; g.shadowOffsetY = 9 * k;
+      g.translate(s.pivot[0] + o.dx, s.pivot[1] + o.dy); g.rotate(o.r); g.scale(o.sc, o.sc);
+      g.drawImage(tex, -s.wL / 2, -s.hL / 2, s.wL, s.hL);
+      g.restore();
+    });
+
+    SPOTS.forEach(([x, y], i) => {
+      const q = x + .4 * y;
+      const sweep = Math.exp(-Math.pow((qc - q) / 60, 2));
+      const tw = .5 + .5 * Math.sin(t * 2 + i * 1.7);
+      glint(g, x, y, 22 + (i % 4) * 8, sweep + .12 * tw * tw, t * .3 + i);
+    });
+    g.restore();
+  }
+
+  // Fixed internal resolution; CSS scales the element down responsively.
+  const CW = 780, CH = 450;
+  canvas.width = CW;
+  canvas.height = CH;
+
+  function frame(ts) {
+    const t = ts / 1000;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, CW, CH);
+    const k = Math.min(CW / LW, CH / LH) * .9;
+    renderLogo(ctx, t, k, (CW - LW * k) / 2, (CH - LH * k) / 2);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+/* =========================================================
+   Games list (unchanged behaviour, loads folders from GitHub)
+   ========================================================= */
+(() => {
   const OWNER = "mrrich-ai";
   const REPO  = "Games";
-  // Folders to hide from the list even though they're in the repo
   const EXCLUDE = ["assets", ".github", "images", "img", "css", "js", "scripts"];
-  // ----------------------------------------------------------
 
   const icons = [
     '<path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>',
@@ -215,6 +578,7 @@
   }
 
   loadGames();
+})();
 </script>
 
 </body>
