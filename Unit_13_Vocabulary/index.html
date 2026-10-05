@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Unit 13 Vocabulary</title>
+<style>
+  :root{
+    --navy:#0b1630; --card:#0f1d3d; --card2:#152a55; --line:#2b4680;
+    --text:#ffffff; --sub:#c9d6f2; --neon:#39ff88; --neon-ink:#03240f;
+    --red:#ff5a6e; --gold:#ffd166;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    background:var(--navy); color:var(--text);
+    min-height:100vh; overflow-x:hidden;
+  }
+  #bg{position:fixed;inset:0;width:100%;height:100%;z-index:0;transition:filter .5s ease;}
+  body.dim #bg{filter:blur(7px) brightness(.32) saturate(.9);}
+  .app{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:16px 16px 40px;}
+  .screen{display:none;}
+  .screen.active{display:block;animation:fadeIn .35s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  .panel{
+    background:rgba(11,22,48,.94); border:2px solid var(--line);
+    border-radius:18px; padding:18px; box-shadow:0 10px 30px rgba(0,0,0,.45);
+  }
+  h1{font-size:1.7rem;margin:0 0 4px;letter-spacing:.5px;}
+  h2{font-size:1.25rem;margin:0 0 10px;}
+  .sub{color:var(--sub);margin:0 0 14px;font-size:.95rem;line-height:1.4;}
+  .hero{text-align:center;padding-top:6vh;}
+  .hero .kicker{display:inline-block;background:var(--neon);color:var(--neon-ink);font-weight:800;
+    font-size:.75rem;letter-spacing:2px;padding:4px 10px;border-radius:999px;margin-bottom:10px;}
+  .hero h1{font-size:2.1rem;text-shadow:0 3px 14px rgba(0,0,0,.7);}
+
+  label{display:block;font-weight:700;margin:12px 0 6px;font-size:.95rem;}
+  input[type=text]{
+    width:100%;font:inherit;font-size:1rem;padding:12px 14px;border-radius:12px;
+    border:2px solid var(--line);background:#071026;color:#fff;
+  }
+  input[type=text]:focus{outline:none;border-color:var(--neon);}
+  .btn{
+    display:block;width:100%;font:inherit;font-weight:800;font-size:1.05rem;
+    padding:14px;border-radius:14px;border:none;cursor:pointer;margin-top:14px;
+    background:var(--neon);color:var(--neon-ink);transition:transform .1s, opacity .2s;
+  }
+  .btn:active{transform:scale(.98);}
+  .btn:disabled{opacity:.35;cursor:not-allowed;}
+  .btn.ghost{background:transparent;color:#fff;border:2px solid var(--line);}
+  .btn.gold{background:var(--gold);color:#2a1d00;}
+  .row{display:flex;gap:10px;}
+  .row .btn{flex:1;}
+
+  /* ---------- Home ---------- */
+  .who{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;
+    background:rgba(11,22,48,.9);border:2px solid var(--line);border-radius:14px;padding:10px 14px;font-size:.9rem;}
+  .who b{color:var(--neon);}
+  .mg-card{
+    display:flex;align-items:center;gap:14px;width:100%;text-align:left;font:inherit;color:#fff;
+    background:rgba(15,29,61,.95);border:2px solid var(--line);border-radius:16px;
+    padding:14px;margin-bottom:12px;cursor:pointer;transition:border-color .2s, transform .1s;
+  }
+  .mg-card:active{transform:scale(.99);}
+  .mg-card:hover{border-color:var(--neon);}
+  .mg-icon{flex:0 0 52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+    background:var(--card2);font-size:1.6rem;font-weight:900;color:var(--neon);}
+  .mg-info{flex:1;min-width:0;}
+  .mg-title{font-weight:800;font-size:1.05rem;}
+  .mg-desc{color:var(--sub);font-size:.85rem;margin:2px 0 8px;}
+  .bar{height:8px;border-radius:99px;background:#071026;overflow:hidden;}
+  .bar > i{display:block;height:100%;width:0;background:var(--neon);transition:width .4s;}
+  .mg-status{font-size:.8rem;margin-top:6px;color:var(--sub);}
+  .mg-status b{color:#fff;}
+  .badge{display:inline-block;font-size:.7rem;font-weight:800;padding:2px 8px;border-radius:99px;margin-left:6px;vertical-align:middle;}
+  .badge.done{background:var(--neon);color:var(--neon-ink);}
+  .badge.prog{background:var(--gold);color:#2a1d00;}
+
+  /* ---------- Quiz ---------- */
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;}
+  .topbar .mini{font-weight:800;font-size:.95rem;text-align:center;flex:1;}
+  .icon-btn{font:inherit;font-weight:700;font-size:.85rem;color:#fff;background:rgba(11,22,48,.9);
+    border:2px solid var(--line);border-radius:12px;padding:8px 12px;cursor:pointer;}
+  .scoreboard{display:flex;align-items:center;justify-content:center;gap:12px;
+    background:#05070f;border:2px solid #222b45;border-radius:14px;padding:8px 12px;margin-bottom:10px;
+    font-family:"Courier New",monospace;}
+  .sb-team{font-size:.7rem;letter-spacing:2px;color:var(--sub);font-weight:700;}
+  .digit{display:inline-block;min-width:38px;text-align:center;font-size:1.6rem;font-weight:900;
+    background:#111a33;border-radius:8px;padding:2px 6px;}
+  .digit.home{color:var(--neon);} .digit.away{color:var(--red);}
+  .digit.flip{animation:flip .45s ease;}
+  @keyframes flip{0%{transform:rotateX(0)}50%{transform:rotateX(90deg)}100%{transform:rotateX(0)}}
+  .sb-dash{color:#55607a;font-weight:900;}
+
+  .track-wrap{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .track{position:relative;flex:1;height:30px;border-radius:99px;background:linear-gradient(#1d6b38,#14532a);
+    border:2px solid #2f8a4e;overflow:visible;}
+  .track::before{content:"";position:absolute;left:10px;right:10px;top:50%;border-top:2px dashed rgba(255,255,255,.45);}
+  .track-ball{position:absolute;top:50%;left:0;width:26px;height:26px;margin-top:-13px;margin-left:-2px;
+    transition:left .6s cubic-bezier(.3,1.4,.5,1);}
+  .track-ball svg{width:26px;height:26px;display:block;}
+  .track-ball.roll svg{animation:spin .6s linear;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .goal{flex:0 0 34px;height:34px;}
+  .qcount{font-size:.8rem;color:var(--sub);text-align:right;margin:-6px 0 8px;}
+
+  .qcard{position:relative;}
+  .mascot-row{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;}
+  .mascot{flex:0 0 64px;width:64px;height:64px;transition:transform .3s;}
+  .mascot.happy{animation:bounce .7s ease;}
+  .mascot.sad{transform:translateY(6px) rotate(-12deg);}
+  @keyframes bounce{0%,100%{transform:translateY(0)}30%{transform:translateY(-18px)}55%{transform:translateY(0)}75%{transform:translateY(-7px)}}
+  .prompt{flex:1;font-size:1.08rem;line-height:1.45;font-weight:600;}
+  .ask{display:block;font-size:.8rem;font-weight:800;letter-spacing:1px;color:var(--neon);text-transform:uppercase;margin-bottom:6px;}
+  .pos{display:inline-block;font-size:.75rem;font-weight:700;background:var(--card2);color:var(--sub);
+    padding:2px 8px;border-radius:99px;margin-top:8px;}
+  .blank{display:inline-block;min-width:70px;border-bottom:3px solid var(--neon);margin:0 2px;}
+
+  .opts{display:flex;flex-direction:column;gap:10px;}
+  .opt{font:inherit;font-size:1.02rem;font-weight:700;text-align:left;color:#fff;background:var(--card2);
+    border:2px solid var(--line);border-radius:14px;padding:13px 14px;cursor:pointer;transition:background .2s,border-color .2s,transform .1s;}
+  .opt:active{transform:scale(.99);}
+  .opt:disabled{cursor:default;}
+  .opt.correct{background:var(--neon);color:var(--neon-ink);border-color:var(--neon);}
+  .opt.wrong{background:var(--red);color:#2b0007;border-color:var(--red);}
+  .opt.dimmed{opacity:.45;}
+  .opt .mark{float:right;font-weight:900;}
+
+  .feedback{display:none;margin-top:12px;padding:12px 14px;border-radius:14px;font-size:.95rem;line-height:1.4;
+    background:#071026;border:2px solid var(--line);}
+  .feedback.show{display:block;animation:fadeIn .3s ease;}
+  .feedback .verdict{font-weight:900;display:block;margin-bottom:4px;}
+  .feedback.ok{border-color:var(--neon);} .feedback.ok .verdict{color:var(--neon);}
+  .feedback.no{border-color:var(--red);} .feedback.no .verdict{color:var(--red);}
+
+  /* GOAL flash + confetti */
+  .goal-flash{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%) scale(.4);z-index:50;pointer-events:none;
+    font-size:3.2rem;font-weight:900;color:var(--neon);letter-spacing:3px;opacity:0;
+    text-shadow:0 0 18px rgba(57,255,136,.8),0 4px 0 #03240f;}
+  .goal-flash.go{animation:goal 1s ease forwards;}
+  @keyframes goal{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}25%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}
+    70%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-60%) scale(1)}}
+  .confetti{position:fixed;top:30%;width:9px;height:14px;z-index:49;pointer-events:none;border-radius:2px;
+    animation:fall 1.2s ease-out forwards;}
+  @keyframes fall{0%{opacity:1;transform:translate(0,0) rotate(0)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--rot))}}
+
+  /* ---------- End / results ---------- */
+  .big-score{font-size:3rem;font-weight:900;text-align:center;color:var(--neon);margin:6px 0;
+    font-family:"Courier New",monospace;}
+  .center{text-align:center;}
+  .res-table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.95rem;}
+  .res-table th,.res-table td{padding:9px 6px;border-bottom:1px solid var(--line);text-align:left;}
+  .res-table th{color:var(--sub);font-size:.78rem;text-transform:uppercase;letter-spacing:1px;}
+  .res-table td.num{text-align:right;font-weight:800;font-family:"Courier New",monospace;}
+  .meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;}
+  .meta div{background:var(--card2);border-radius:12px;padding:8px 10px;}
+  .meta small{display:block;color:var(--sub);font-size:.72rem;text-transform:uppercase;letter-spacing:1px;}
+  .meta b{font-size:1rem;word-break:break-word;}
+  .note{font-size:.82rem;color:var(--sub);text-align:center;margin-top:8px;}
+
+  /* Leaderboard */
+  .lb-box{margin-top:16px;background:rgba(11,22,48,.94);border:2px solid var(--line);border-radius:16px;padding:14px;}
+  .lb-box h3{margin:0 0 2px;text-align:center;font-size:1.05rem;}
+  .lb-note{margin:0 0 10px;font-size:.78rem;text-align:center;color:var(--sub);}
+  .lb-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;}
+  .lb-list li{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;background:var(--card2);border:1px solid var(--line);}
+  .lb-list li.me{outline:2px solid var(--neon);}
+  .lb-rank{flex:0 0 26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:.8rem;background:#2c3550;}
+  .lb-list li:nth-child(1) .lb-rank{background:#ffd166;color:#1a1300;}
+  .lb-list li:nth-child(2) .lb-rank{background:#d9dee7;color:#10131a;}
+  .lb-list li:nth-child(3) .lb-rank{background:#e0a070;color:#1f1006;}
+  .lb-who{flex:1;min-width:0;}
+  .lb-n{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .lb-c{font-size:.75rem;color:var(--sub);}
+  .lb-pts{font-weight:800;white-space:nowrap;font-family:"Courier New",monospace;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.01ms !important;transition-duration:.01ms !important;}
+  }
+</style>
+</head>
+<body>
+<canvas id="bg" aria-hidden="true"></canvas>
+
+<div class="app">
+
+  <!-- ================= START ================= -->
+  <section class="screen active" id="scrStart">
+    <div class="hero">
+      <span class="kicker">UNIT 13</span>
+      <h1>Unit 13 Vocabulary</h1>
+      <p class="sub" style="color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.8)">Three mini-games under the floodlights. Can you score them all?</p>
+    </div>
+    <div class="panel">
+      <label for="inName">Your name</label>
+      <input type="text" id="inName" autocomplete="off" maxlength="40" placeholder="e.g. Minh Anh">
+      <label for="inClass">Your class</label>
+      <input type="text" id="inClass" autocomplete="off" maxlength="20" placeholder="e.g. 9A">
+      <button class="btn" id="btnStart" disabled>Kick Off ⚽</button>
+    </div>
+  </section>
+
+  <!-- ================= HOME ================= -->
+  <section class="screen" id="scrHome">
+    <div class="who"><span>Player: <b id="homeName"></b></span><span>Class: <b id="homeClass"></b></span></div>
+    <div id="mgList"></div>
+    <button class="btn gold" id="btnFinish" disabled>Finish &amp; See Results</button>
+    <p class="note" id="finishNote">Complete all three mini-games to finish.</p>
+  </section>
+
+  <!-- ================= QUIZ ================= -->
+  <section class="screen" id="scrQuiz">
+    <div class="topbar">
+      <button class="icon-btn" id="btnQuizHome">← Home</button>
+      <div class="mini" id="quizTitle"></div>
+      <div style="width:72px"></div>
+    </div>
+    <div class="scoreboard" aria-label="Score">
+      <span class="sb-team">HOME</span>
+      <span class="digit home" id="sbHome">0</span>
+      <span class="sb-dash">–</span>
+      <span class="digit away" id="sbAway">0</span>
+      <span class="sb-team">AWAY</span>
+    </div>
+    <div class="track-wrap">
+      <div class="track">
+        <div class="track-ball" id="trackBall">
+          <svg viewBox="0 0 26 26"><circle cx="13" cy="13" r="12" fill="#fff" stroke="#111" stroke-width="1.5"/>
+            <polygon points="13,8 17,11 15.5,15.5 10.5,15.5 9,11" fill="#111"/>
+            <path d="M13 8 L13 2 M17 11 L23 9 M15.5 15.5 L19 21 M10.5 15.5 L7 21 M9 11 L3 9" stroke="#111" stroke-width="1.3"/></svg>
+        </div>
+      </div>
+      <svg class="goal" viewBox="0 0 34 34" aria-hidden="true">
+        <rect x="4" y="4" width="26" height="26" fill="none" stroke="#fff" stroke-width="3"/>
+        <path d="M4 11h26M4 18h26M4 25h26M11 4v26M18 4v26M25 4v26" stroke="rgba(255,255,255,.4)" stroke-width="1"/>
+      </svg>
+    </div>
+    <div class="qcount" id="qCount"></div>
+
+    <div class="panel qcard">
+      <div class="mascot-row">
+        <svg class="mascot" id="mascot" viewBox="0 0 64 64" aria-hidden="true">
+          <circle cx="32" cy="32" r="29" fill="#fff" stroke="#0b1630" stroke-width="3"/>
+          <polygon points="32,4 39,9 37,16 27,16 25,9" fill="#0b1630"/>
+          <polygon points="6,30 11,23 16,28 14,36 8,37" fill="#0b1630"/>
+          <polygon points="58,30 53,23 48,28 50,36 56,37" fill="#0b1630"/>
+          <circle cx="23" cy="30" r="6" fill="#fff" stroke="#0b1630" stroke-width="2"/>
+          <circle cx="41" cy="30" r="6" fill="#fff" stroke="#0b1630" stroke-width="2"/>
+          <circle id="pupL" cx="24" cy="31" r="2.6" fill="#0b1630"/>
+          <circle id="pupR" cx="42" cy="31" r="2.6" fill="#0b1630"/>
+          <path id="mouth" d="M24 44 Q32 49 40 44" stroke="#0b1630" stroke-width="3" fill="none" stroke-linecap="round"/>
+        </svg>
+        <div class="prompt" id="prompt"></div>
+      </div>
+      <div class="opts" id="opts"></div>
+      <div class="feedback" id="feedback"></div>
+      <button class="btn" id="btnNext" disabled>Next →</button>
+    </div>
+  </section>
+
+  <!-- ================= MINI-GAME END ================= -->
+  <section class="screen" id="scrEnd">
+    <div class="panel center">
+      <h2 id="endTitle"></h2>
+      <p class="sub" id="endSub"></p>
+      <div class="big-score" id="endScore"></div>
+      <p class="sub" id="endAttempt"></p>
+      <div class="row">
+        <button class="btn ghost" id="btnEndRetry">Try Again</button>
+        <button class="btn" id="btnEndHome">Back to Home</button>
+      </div>
+      <p class="note">"Try Again" replays only this mini-game and counts as a new attempt.</p>
+    </div>
+  </section>
+
+  <!-- ================= FINAL RESULTS ================= -->
+  <section class="screen" id="scrResults">
+    <div class="hero" style="padding-top:2vh"><span class="kicker">FULL TIME</span><h1>Match Report</h1></div>
+    <div class="panel">
+      <div class="meta">
+        <div><small>Name</small><b id="resName"></b></div>
+        <div><small>Class</small><b id="resClass"></b></div>
+      </div>
+      <table class="res-table">
+        <thead><tr><th>Mini-game</th><th style="text-align:right">Score</th><th style="text-align:right">Attempt</th></tr></thead>
+        <tbody id="resBody"></tbody>
+      </table>
+      <div class="big-score" id="resAll" style="font-size:1.6rem"></div>
+      <p class="note" id="resTime"></p>
+      <p class="note" id="resSent"></p>
+      <button class="btn gold" id="btnTryAll">Try Again</button>
+      <p class="note">"Try Again" replays all three mini-games as a new attempt.</p>
+    </div>
+    <div class="lb-box" id="lb-box" hidden>
+      <h3>🏆 Top 5 Leaderboard</h3>
+      <p class="lb-note">Best result per student for this game</p>
+      <ol class="lb-list" id="lb-list"></ol>
+    </div>
+  </section>
+</div>
+
+<div class="goal-flash" id="goalFlash">GOAL!</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ============================================================
+  // CONFIG
+  // ============================================================
+  var GAME_NAME = 'Unit_13_Vocabulary';
+  var GAME_DATA_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyxAAXBx_SRQcUrw6fYBJ2A78-kJqKTf72suSy3OkKFGVJe9QPtFFX2RkMqCTwUrwOHDA/exec';
+
+  // ============================================================
+  // VOCABULARY (definitions for the second and third word lists are the textbook's;
+  // the first list has none in the book, so student-friendly ones are written here)
+  // ============================================================
+  var WORDS = {
+    confidence:    {pos:'noun', def:'the feeling that you can trust your own abilities'},
+    dedication:    {pos:'noun', def:'giving a lot of time and effort to something you care about'},
+    determination: {pos:'noun', def:'the quality of continuing to try, even when something is difficult'},
+    fearlessness:  {pos:'noun', def:'the quality of not being afraid'},
+    independence:  {pos:'noun', def:'the ability to do things by yourself, without needing help from others'},
+    selfishness:   {pos:'noun', def:'caring only about yourself and not about other people'},
+    skill:         {pos:'noun', def:'the ability to do something well, usually because of training or practice'},
+    strength:      {pos:'noun', def:'the quality of being physically or mentally strong'},
+    ambassador:    {pos:'noun', def:'a person who represents, speaks for, or advertises a particular organisation or group'},
+    award:         {pos:'noun', def:'a prize or an amount of money that is given to someone following an official decision'},
+    ferocious:     {pos:'adjective', def:'very strong and forceful'},
+    honour:        {pos:'noun', def:'an acknowledgement or show of respect for someone or something'},
+    praise:        {pos:'verb', def:'to say that you admire someone or something, or that they are very good'},
+    prolific:      {pos:'adjective', def:'a great number or amount of something'},
+    retirement:    {pos:'noun', def:'the act of stopping work, usually at a certain age'},
+    territory:     {pos:'noun', def:'an area of land, or sometimes sea, that is considered as belonging to or connected with a particular country'},
+    bewildering:   {pos:'adjective', def:'describing something that confuses and overpowers others'},
+    possessed:     {pos:'verb', def:'had, owned'},
+    feat:          {pos:'noun', def:'achievement (usually requiring a lot of skill)'},
+    strikers:      {pos:'noun', def:'attacking football players who try to score goals'},
+    humility:      {pos:'noun', def:'the feeling that you are no better than other people'}
+  };
+  var ALL_WORDS = Object.keys(WORDS);
+
+  // Mini-game 2 — words used here never appear in Mini-game 3 (not even as wrong options)
+  var CONTEXT_ITEMS = [
+    {w:'ambassador', s:'After she stopped playing, Mai became an ___ for a children\'s sports charity, speaking for it at events around the world.'},
+    {w:'award', s:'At the end of the season, she received the Player of the Year ___ and a cash prize.'},
+    {w:'honour', s:'It was a great ___ for her to carry the national flag at the opening ceremony.'},
+    {w:'praise', s:'Coaches from every team love to ___ her calm leadership on the pitch.'},
+    {w:'prolific', s:'She was a ___ goal scorer, finding the net more than 200 times in her career.'},
+    {w:'retirement', s:'Fans cried when she announced her ___ from football at the age of 36.'},
+    {w:'territory', s:'Before the World Cup, the team played a friendly match in Gibraltar, a British ___ near Spain.'},
+    {w:'bewildering', s:'Her ___ footwork left defenders confused, unsure which way she would go next.'},
+    {w:'possessed', s:'Even as a teenager, she ___ a powerful left foot that few adults could match.'},
+    {w:'feat', s:'Scoring a hat-trick in a World Cup final is an amazing ___ that very few players have achieved.'}
+  ];
+
+  // Mini-game 3 — scenario questions
+  var QUALITY_ITEMS = [
+    {w:'confidence', ask:'Which quality does this show?', s:'Before the penalty, Tom smiled and said, "I know I can score this. I\'ve practised it a thousand times."'},
+    {w:'dedication', ask:'Which quality does this show?', s:'Lan has trained every morning at 5 a.m. for ten years, even during the holidays.'},
+    {w:'determination', ask:'Which quality does this show?', s:'After losing the final two years in a row, the team refused to give up and finally won on their third try.'},
+    {w:'fearlessness', ask:'Which quality does this show?', s:'The goalkeeper dived head-first at the attacker\'s feet without worrying about getting hurt.'},
+    {w:'independence', ask:'Which quality does this show?', s:'With no coach to help him, Minh planned his own training and travelled to tournaments alone.'},
+    {w:'selfishness', ask:'Which quality does this show?', s:'Instead of passing to his teammate in front of an empty goal, Bao shot from an impossible angle because he wanted the goal for himself.'},
+    {w:'skill', ask:'Which quality does this show?', s:'With one touch, she flicked the ball over the defender\'s head and volleyed it into the top corner.'},
+    {w:'strength', ask:'Which quality does this show?', exclude:['ferocious'], s:'The midfielder was the strongest player on his team. Even when two big defenders pushed him hard, his powerful body kept him on his feet, and he kept the ball.'},
+    {w:'humility', ask:'Which quality does this show?', s:'After scoring the winning goal, she thanked her teammates and said, "I\'m just one small part of this team."'},
+    {w:'ferocious', ask:'Which word best describes the shot?', exclude:['strength'], s:'He ran at the ball and hit it with so much force that it flew like a rocket, the goalkeeper ducked out of the way, and it ripped through the net.'}
+  ];
+
+  var MINI_GAMES = [
+    {id:'def', title:'Definition Match', icon:'A', desc:'Read the definition. Pick the word. (21 questions)'},
+    {id:'ctx', title:'Context Clues', icon:'B', desc:'Complete the football story sentences. (10 questions)'},
+    {id:'qual', title:'Which Quality?', icon:'C', desc:'Read about the player. Name the quality. (10 questions)'}
+  ];
+
+  // ============================================================
+  // HELPERS
+  // ============================================================
+  function $(id){ return document.getElementById(id); }
+  function shuffle(a){
+    a = a.slice();
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+  function pickDistractors(answer, pool, n, preferPos){
+    var others = pool.filter(function (w) { return w !== answer; });
+    var out = [];
+    if (preferPos) {
+      shuffle(others.filter(function (w) { return WORDS[w].pos === preferPos; })).forEach(function (w) { if (out.length < n) out.push(w); });
+    }
+    shuffle(others).forEach(function (w) { if (out.length < n && out.indexOf(w) === -1) out.push(w); });
+    return out;
+  }
+
+  function buildQuestions(id){
+    var qs = [];
+    if (id === 'def') {
+      ALL_WORDS.forEach(function (w) {
+        qs.push({ type:'def', answer:w,
+          html: '<span class="ask">Which word matches this definition?</span>' + WORDS[w].def + '<br><span class="pos">' + WORDS[w].pos + '</span>',
+          options: shuffle([w].concat(pickDistractors(w, ALL_WORDS, 3, WORDS[w].pos))) });
+      });
+    } else if (id === 'ctx') {
+      var pool = CONTEXT_ITEMS.map(function (x) { return x.w; });
+      CONTEXT_ITEMS.forEach(function (it) {
+        qs.push({ type:'ctx', answer:it.w,
+          html: '<span class="ask">Choose the missing word</span>' + it.s.replace('___', '<span class="blank"></span>'),
+          options: shuffle([it.w].concat(pickDistractors(it.w, pool, 3))) });
+      });
+    } else {
+      var pool2 = QUALITY_ITEMS.map(function (x) { return x.w; });
+      QUALITY_ITEMS.forEach(function (it) {
+        // words in "exclude" never appear as wrong options for this question (they're too close in meaning)
+        var itemPool = pool2.filter(function (w) { return !it.exclude || it.exclude.indexOf(w) === -1; });
+        qs.push({ type:'qual', answer:it.w,
+          html: '<span class="ask">' + it.ask + '</span>' + it.s,
+          options: shuffle([it.w].concat(pickDistractors(it.w, itemPool, 3))) });
+      });
+    }
+    return shuffle(qs);
+  }
+
+  // ============================================================
+  // STATE
+  // ============================================================
+  var S = {
+    name:'', cls:'', startTime:0, submitted:false, cur:-1,
+    mg: MINI_GAMES.map(function () { return { attempts:1, status:'new', qs:[], idx:0, answered:false, correct:0, wrong:0 }; })
+  };
+
+  function resetMini(i){
+    var m = S.mg[i];
+    m.qs = buildQuestions(MINI_GAMES[i].id);
+    m.idx = 0; m.answered = false; m.correct = 0; m.wrong = 0; m.status = 'play';
+  }
+
+  // ============================================================
+  // SCREENS
+  // ============================================================
+  var SCENE_SCREENS = { scrStart:1, scrHome:1, scrResults:1 };
+  function show(id){
+    Array.prototype.forEach.call(document.querySelectorAll('.screen'), function (s) { s.classList.remove('active'); });
+    $(id).classList.add('active');
+    var dim = !SCENE_SCREENS[id];
+    document.body.classList.toggle('dim', dim);
+    Scene.setActive(!dim);
+    window.scrollTo(0, 0);
+  }
+
+  // ---------- Start ----------
+  function checkStart(){ $('btnStart').disabled = !($('inName').value.trim() && $('inClass').value.trim()); }
+  $('inName').addEventListener('input', checkStart);
+  $('inClass').addEventListener('input', checkStart);
+  $('btnStart').addEventListener('click', function () {
+    S.name = $('inName').value.trim(); S.cls = $('inClass').value.trim();
+    if (!S.name || !S.cls) return;
+    S.startTime = Date.now();
+    $('homeName').textContent = S.name; $('homeClass').textContent = S.cls;
+    renderHome(); show('scrHome');
+  });
+
+  // ---------- Home ----------
+  function renderHome(){
+    var list = $('mgList'); list.textContent = '';
+    MINI_GAMES.forEach(function (g, i) {
+      var m = S.mg[i], total = m.qs.length || (g.id === 'def' ? ALL_WORDS.length : 10);
+      var done = m.status === 'done' ? total : (m.status === 'play' ? m.idx + (m.answered ? 1 : 0) : 0);
+      var b = document.createElement('button'); b.className = 'mg-card'; b.type = 'button';
+      var badge = m.status === 'done' ? '<span class="badge done">DONE</span>' : (m.status === 'play' ? '<span class="badge prog">IN PROGRESS</span>' : '');
+      var status = m.status === 'done' ? 'Score: <b>' + m.correct + '/' + total + '</b> · Attempt ' + m.attempts
+                 : m.status === 'play' ? 'Question <b>' + Math.min(m.idx + 1, total) + '/' + total + '</b> · Tap to continue'
+                 : 'Not started · Tap to play';
+      b.innerHTML = '<div class="mg-icon">' + g.icon + '</div><div class="mg-info"><div class="mg-title">' + g.title + badge +
+        '</div><div class="mg-desc">' + g.desc + '</div><div class="bar"><i style="width:' + Math.round(done / total * 100) +
+        '%"></i></div><div class="mg-status">' + status + '</div></div>';
+      b.addEventListener('click', function () { openMini(i); });
+      list.appendChild(b);
+    });
+    var all = S.mg.every(function (m) { return m.status === 'done'; });
+    $('btnFinish').disabled = !all;
+    $('finishNote').textContent = all ? 'All mini-games complete — finish to submit your results.' : 'Complete all three mini-games to finish.';
+  }
+  $('btnFinish').addEventListener('click', function () {
+    if (S.mg.every(function (m) { return m.status === 'done'; })) showResults();
+  });
+
+  function openMini(i){
+    S.cur = i;
+    var m = S.mg[i];
+    if (m.status === 'done') { showEnd(); return; }
+    if (m.status === 'new') resetMini(i);
+    renderQuestion(); show('scrQuiz');
+  }
+
+  // ---------- Quiz ----------
+  var MOUTH = { neutral:'M24 44 Q32 49 40 44', happy:'M21 41 Q32 54 43 41', sad:'M23 48 Q32 41 41 48' };
+  function setMascot(state){
+    var el = $('mascot');
+    el.classList.remove('happy', 'sad');
+    void el.getBoundingClientRect();
+    if (state !== 'neutral') el.classList.add(state);
+    $('mouth').setAttribute('d', MOUTH[state]);
+    var dy = state === 'sad' ? 2 : (state === 'happy' ? -1 : 0);
+    $('pupL').setAttribute('cy', 31 + dy); $('pupR').setAttribute('cy', 31 + dy);
+  }
+  function setDigit(el, val){
+    if (el.textContent === String(val)) return;
+    el.textContent = val; el.classList.remove('flip'); void el.offsetWidth; el.classList.add('flip');
+  }
+  function updateTrack(){
+    var m = S.mg[S.cur], total = m.qs.length;
+    var doneCount = m.idx + (m.answered ? 1 : 0);
+    var ball = $('trackBall');
+    ball.style.left = 'calc(' + (doneCount / total * 100) + '% - ' + (doneCount / total * 24) + 'px)';
+    ball.classList.remove('roll'); void ball.offsetWidth; ball.classList.add('roll');
+  }
+
+  function renderQuestion(){
+    var m = S.mg[S.cur], q = m.qs[m.idx], g = MINI_GAMES[S.cur];
+    $('quizTitle').textContent = g.title;
+    $('qCount').textContent = 'Question ' + (m.idx + 1) + ' of ' + m.qs.length;
+    setDigit($('sbHome'), m.correct); setDigit($('sbAway'), m.wrong);
+    $('prompt').innerHTML = q.html;
+    var opts = $('opts'); opts.textContent = '';
+    q.options.forEach(function (w) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'opt'; b.textContent = w;
+      b.dataset.word = w;
+      b.addEventListener('click', function () { answer(w); });
+      opts.appendChild(b);
+    });
+    var fb = $('feedback'); fb.className = 'feedback'; fb.textContent = '';
+    $('btnNext').disabled = true;
+    $('btnNext').textContent = m.idx === m.qs.length - 1 ? 'Final Whistle →' : 'Next →';
+    setMascot('neutral');
+    updateTrack();
+    if (m.answered) applyAnswered(q.chosen, false);
+  }
+
+  function answer(w){
+    var m = S.mg[S.cur];
+    if (m.answered) return;
+    var q = m.qs[m.idx];
+    m.answered = true; q.chosen = w;
+    var ok = w === q.answer;
+    if (ok) m.correct++; else m.wrong++;
+    applyAnswered(w, true);
+  }
+
+  function applyAnswered(w, fresh){
+    var m = S.mg[S.cur], q = m.qs[m.idx], ok = w === q.answer;
+    Array.prototype.forEach.call(document.querySelectorAll('#opts .opt'), function (b) {
+      b.disabled = true;
+      var word = b.dataset.word;
+      if (word === q.answer) { b.classList.add('correct'); b.innerHTML = ''; b.textContent = word; addMark(b, '✓'); }
+      else if (word === w) { b.classList.add('wrong'); addMark(b, '✗'); }
+      else b.classList.add('dimmed');
+    });
+    var fb = $('feedback');
+    fb.className = 'feedback show ' + (ok ? 'ok' : 'no');
+    fb.textContent = '';
+    var v = document.createElement('span'); v.className = 'verdict';
+    v.textContent = ok ? 'Correct! Great shot.' : 'Not quite — the answer is "' + q.answer + '".';
+    fb.appendChild(v);
+    var d = document.createElement('span');
+    d.innerHTML = '<b>' + q.answer + '</b> (' + WORDS[q.answer].pos + '): ' + WORDS[q.answer].def;
+    fb.appendChild(d);
+    $('btnNext').disabled = false;
+    setDigit($('sbHome'), m.correct); setDigit($('sbAway'), m.wrong);
+    updateTrack();
+    if (fresh) { setMascot(ok ? 'happy' : 'sad'); if (ok) goalCelebration(); }
+    else setMascot(ok ? 'happy' : 'sad');
+  }
+  function addMark(b, t){ var s = document.createElement('span'); s.className = 'mark'; s.textContent = t; b.appendChild(s); }
+
+  $('btnNext').addEventListener('click', function () {
+    var m = S.mg[S.cur];
+    if (!m.answered) return;
+    if (m.idx < m.qs.length - 1) { m.idx++; m.answered = false; renderQuestion(); window.scrollTo(0, 0); }
+    else { m.status = 'done'; showEnd(); }
+  });
+  $('btnQuizHome').addEventListener('click', function () { renderHome(); show('scrHome'); });
+
+  function goalCelebration(){
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var f = $('goalFlash'); f.classList.remove('go'); void f.offsetWidth; f.classList.add('go');
+    var colors = ['#39ff88', '#ffd166', '#ffffff', '#5ec8ff', '#ff5a6e'];
+    for (var i = 0; i < 22; i++) {
+      var c = document.createElement('span'); c.className = 'confetti';
+      c.style.left = (40 + Math.random() * 20) + '%';
+      c.style.background = colors[i % colors.length];
+      c.style.setProperty('--dx', (Math.random() * 300 - 150) + 'px');
+      c.style.setProperty('--dy', (Math.random() * 300 + 60) + 'px');
+      c.style.setProperty('--rot', (Math.random() * 720 - 360) + 'deg');
+      document.body.appendChild(c);
+      setTimeout((function (el) { return function () { el.remove(); }; })(c), 1300);
+    }
+  }
+
+  // ---------- Mini-game end ----------
+  function showEnd(){
+    var m = S.mg[S.cur], g = MINI_GAMES[S.cur];
+    $('endTitle').textContent = g.title + ' — Full Time!';
+    var pct = m.correct / m.qs.length;
+    $('endSub').textContent = pct === 1 ? 'Perfect game! A true champion.' : pct >= 0.7 ? 'Strong performance!' : pct >= 0.5 ? 'Good effort — keep training!' : 'Tough match. Try again to improve!';
+    $('endScore').textContent = m.correct + '/' + m.qs.length;
+    $('endAttempt').textContent = 'Attempt ' + m.attempts;
+    $('btnEndRetry').disabled = S.submitted;
+    show('scrEnd');
+  }
+  $('btnEndRetry').addEventListener('click', function () {
+    if (S.submitted) return;
+    S.mg[S.cur].attempts++;
+    resetMini(S.cur); renderQuestion(); show('scrQuiz');
+  });
+  $('btnEndHome').addEventListener('click', function () { renderHome(); show('scrHome'); });
+
+  // ---------- Final results ----------
+  function scoreString(){ return S.mg.map(function (m) { return m.correct + '/' + m.qs.length; }).join(', '); }
+  function attemptsString(){ return S.mg.map(function (m) { return m.attempts; }).join(','); }
+
+  function showResults(){
+    $('resName').textContent = S.name; $('resClass').textContent = S.cls;
+    var body = $('resBody'); body.textContent = '';
+    MINI_GAMES.forEach(function (g, i) {
+      var m = S.mg[i], tr = document.createElement('tr');
+      tr.innerHTML = '<td></td><td class="num"></td><td class="num"></td>';
+      tr.children[0].textContent = g.title;
+      tr.children[1].textContent = m.correct + '/' + m.qs.length;
+      tr.children[2].textContent = m.attempts;
+      body.appendChild(tr);
+    });
+    $('resAll').textContent = scoreString();
+    var minutesPlayed = Math.max(1, Math.round((Date.now() - S.startTime) / 60000));
+    $('resTime').textContent = 'Time played: about ' + minutesPlayed + ' min';
+    show('scrResults');
+
+    var freshSubmit = !S.submitted;
+    if (!S.submitted) {
+      S.submitted = true;   // duplicate-submission guard: fires once per completed playthrough
+      submitGameData({
+        gameName: GAME_NAME,
+        studentName: S.name,
+        class: S.cls,
+        score: scoreString(),
+        minutesPlayed: minutesPlayed,
+        attempts: attemptsString()
+      });
+      $('resSent').textContent = '✓ Results sent to your teacher.';
+    }
+    loadLeaderboard(freshSubmit ? 2500 : 0);
+  }
+
+  $('btnTryAll').addEventListener('click', function () {
+    // New full playthrough: every mini-game counts a new attempt
+    S.mg.forEach(function (m, i) { m.attempts++; m.status = 'new'; m.qs = []; m.idx = 0; m.answered = false; m.correct = 0; m.wrong = 0; });
+    S.submitted = false; S.startTime = Date.now();
+    $('resSent').textContent = '';
+    $('lb-box').hidden = true;
+    renderHome(); show('scrHome');
+  });
+
+  // ============================================================
+  // DATA SUBMISSION
+  // ============================================================
+  function submitGameData(data){
+    try {
+      fetch(GAME_DATA_ENDPOINT, {
+        method: 'POST', mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(data)
+      }).catch(function (err) { console.error('Data submission failed:', err); });
+    } catch (err) { console.error('Data submission failed:', err); }
+  }
+
+  // ============================================================
+  // LEADERBOARD: top 5 for this game from the Google Sheet. Hidden if unavailable.
+  // ============================================================
+  function loadLeaderboard(delayMs){
+    setTimeout(function () {
+      fetch(GAME_DATA_ENDPOINT + '?action=leaderboard&limit=5&game=' + encodeURIComponent(GAME_NAME))
+        .then(function (r) { return r.json(); })
+        .then(function (res) {
+          var box = $('lb-box'), list = $('lb-list');
+          if (!res || !res.games) return;
+          var rows = res.games[GAME_NAME] || [];
+          if (!rows.length) return;
+          var me = S.name.toLowerCase(), myCls = S.cls.toLowerCase();
+          list.textContent = '';
+          rows.forEach(function (r, i) {
+            var li = document.createElement('li');
+            if (String(r.name).toLowerCase() === me && String(r.cls || '').toLowerCase() === myCls) li.className = 'me';
+            var rank = document.createElement('div'); rank.className = 'lb-rank'; rank.textContent = String(i + 1);
+            var who = document.createElement('div'); who.className = 'lb-who';
+            var n = document.createElement('div'); n.className = 'lb-n'; n.textContent = r.name;
+            var c = document.createElement('div'); c.className = 'lb-c'; c.textContent = r.cls ? 'Class ' + r.cls : '';
+            who.appendChild(n); who.appendChild(c);
+            var pts = document.createElement('div'); pts.className = 'lb-pts'; pts.textContent = r.score;
+            li.appendChild(rank); li.appendChild(who); li.appendChild(pts);
+            list.appendChild(li);
+          });
+          box.hidden = false;
+        })
+        .catch(function () { /* offline or not set up: leaderboard stays hidden */ });
+    }, delayMs || 0);
+  }
+
+  // ============================================================
+  // PAINTERLY STADIUM SCENE (canvas, code-drawn, no image files, no haze)
+  // ============================================================
+  var Scene = (function () {
+    var cvs = $('bg'), ctx = cvs.getContext('2d');
+    var base = document.createElement('canvas'), bctx = base.getContext('2d');
+    var W = 0, H = 0, DPR = 1, active = true, raf = 0, motes = [], flashes = [], lamps = [], crowdSpots = [];
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function rng(seed){ return function () { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }; }
+
+    function drawBase(){
+      var c = bctx, R = rng(1337), s = Math.max(0.6, Math.min(W, H) / 700);
+      lamps = []; crowdSpots = [];
+      var roofY = H * 0.30, standBot = H * 0.585, pitchTop = standBot + H * 0.014;
+
+      // --- sky at dusk ---
+      var g = c.createLinearGradient(0, 0, 0, standBot);
+      g.addColorStop(0, '#120c33'); g.addColorStop(0.35, '#3b2366'); g.addColorStop(0.62, '#a24a72'); g.addColorStop(0.85, '#f08a56'); g.addColorStop(1, '#ffc27a');
+      c.fillStyle = g; c.fillRect(0, 0, W, standBot);
+      // stars
+      for (var i = 0; i < 70; i++) { c.fillStyle = 'rgba(255,255,255,' + (0.2 + R() * 0.6) + ')'; c.fillRect(R() * W, R() * H * 0.14, 1.2 * s, 1.2 * s); }
+      // painterly cloud strokes
+      for (i = 0; i < 90; i++) {
+        var cy = H * (0.04 + R() * 0.26), cx = R() * W, rx = (30 + R() * 140) * s, ry = (3 + R() * 9) * s;
+        var warm = cy / (H * 0.3);
+        c.fillStyle = 'rgba(' + Math.round(150 + 105 * warm) + ',' + Math.round(90 + 70 * warm) + ',' + Math.round(150 - 40 * warm) + ',' + (0.05 + R() * 0.12) + ')';
+        c.beginPath(); c.ellipse(cx, cy, rx, ry, (R() - 0.5) * 0.12, 0, Math.PI * 2); c.fill();
+      }
+      // setting-sun glow behind the stadium
+      var sg = c.createRadialGradient(W * 0.5, roofY, 0, W * 0.5, roofY, W * 0.7);
+      sg.addColorStop(0, 'rgba(255,190,120,.55)'); sg.addColorStop(1, 'rgba(255,190,120,0)');
+      c.fillStyle = sg; c.fillRect(0, 0, W, standBot);
+
+      // --- stadium roof silhouette ---
+      c.fillStyle = '#100b20';
+      c.beginPath(); c.moveTo(0, roofY - H * 0.035);
+      c.quadraticCurveTo(W * 0.5, roofY + H * 0.01, W, roofY - H * 0.035);
+      c.lineTo(W, roofY + H * 0.02); c.lineTo(0, roofY + H * 0.02); c.closePath(); c.fill();
+      c.strokeStyle = 'rgba(255,200,150,.35)'; c.lineWidth = 1.5 * s;
+      c.beginPath(); c.moveTo(0, roofY - H * 0.035); c.quadraticCurveTo(W * 0.5, roofY + H * 0.01, W, roofY - H * 0.035); c.stroke();
+      // roof truss lines
+      c.strokeStyle = 'rgba(255,255,255,.07)'; c.lineWidth = 1 * s;
+      for (i = 0; i <= 24; i++) { var tx = W * i / 24; c.beginPath(); c.moveTo(tx, roofY - H * 0.02); c.lineTo(tx, roofY + H * 0.02); c.stroke(); }
+
+      // --- stands ---
+      var sgr = c.createLinearGradient(0, roofY, 0, standBot);
+      sgr.addColorStop(0, '#1c1533'); sgr.addColorStop(1, '#2a1f45');
+      c.fillStyle = sgr; c.fillRect(0, roofY + H * 0.02, W, standBot - roofY - H * 0.02);
+      for (i = 1; i < 6; i++) {
+        var ty = roofY + H * 0.02 + (standBot - roofY - H * 0.02) * i / 6;
+        c.fillStyle = 'rgba(255,255,255,.05)'; c.fillRect(0, ty, W, 2 * s);
+      }
+      // crowd: painterly dabs, lit from the floodlights on both sides
+      var step = 5.2 * s, shirt = ['#c8263a', '#f4f4f4', '#2b62d9', '#ffcf3a', '#1e9e57', '#ff7a2f', '#7b3fc4'];
+      for (var y = roofY + H * 0.03; y < standBot - 4 * s; y += step) {
+        for (var x = -step; x < W + step; x += step) {
+          if (R() < 0.08) continue;
+          var px = x + (R() - 0.5) * step * 0.9, py = y + (R() - 0.5) * step * 0.5;
+          var light = Math.max(0, 1 - Math.min(px, W - px) / (W * 0.55));
+          c.fillStyle = shirt[Math.floor(R() * shirt.length)];
+          c.globalAlpha = 0.35 + light * 0.4;
+          c.fillRect(px - 1.8 * s, py + 1.4 * s, 3.6 * s, 2.8 * s);
+          c.globalAlpha = 1;
+          var l = Math.round(14 + R() * 16 + light * 22);
+          c.fillStyle = 'hsl(' + Math.round(20 + R() * 25) + ',35%,' + l + '%)';
+          c.beginPath(); c.arc(px, py, (1.4 + R() * 0.9) * s, 0, Math.PI * 2); c.fill();
+          if (R() < 0.5) { c.fillStyle = 'rgba(255,225,180,' + (0.15 + light * 0.45) + ')';
+            c.beginPath(); c.arc(px + (px < W / 2 ? -0.7 : 0.7) * s, py - 0.7 * s, 0.7 * s, 0, Math.PI * 2); c.fill(); }
+          if (R() < 0.02) crowdSpots.push([px, py]);
+        }
+      }
+      // advertising boards
+      var ag = c.createLinearGradient(0, 0, W, 0);
+      ag.addColorStop(0, '#0dd1ff'); ag.addColorStop(0.33, '#39ff88'); ag.addColorStop(0.66, '#ffd166'); ag.addColorStop(1, '#ff4fa3');
+      c.fillStyle = '#05060c'; c.fillRect(0, standBot, W, pitchTop - standBot);
+      c.globalAlpha = 0.85; c.fillStyle = ag; c.fillRect(0, standBot + (pitchTop - standBot) * 0.2, W, (pitchTop - standBot) * 0.6); c.globalAlpha = 1;
+
+      // --- pitch ---
+      var pg = c.createLinearGradient(0, pitchTop, 0, H);
+      pg.addColorStop(0, '#2c7a3f'); pg.addColorStop(1, '#0f3a1e');
+      c.fillStyle = pg; c.fillRect(0, pitchTop, W, H - pitchTop);
+      var N = 12;
+      for (i = 0; i < N; i += 2) {
+        var y0 = pitchTop + (H - pitchTop) * Math.pow(i / N, 1.5), y1 = pitchTop + (H - pitchTop) * Math.pow((i + 1) / N, 1.5);
+        c.fillStyle = 'rgba(255,255,255,.045)'; c.fillRect(0, y0, W, y1 - y0);
+      }
+      // grass brush dabs
+      for (i = 0; i < 2600; i++) {
+        var gx = R() * W, gy = pitchTop + R() * (H - pitchTop), depth = (gy - pitchTop) / (H - pitchTop);
+        c.strokeStyle = R() < 0.5 ? 'rgba(120,200,110,' + (0.06 + R() * 0.1) + ')' : 'rgba(10,40,20,' + (0.08 + R() * 0.12) + ')';
+        c.lineWidth = (0.6 + depth * 1.4) * s;
+        c.beginPath(); c.moveTo(gx, gy); c.lineTo(gx + (R() - 0.5) * 2 * s, gy - (2 + depth * 6) * s); c.stroke();
+      }
+      // pitch markings
+      c.strokeStyle = 'rgba(255,255,255,.75)'; c.lineWidth = 2 * s;
+      c.beginPath(); c.moveTo(0, pitchTop + 6 * s); c.lineTo(W, pitchTop + 6 * s); c.stroke();
+      c.beginPath(); c.moveTo(W / 2, pitchTop + 6 * s); c.lineTo(W / 2, H); c.stroke();
+      var ccy = pitchTop + (H - pitchTop) * 0.5;
+      c.beginPath(); c.ellipse(W / 2, ccy, W * 0.24, (H - pitchTop) * 0.2, 0, 0, Math.PI * 2); c.stroke();
+      c.fillStyle = '#fff'; c.beginPath(); c.ellipse(W / 2, ccy, 3 * s, 2 * s, 0, 0, Math.PI * 2); c.fill();
+
+      // --- floodlight towers (light from upper left and upper right) ---
+      [[W * 0.07, 1], [W * 0.93, -1]].forEach(function (t) {
+        var bx = t[0], top = H * 0.07, w = Math.max(5, 6 * s);
+        c.strokeStyle = '#0a0714'; c.lineWidth = w;
+        c.beginPath(); c.moveTo(bx, standBot); c.lineTo(bx, top + H * 0.04); c.stroke();
+        c.lineWidth = 1 * s; c.strokeStyle = 'rgba(255,220,180,.25)';
+        for (var yy = top + H * 0.05; yy < standBot; yy += 14 * s) { c.beginPath(); c.moveTo(bx - w, yy); c.lineTo(bx + w, yy + 10 * s); c.stroke(); }
+        var pw = Math.max(46, W * 0.15), ph = H * 0.045, lx = bx - pw / 2 + t[1] * pw * 0.15;
+        c.fillStyle = '#0a0714'; c.fillRect(lx - 3, top - 3, pw + 6, ph + 6);
+        for (var r = 0; r < 3; r++) for (var k = 0; k < 5; k++) {
+          var cx2 = lx + pw * (k + 0.5) / 5, cy2 = top + ph * (r + 0.5) / 3;
+          lamps.push([cx2, cy2]);
+          c.fillStyle = '#fffbe8'; c.beginPath(); c.arc(cx2, cy2, Math.min(pw / 12, ph / 7), 0, Math.PI * 2); c.fill();
+        }
+        // pool of light on the pitch below this tower
+        c.globalCompositeOperation = 'lighter';
+        var pool = c.createRadialGradient(bx + t[1] * W * 0.22, pitchTop + (H - pitchTop) * 0.35, 0, bx + t[1] * W * 0.22, pitchTop + (H - pitchTop) * 0.35, W * 0.55);
+        pool.addColorStop(0, 'rgba(255,245,210,.16)'); pool.addColorStop(1, 'rgba(255,245,210,0)');
+        c.fillStyle = pool; c.fillRect(0, pitchTop, W, H - pitchTop);
+        c.globalCompositeOperation = 'source-over';
+      });
+
+      // vignette
+      var vg = c.createRadialGradient(W / 2, H * 0.55, Math.min(W, H) * 0.25, W / 2, H * 0.55, Math.max(W, H) * 0.8);
+      vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,10,.6)');
+      c.fillStyle = vg; c.fillRect(0, 0, W, H);
+
+      // drifting light particles
+      motes = [];
+      var Rm = rng(42);
+      for (i = 0; i < 55; i++) motes.push({ x: Rm() * W, y: Rm() * H, r: (0.6 + Rm() * 1.8) * s, vy: -(0.08 + Rm() * 0.3) * s, ph: Rm() * 6.28, sp: 0.01 + Rm() * 0.03 });
+    }
+
+    function frame(t){
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      ctx.drawImage(base, 0, 0, W, H);
+      ctx.globalCompositeOperation = 'lighter';
+      // floodlight glow with a gentle flicker
+      var flick = 0.85 + Math.sin(t / 700) * 0.05 + Math.sin(t / 173) * 0.03;
+      lamps.forEach(function (p) {
+        var r = Math.min(W, H) * 0.06;
+        var g = ctx.createRadialGradient(p[0], p[1], 0, p[0], p[1], r);
+        g.addColorStop(0, 'rgba(255,250,225,' + (0.22 * flick) + ')'); g.addColorStop(1, 'rgba(255,250,225,0)');
+        ctx.fillStyle = g; ctx.fillRect(p[0] - r, p[1] - r, r * 2, r * 2);
+      });
+      // camera flashes in the crowd
+      if (!reduce && crowdSpots.length && Math.random() < 0.05) flashes.push({ p: crowdSpots[Math.floor(Math.random() * crowdSpots.length)], life: 1 });
+      flashes = flashes.filter(function (f) {
+        var r = 7 * f.life + 2;
+        var g = ctx.createRadialGradient(f.p[0], f.p[1], 0, f.p[0], f.p[1], r);
+        g.addColorStop(0, 'rgba(255,255,255,' + f.life + ')'); g.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = g; ctx.fillRect(f.p[0] - r, f.p[1] - r, r * 2, r * 2);
+        f.life -= 0.12; return f.life > 0;
+      });
+      // drifting golden motes
+      motes.forEach(function (m) {
+        if (!reduce) { m.y += m.vy; m.ph += m.sp; m.x += Math.sin(m.ph) * 0.25; if (m.y < -5) { m.y = H + 5; m.x = Math.random() * W; } }
+        var a = 0.25 + 0.35 * (0.5 + 0.5 * Math.sin(m.ph * 2));
+        ctx.fillStyle = 'rgba(255,215,140,' + a + ')';
+        ctx.beginPath(); ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2); ctx.fill();
+      });
+      ctx.globalCompositeOperation = 'source-over';
+    }
+
+    function loop(t){ frame(t || 0); if (active && !reduce) raf = requestAnimationFrame(loop); }
+
+    function resize(){
+      var nw = window.innerWidth, nh = window.innerHeight;
+      if (Math.abs(nw - W) < 2 && Math.abs(nh - H) < 80 && W) return;   // ignore mobile URL-bar jiggle
+      W = nw; H = nh; DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+      cvs.width = Math.round(W * DPR); cvs.height = Math.round(H * DPR);
+      base.width = Math.round(W * DPR); base.height = Math.round(H * DPR);
+      bctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      drawBase(); frame(0);
+    }
+    var rt;
+    window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(resize, 200); });
+    resize();
+
+    return {
+      setActive: function (on){
+        active = on; cancelAnimationFrame(raf);
+        if (on && !reduce) raf = requestAnimationFrame(loop); else frame(0);   // dim screens: one still frame, no animation cost
+      }
+    };
+  })();
+  Scene.setActive(true);
+})();
+</script>
+</body>
+</html>
