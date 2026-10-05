@@ -156,6 +156,102 @@
     margin-top:32px;
     text-shadow:0 1px 6px rgba(0,0,0,.5);
   }
+
+  /* ---------- Leaderboard ---------- */
+  .lb{
+    margin-top:32px;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:16px;
+    backdrop-filter: blur(6px);
+  }
+  .lb h2{
+    font-size:1.1rem;
+    margin:0 0 4px;
+  }
+  .lb .lb-sub{
+    color:var(--sub);
+    font-size:0.8rem;
+    margin:0 0 12px;
+  }
+  .lb select{
+    width:100%;
+    font:inherit;
+    font-size:0.95rem;
+    color:var(--text);
+    background:#11151c;
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:10px 12px;
+    margin-bottom:12px;
+  }
+  .lb ol{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .lb li{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background:#11151c;
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:10px 12px;
+  }
+  .lb .rank{
+    flex:0 0 auto;
+    width:28px;
+    height:28px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    font-size:0.85rem;
+    background:#2c3240;
+    color:var(--text);
+  }
+  .lb li:nth-child(1) .rank{ background:#ffd166; color:#1a1300; }
+  .lb li:nth-child(2) .rank{ background:#d9dee7; color:#10131a; }
+  .lb li:nth-child(3) .rank{ background:#e0a070; color:#1f1006; }
+  .lb .who{
+    flex:1 1 auto;
+    min-width:0;
+  }
+  .lb .who .n{
+    font-weight:600;
+    font-size:0.95rem;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .lb .who .c{
+    color:var(--sub);
+    font-size:0.78rem;
+  }
+  .lb .pts{
+    flex:0 0 auto;
+    text-align:right;
+    font-weight:700;
+    font-size:0.95rem;
+  }
+  .lb .pts small{
+    display:block;
+    color:var(--sub);
+    font-weight:400;
+    font-size:0.72rem;
+  }
+  .lb .lb-msg{
+    color:var(--sub);
+    font-size:0.9rem;
+    text-align:center;
+    margin:8px 0 0;
+  }
 </style>
 </head>
 <body>
@@ -174,6 +270,14 @@
   <div class="grid" id="gameGrid">
     <p id="status" style="color:var(--sub);text-align:center;">Loading games…</p>
   </div>
+
+  <section class="lb" id="lbBox" hidden>
+    <h2>Top 5 Leaderboard</h2>
+    <p class="lb-sub">Best result per student. Ties are decided by time, then attempts.</p>
+    <select id="lbSelect" aria-label="Choose a game"></select>
+    <ol id="lbList"></ol>
+    <p class="lb-msg" id="lbMsg"></p>
+  </section>
 
   <footer>Tap a card to open the game</footer>
 </div>
@@ -578,6 +682,62 @@
   }
 
   loadGames();
+})();
+
+/* =========================================================
+   Leaderboard — top 5 per game, read from the Google Sheet
+   (needs the leaderboard doGet added to the Apps Script)
+   ========================================================= */
+(() => {
+  const ENDPOINT = 'https://script.google.com/macros/s/AKfycbyxAAXBx_SRQcUrw6fYBJ2A78-kJqKTf72suSy3OkKFGVJe9QPtFFX2RkMqCTwUrwOHDA/exec';
+  const box = document.getElementById('lbBox');
+  const select = document.getElementById('lbSelect');
+  const list = document.getElementById('lbList');
+  const msg = document.getElementById('lbMsg');
+  let data = {};
+
+  function el(tag, cls, text) {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined) n.textContent = text;   // textContent: student-typed names can never inject HTML
+    return n;
+  }
+
+  function show(game) {
+    list.replaceChildren();
+    const rows = data[game] || [];
+    msg.textContent = rows.length ? '' : 'No scores yet. Be the first!';
+    rows.forEach((r, i) => {
+      const li = el('li');
+      li.appendChild(el('div', 'rank', String(i + 1)));
+      const who = el('div', 'who');
+      who.appendChild(el('div', 'n', r.name));
+      who.appendChild(el('div', 'c', r.cls ? 'Class ' + r.cls : ''));
+      li.appendChild(who);
+      const pts = el('div', 'pts', r.score);
+      pts.appendChild(el('small', '', r.pct + '%'));
+      li.appendChild(pts);
+      list.appendChild(li);
+    });
+  }
+
+  fetch(ENDPOINT + '?action=leaderboard&limit=5')
+    .then(r => r.json())
+    .then(res => {
+      if (!res || !res.games) return;               // endpoint not updated yet: keep section hidden
+      data = res.games;
+      const names = Object.keys(data).sort((a, b) => a.localeCompare(b));
+      box.hidden = false;
+      if (!names.length) { msg.textContent = 'No scores yet. Be the first!'; select.hidden = true; return; }
+      names.forEach(n => {
+        const o = document.createElement('option');
+        o.value = n; o.textContent = n;
+        select.appendChild(o);
+      });
+      select.addEventListener('change', () => show(select.value));
+      show(names[0]);
+    })
+    .catch(() => { /* offline or blocked: leaderboard simply stays hidden */ });
 })();
 </script>
 

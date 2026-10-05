@@ -378,6 +378,19 @@
   }
   .final-row:last-child{ border-bottom:none; }
   /* END ADDED */
+
+  /* ---------- Leaderboard (results screen) ---------- */
+  .lb-box{margin-top:18px;text-align:left;border:1px solid rgba(128,128,128,.4);background:rgba(128,128,128,.08);border-radius:12px;padding:12px;}
+  .lb-box h3{margin:0 0 4px;font-size:1.05rem;text-align:center;}
+  .lb-box .lb-note{margin:0 0 10px;font-size:.78rem;text-align:center;opacity:.8;}
+  .lb-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;}
+  .lb-list li{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;border:1px solid rgba(128,128,128,.35);}
+  .lb-list li.me{outline:2px solid currentColor;font-weight:700;}
+  .lb-rank{flex:0 0 26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;border:1px solid currentColor;}
+  .lb-who{flex:1 1 auto;min-width:0;}
+  .lb-n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .lb-c{font-size:.75rem;opacity:.8;}
+  .lb-pts{font-weight:700;white-space:nowrap;}
 </style>
 </head>
 <body>
@@ -452,6 +465,44 @@
       body: JSON.stringify(payload)
     }).catch(function (err) { console.error('Data submission failed:', err); });
   }
+
+  // ============================================================
+  // LEADERBOARD: loads the top 5 for this game from the Google Sheet
+  // (needs the leaderboard doGet in the Apps Script). Hidden if unavailable.
+  // ============================================================
+  function loadLeaderboard(delayMs) {
+    setTimeout(function () {
+      var box = document.getElementById('lb-box');
+      if (!box) return;
+      fetch(GAME_DATA_ENDPOINT + '?action=leaderboard&limit=5&game=' + encodeURIComponent(GAME_NAME))
+        .then(function (r) { return r.json(); })
+        .then(function (res) {
+          box = document.getElementById('lb-box');
+          var list = document.getElementById('lb-list');
+          if (!box || !list || !res || !res.games) return;
+          var rows = res.games[GAME_NAME] || [];
+          if (!rows.length) return;
+          var myName = String(studentName || '').trim().toLowerCase();
+          var myClass = String((typeof studentClass !== 'undefined' ? studentClass : '') || '').trim().toLowerCase();
+          list.textContent = '';
+          rows.forEach(function (r, i) {
+            var li = document.createElement('li');
+            if (String(r.name).toLowerCase() === myName && String(r.cls || '').toLowerCase() === myClass) li.className = 'me';
+            var rank = document.createElement('div'); rank.className = 'lb-rank'; rank.textContent = String(i + 1);
+            var who = document.createElement('div'); who.className = 'lb-who';
+            var n = document.createElement('div'); n.className = 'lb-n'; n.textContent = r.name;
+            var c = document.createElement('div'); c.className = 'lb-c'; c.textContent = r.cls ? 'Class ' + r.cls : '';
+            who.appendChild(n); who.appendChild(c);
+            var pts = document.createElement('div'); pts.className = 'lb-pts'; pts.textContent = r.score;
+            li.appendChild(rank); li.appendChild(who); li.appendChild(pts);
+            list.appendChild(li);
+          });
+          box.hidden = false;
+        })
+        .catch(function () { /* offline or not set up: leaderboard stays hidden */ });
+    }, delayMs || 0);
+  }
+
   // END ADDED
   // ============================================================
 
@@ -910,12 +961,14 @@ function showFinal(){
       ${rowsHtml}
       <button class="primary-btn" id="playAgainAllBtn">Start New Attempt</button>
       <button class="primary-btn" id="backHomeBtn2" style="background:var(--paper-2);color:var(--navy);">Back to Home</button>
+      <div class="lb-box" id="lb-box" hidden><h3>Top 5 Leaderboard</h3><p class="lb-note">Best result per student for this game</p><ol class="lb-list" id="lb-list"></ol></div>
     </div>
   `;
 
   // ============================================================
   // ADDED: submit combined results once per completed session
   // ============================================================
+  var submittedNow = !hasSubmittedResults; // leaderboard waits a moment after a fresh submit
   if (!hasSubmittedResults) {
     hasSubmittedResults = true;
     var minutesPlayed = gameStartTime ? Math.round(((Date.now()-gameStartTime)/60000)*10)/10 : 0;
@@ -934,6 +987,8 @@ function showFinal(){
   }
   // END ADDED
   // ============================================================
+
+  loadLeaderboard(submittedNow ? 2500 : 0);
 
   document.getElementById('playAgainAllBtn').addEventListener('click', function(){
     MODULE_ORDER.forEach(function(k){
