@@ -696,6 +696,16 @@
   const msg = document.getElementById('lbMsg');
   let data = {};
 
+  // Teacher check: add ?lbdebug=1 to the page URL to see why the leaderboard is not showing.
+  function debug(text) {
+    console.warn('[leaderboard] ' + text);
+    if (/[?&]lbdebug=1/.test(location.search)) {
+      box.hidden = false;
+      select.hidden = true;
+      msg.textContent = text;
+    }
+  }
+
   function el(tag, cls, text) {
     const n = document.createElement(tag);
     if (cls) n.className = cls;
@@ -724,7 +734,10 @@
   fetch(ENDPOINT + '?action=leaderboard&limit=5')
     .then(r => r.json())
     .then(res => {
-      if (!res || !res.games) return;               // endpoint not updated yet: keep section hidden
+      if (!res || !res.games) {                     // endpoint not updated yet: keep section hidden
+        debug(res && res.error ? 'Endpoint error: ' + res.error : 'Endpoint reply has no leaderboard data. The Apps Script probably needs the leaderboard doGet added and a New version deployed.');
+        return;
+      }
       data = res.games;
       const names = Object.keys(data).sort((a, b) => a.localeCompare(b));
       box.hidden = false;
@@ -737,7 +750,7 @@
       select.addEventListener('change', () => show(select.value));
       show(names[0]);
     })
-    .catch(() => { /* offline or blocked: leaderboard simply stays hidden */ });
+    .catch(err => { debug('Could not reach the leaderboard: ' + err); });  // students just see nothing
 })();
 </script>
 
