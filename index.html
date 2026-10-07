@@ -91,34 +91,21 @@
     flex-direction:column;
     gap:12px;
   }
-  .unit-head{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    margin:14px 0 0;
-    padding:6px 12px;
-    border-radius:10px;
-    background:rgba(8,10,30,.55);
-    font-size:.82rem;
-    font-weight:800;
-    letter-spacing:2px;
-    text-transform:uppercase;
-    color:var(--text);
-    text-shadow:0 1px 6px rgba(0,0,0,.6);
-  }
-  .unit-head:first-child{ margin-top:0; }
-  .unit-head::after{
-    content:"";
-    flex:1;
-    height:1px;
-    background:linear-gradient(90deg, rgba(255,255,255,.45), rgba(255,255,255,0));
-  }
-  .unit-head .count{
+  .backbtn{
+    display:inline-block;
+    align-self:flex-start;
+    font:inherit;
+    font-size:.95rem;
     font-weight:700;
-    letter-spacing:0;
-    text-transform:none;
-    color:var(--sub);
+    color:var(--text);
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:8px 14px;
+    text-decoration:none;
+    backdrop-filter: blur(6px);
   }
+  .backbtn:hover{ background:var(--card-hover); border-color:var(--accent); }
   a.card{
     display:flex;
     align-items:center;
@@ -292,7 +279,7 @@
       <canvas id="logoCanvas"></canvas>
     </div>
     <h1>IGCSE ESL Games</h1>
-    <p>Pick a unit or activity to play</p>
+    <p id="subtitle">Select a unit</p>
   </header>
 
   <div class="grid" id="gameGrid">
@@ -307,7 +294,7 @@
     <p class="lb-msg" id="lbMsg"></p>
   </section>
 
-  <footer>Tap a card to open the game</footer>
+  <footer id="footer">Tap a unit to see its games</footer>
 </div>
 
 <script>
@@ -760,64 +747,87 @@
       .trim();
   }
 
-  async function loadGames() {
-    const grid = document.getElementById('gameGrid');
-    const status = document.getElementById('status');
+  // Unit number from the folder name (Unit_3_…, U12_…, Unit _12_…, Unit_12a). None → MISC.
+  const unitOf = name => { const m = name.trim().match(/^U(?:nit)?[\s_-]*(\d+)/i); return m ? parseInt(m[1], 10) : null; };
+  const plural = n => n + (n === 1 ? ' game' : ' games');
 
+  function card(href, iconIdx, name, sub) {
+    const a = document.createElement('a');
+    a.className = 'card';
+    a.href = href;
+    a.innerHTML = `
+      <div class="icon">
+        <svg viewBox="0 0 24 24">${icons[iconIdx % icons.length]}</svg>
+      </div>
+      <div class="label">
+        <div class="name">${name}</div>
+        ${sub ? `<div class="sub">${sub}</div>` : ''}
+      </div>
+      <div class="arrow">›</div>
+    `;
+    return a;
+  }
+
+  let ALL = [];
+
+  function render() {
+    const grid = document.getElementById('gameGrid');
+    const subtitle = document.getElementById('subtitle');
+    const footer = document.getElementById('footer');
+    grid.innerHTML = '';
+
+    const hm = location.hash.match(/^#unit-(\d+)$/);
+    const isMisc = location.hash === '#misc';
+    const chosen = hm ? parseInt(hm[1], 10) : null;
+
+    if (chosen !== null || isMisc) {
+      // ---- One unit (or MISC): list its games ----
+      const list = ALL.filter(f => isMisc ? f.unit === null : f.unit === chosen);
+      subtitle.textContent = isMisc ? 'MISC' : 'Unit ' + chosen;
+      footer.textContent = 'Tap a card to open the game';
+      const back = document.createElement('a');
+      back.className = 'backbtn';
+      back.href = '#';
+      back.textContent = '\u2190 All units';
+      grid.appendChild(back);
+      if (!list.length) {
+        const p = document.createElement('p');
+        p.style.cssText = 'color:var(--sub);text-align:center;';
+        p.textContent = 'No games found here yet.';
+        grid.appendChild(p);
+      }
+      list.forEach((f, i) => grid.appendChild(card(encodeURI(f.name + '/index.html'), i, prettyName(f.name), f.name)));
+      return;
+    }
+
+    // ---- All units, newest (highest number) first; MISC card last ----
+    subtitle.textContent = 'Select a unit';
+    footer.textContent = 'Tap a unit to see its games';
+    const units = {}, misc = [];
+    ALL.forEach(f => { if (f.unit === null) misc.push(f); else (units[f.unit] = units[f.unit] || []).push(f); });
+    const nums = Object.keys(units).map(Number).sort((a, b) => b - a);
+    nums.forEach((u, i) => grid.appendChild(card('#unit-' + u, i, 'Unit ' + u, plural(units[u].length))));
+    if (misc.length) grid.appendChild(card('#misc', nums.length, 'MISC', plural(misc.length)));
+    if (!nums.length && !misc.length) {
+      const p = document.createElement('p');
+      p.style.cssText = 'color:var(--sub);text-align:center;';
+      p.textContent = 'No games found yet.';
+      grid.appendChild(p);
+    }
+  }
+
+  async function loadGames() {
+    const status = document.getElementById('status');
     try {
       const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/`);
       if (!res.ok) throw new Error("GitHub API error " + res.status);
       const items = await res.json();
-
-      const folders = items
-        .filter(item => item.type === "dir" && !EXCLUDE.includes(item.name))
-        .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" }));
-
-      if (folders.length === 0) {
-        status.textContent = "No games found yet.";
-        return;
-      }
-
-      status.remove();
-
-      // Group by unit number taken from the folder name (Unit_3_…, U12_…, Unit _12_…, Unit_12a).
-      // Anything without a unit number goes in MISC, listed last.
-      const unitOf = name => { const m = name.trim().match(/^U(?:nit)?[\s_-]*(\d+)/i); return m ? parseInt(m[1], 10) : null; };
-      const groups = new Map();
-      folders.forEach(f => {
-        const u = unitOf(f.name), key = u === null ? 'MISC' : u;
-        if (!groups.has(key)) groups.set(key, []);
-        groups.get(key).push(f);
-      });
-      const keys = [...groups.keys()].sort((a, b) => (a === 'MISC') - (b === 'MISC') || a - b);
-
-      let n = 0;
-      keys.forEach(key => {
-        const list = groups.get(key);
-        const h = document.createElement('div');
-        h.className = 'unit-head';
-        h.innerHTML = `<span>${key === 'MISC' ? 'MISC' : 'Unit ' + key}</span><span class="count">${list.length} game${list.length === 1 ? '' : 's'}</span>`;
-        grid.appendChild(h);
-
-        list.forEach(folder => {
-          const i = n++;
-          const a = document.createElement('a');
-          a.className = 'card';
-          a.href = encodeURI(folder.name + '/index.html');
-
-          a.innerHTML = `
-            <div class="icon">
-              <svg viewBox="0 0 24 24">${icons[i % icons.length]}</svg>
-            </div>
-            <div class="label">
-              <div class="name">${prettyName(folder.name)}</div>
-              <div class="sub">${folder.name}</div>
-            </div>
-            <div class="arrow">›</div>
-          `;
-          grid.appendChild(a);
-        });
-      });
+      ALL = items
+        .filter(item => item.type === "dir" && !EXCLUDE.includes(item.name) && !item.name.startsWith("."))
+        .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" }))
+        .map(item => ({ name: item.name, unit: unitOf(item.name) }));
+      render();
+      window.addEventListener('hashchange', () => { render(); window.scrollTo(0, 0); });
     } catch (err) {
       status.textContent = "Couldn't load games list (GitHub API may be rate-limited). Try refreshing in a bit.";
       console.error(err);
